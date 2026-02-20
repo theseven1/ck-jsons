@@ -10,13 +10,13 @@
         "CategoryName": "Unknown",
         "CustomWildcard": [],
         "CustomURL": [],
-        "Allow": false
+        "Allow": true
       },
       {
         "CategoryNumber": 1,
         "CategoryName": "Local Allow",
-        "CustomWildcard": ["*theseven1.github.io*"],
-        "CustomURL": [],
+        "CustomWildcard": ["*theseven1.github.io*","theseven1.github.io"],
+        "CustomURL": ["https://theseven1.github.io/ck-jsons*"],
         "Allow": true
       },
       {
