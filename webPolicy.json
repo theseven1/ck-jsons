@@ -15,7 +15,7 @@
       {
         "CategoryNumber": 1,
         "CategoryName": "Local Allow",
-        "CustomWildcard": [],
+        "CustomWildcard": ["*theseven1.github.io*"],
         "CustomURL": [],
         "Allow": true
       },
