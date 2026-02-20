@@ -367,7 +367,7 @@
         "CategoryName": "Microsoft",
         "CustomWildcard": [],
         "CustomURL": [],
-        "Allow": false
+        "Allow": true
       },
       {
         "CategoryNumber": 52,
