@@ -8,14 +8,8 @@
       {
         "CategoryNumber": 0,
         "CategoryName": "Unknown",
-        "CustomWildcard": [
-          "*discord.com",
-          "*.mov"
-        ],
-        "CustomURL": [
-          "https://www.example.com/*",
-          "https://example.com/*"
-        ],
+        "CustomWildcard": [],
+        "CustomURL": [],
         "Allow": false
       },
       {
