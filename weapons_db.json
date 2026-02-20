@@ -1,11 +1,13 @@
 
 {
-  "version": "weapons-db-2026-02-05",
+  "version": "weapons-db-2026-02-20",
   "updated": "2026-02-05T00:00:00.000Z",
   "whitelisted_domains": [
     "wikipedia.org",
     "britannica.com",
     "npr.org",
+    "classlink.com",
+    "katyisd.org",
     "reuters.com",
     "apnews.com",
     "theseven1.github.io",
