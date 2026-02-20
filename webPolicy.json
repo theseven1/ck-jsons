@@ -1,0 +1,1248 @@
+
+[
+  {
+    "Policy": "Global --> HS_Students",
+    "Enabled": true,
+    "pID": 1,
+    "Categories": [
+      {
+        "CategoryNumber": 0,
+        "CategoryName": "Unknown",
+        "CustomWildcard": [
+          "*discord.com",
+          "*.mov"
+        ],
+        "CustomURL": [
+          "https://www.example.com/*",
+          "https://example.com/*"
+        ],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1,
+        "CategoryName": "Local Allow",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 2,
+        "CategoryName": "Local Block",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 3,
+        "CategoryName": "Ads",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 4,
+        "CategoryName": "Mature",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 5,
+        "CategoryName": "Audio/Video",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 6,
+        "CategoryName": "Business",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 7,
+        "CategoryName": "Errors",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 8,
+        "CategoryName": "Drugs",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 9,
+        "CategoryName": "Education",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 10,
+        "CategoryName": "Business - Finance",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 11,
+        "CategoryName": "Forums",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 12,
+        "CategoryName": "Gambling",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 13,
+        "CategoryName": "Games",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 14,
+        "CategoryName": "General",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 15,
+        "CategoryName": "Government",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 16,
+        "CategoryName": "security.hacking",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 17,
+        "CategoryName": "violence.hate",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 18,
+        "CategoryName": "Business - Jobs",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 19,
+        "CategoryName": "Forums - Email",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 20,
+        "CategoryName": "News",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 21,
+        "CategoryName": "Porn",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 22,
+        "CategoryName": "porn.de",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 23,
+        "CategoryName": "porn.es",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 24,
+        "CategoryName": "porn.fr",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 25,
+        "CategoryName": "porn.it",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 26,
+        "CategoryName": "porn.jp",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 27,
+        "CategoryName": "porn.nl",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 28,
+        "CategoryName": "Security - Proxy",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 29,
+        "CategoryName": "Shopping",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 30,
+        "CategoryName": "Sports",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 31,
+        "CategoryName": "Suspicious",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 32,
+        "CategoryName": "Violence",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 33,
+        "CategoryName": "Security - Warez",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 34,
+        "CategoryName": "Directory",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 35,
+        "CategoryName": "ads.popup-ads",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 36,
+        "CategoryName": "Travel",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 37,
+        "CategoryName": "Automobile",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 38,
+        "CategoryName": "Forums - Newsgroups",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 39,
+        "CategoryName": "Forums - Personals",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 40,
+        "CategoryName": "Humor",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 41,
+        "CategoryName": "Education - Lifestyles",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 42,
+        "CategoryName": "Alcohol",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 43,
+        "CategoryName": "Family - Health",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 44,
+        "CategoryName": "Education - Science",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 45,
+        "CategoryName": "Entertainment",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 46,
+        "CategoryName": "Kids and Teens",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 47,
+        "CategoryName": "Education - Arts",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 48,
+        "CategoryName": "Education - Literature",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 49,
+        "CategoryName": "Music",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 50,
+        "CategoryName": "Education - Music",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 51,
+        "CategoryName": "Microsoft",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 52,
+        "CategoryName": "ads.banner-ads",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 53,
+        "CategoryName": "ads.html-ads",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 54,
+        "CategoryName": "ads.javascript-ads",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 55,
+        "CategoryName": "Spam",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 56,
+        "CategoryName": "Ham",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 57,
+        "CategoryName": "Computers",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 58,
+        "CategoryName": "Family - Religion",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 59,
+        "CategoryName": "World",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 60,
+        "CategoryName": "Forums - p2p",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 61,
+        "CategoryName": "Forums - IM",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 62,
+        "CategoryName": "security.spyware",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 63,
+        "CategoryName": "security.virus",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 64,
+        "CategoryName": "security.test",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 65,
+        "CategoryName": "security.phishing",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 66,
+        "CategoryName": "Weapons",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 67,
+        "CategoryName": "Access Denied",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 68,
+        "CategoryName": "Law",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 69,
+        "CategoryName": "Kids and Teens - Chat",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 70,
+        "CategoryName": "Mature - Language",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 71,
+        "CategoryName": "Forums - Blogs",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 72,
+        "CategoryName": "Security",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 73,
+        "CategoryName": "Business - Real Estate",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 74,
+        "CategoryName": "Education - Games",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 75,
+        "CategoryName": "Education - Social Science",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 76,
+        "CategoryName": "Family - Food",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 77,
+        "CategoryName": "kids_and_teens.animals",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 78,
+        "CategoryName": "Spam - Shopping",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 79,
+        "CategoryName": "Society",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 80,
+        "CategoryName": "Education - Sex",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 81,
+        "CategoryName": "Shopping - Auctions",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 82,
+        "CategoryName": "Sports - Fantasy",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 83,
+        "CategoryName": "Hobby",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 84,
+        "CategoryName": "Sports - Youth",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 85,
+        "CategoryName": "SafeSearch",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 86,
+        "CategoryName": "World - German",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 87,
+        "CategoryName": "World - Spanish",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 88,
+        "CategoryName": "World - French",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 89,
+        "CategoryName": "World - Italian",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 90,
+        "CategoryName": "World - Japanese",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 91,
+        "CategoryName": "World - Netherlands",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 92,
+        "CategoryName": "World - Portuguese",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 93,
+        "CategoryName": "World - Russian",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 94,
+        "CategoryName": "Porn - Illicit",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 95,
+        "CategoryName": "Family",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 96,
+        "CategoryName": "Society - Politics",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 97,
+        "CategoryName": "Society - Crime",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 98,
+        "CategoryName": "Sports - Martial Arts",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 99,
+        "CategoryName": "Education - History",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 100,
+        "CategoryName": "Mature - Art",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 101,
+        "CategoryName": "Mature - Body Art",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 102,
+        "CategoryName": "Mature - Games",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 103,
+        "CategoryName": "adult.lifestyles",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 104,
+        "CategoryName": "Shopping - Office Supplies",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 105,
+        "CategoryName": "Expired",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 106,
+        "CategoryName": "World - Polish",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 107,
+        "CategoryName": "World - Chinese",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 108,
+        "CategoryName": "World - Korean",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 109,
+        "CategoryName": "porn.pl",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 110,
+        "CategoryName": "porn.ru",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 111,
+        "CategoryName": "porn.pt",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 112,
+        "CategoryName": "Plagiarism",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 113,
+        "CategoryName": "Parked",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 114,
+        "CategoryName": "suspicious.script",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 115,
+        "CategoryName": "Business - Construction",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 116,
+        "CategoryName": "Security - Nettools",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 117,
+        "CategoryName": "Forums - Social Networking",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 118,
+        "CategoryName": "Forums - Dating",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 119,
+        "CategoryName": "Business - Manufacturing",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 120,
+        "CategoryName": "G-Rated",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 121,
+        "CategoryName": "PG-Rated",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 122,
+        "CategoryName": "R-Rated",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 123,
+        "CategoryName": "X-Rated",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 124,
+        "CategoryName": "S-Rated",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 125,
+        "CategoryName": "security.potentially_unwanted_applications",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 126,
+        "CategoryName": "Offensive",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 127,
+        "CategoryName": "Computers - File Hosting",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 128,
+        "CategoryName": "Computers - Consumer Electronics",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 129,
+        "CategoryName": "Education - Media",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 130,
+        "CategoryName": "security.virus_ignore",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 131,
+        "CategoryName": "Entertainment - Radio and TV",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 132,
+        "CategoryName": "Photography",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 133,
+        "CategoryName": "Security - Shorteners",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 134,
+        "CategoryName": "Security - Malware",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 135,
+        "CategoryName": "Security - Translators",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 136,
+        "CategoryName": "Computers - Storage",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 137,
+        "CategoryName": "Violence - Extremism",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 138,
+        "CategoryName": "Computers - Analytics",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 139,
+        "CategoryName": "Sports - Esports",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 140,
+        "CategoryName": "Artificial Intelligence",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 141,
+        "CategoryName": "AI - Generative",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 142,
+        "CategoryName": "AI - Detective",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 143,
+        "CategoryName": "Search",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 144,
+        "CategoryName": "Security - Domain Sharing",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 200,
+        "CategoryName": "Facebook",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 201,
+        "CategoryName": "X (formerly Twitter)",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 202,
+        "CategoryName": "Instagram",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 203,
+        "CategoryName": "Pinterest",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 900,
+        "CategoryName": "Education Videos",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1001,
+        "CategoryName": "Testing Applications",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1002,
+        "CategoryName": "MDM",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1003,
+        "CategoryName": "Edgenuity",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1004,
+        "CategoryName": "Staff/Student Allow",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1006,
+        "CategoryName": "Staff Allow / Student Block",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1007,
+        "CategoryName": "Staff/Student Block",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1008,
+        "CategoryName": "Social Networking",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1009,
+        "CategoryName": "Google Meet",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1010,
+        "CategoryName": "Vimeo",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1011,
+        "CategoryName": "Google Chat",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1012,
+        "CategoryName": "Video On Demand Streaming",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1014,
+        "CategoryName": "Music Streaming",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1015,
+        "CategoryName": "Medical",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1016,
+        "CategoryName": "eSports",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1017,
+        "CategoryName": "Unknown .Zip and .Mov TLDs",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1018,
+        "CategoryName": "Third-Party Requirements",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1051,
+        "CategoryName": "Allowed AI",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1052,
+        "CategoryName": "Bing",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1084,
+        "CategoryName": "TK-8 Block",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1117,
+        "CategoryName": "JH-HS Access",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1118,
+        "CategoryName": "HS Access",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 1119,
+        "CategoryName": "Disallowed TLDs",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      }
+    ]
+  },
+  {
+    "Policy": "EXAMPLE2",
+    "Enabled": false,
+    "pID": 2,
+    "Categories": [
+      {
+        "CategoryNumber": 0,
+        "CategoryName": "Unknown",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": false
+      },
+      {
+        "CategoryNumber": 1,
+        "CategoryName": "Local Allow",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      },
+      {
+        "CategoryNumber": 100,
+        "CategoryName": "Mature - Art",
+        "CustomWildcard": [],
+        "CustomURL": [],
+        "Allow": true
+      }
+    ]
+  }
+]
