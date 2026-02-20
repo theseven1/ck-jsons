@@ -1,0 +1,75 @@
+
+{
+  "version": "policy-2026-02-05",
+  "updated": "2026-02-05T00:00:00.000Z",
+
+  "Web": {
+    "DNS-Filter": true,
+    "Custom-Policies": {
+      "Allowlist": [
+        "https://classroom.google.com/*",
+        "https://docs.google.com/*",
+        "https://drive.google.com/*",
+        "https://mail.google.com/*",
+        "https://outlook.office.com/*",
+        "https://login.microsoftonline.com/*",
+        "https://*katyisd.org/*",
+        "https://redirect.sarsembayevdias7.workers.dev/*"
+      ],
+      "Blocklist": [
+       
+      ]
+    }
+  },
+
+  "Youtube": {
+    "Categories": {
+      "1": true,
+      "2": true,
+      "10": true,
+        "15": true,
+        "17": true,
+        "18": false,
+        "19": true,
+        "20": false,
+        "21": true,
+        "22": true,
+        "23": false,
+        "24": false,
+        "25": true,
+        "26": true,
+        "27": true,
+        "28": true,
+        "29": true,
+        "30": false,
+        "31": false,
+        "32": true,
+        "33": true,
+        "34": false,
+        "35": true,
+        "36": false,
+        "37": true,
+        "38": true,
+        "39": true,
+        "40": false,
+        "41": true,
+        "42": false,
+        "43": false,
+        "44": true
+    }
+  },
+
+  "Settings": {"hide_annotations":true,"hide_autoplay":true,"hide_bar":false,"hide_cards":false,"hide_channel":false,"hide_chat":true,"hide_comments":true,"hide_desc":false,"hide_donate":true,"hide_endscreen":false,"hide_feed":false,"hide_header":false,"hide_merch":true,"hide_meta":false,"hide_mix":false,"hide_moreyt":true,"hide_notifs":true,"hide_playlists":true,"hide_prof":false,"hide_recommended":false,"hide_redirect_home":false,"hide_search":false,"hide_shorts":true,"hide_sidebar":false,"hide_subs":false,"hide_trending":false},
+  "Detections": {
+    "proxy": true,
+    "safety": true,
+    "porn": true,
+    "weapons": true
+  },
+
+  "Confidence": {
+    "proxyScore": 28,
+    "entropy": 9.3,
+    "base64Entropy": 8.6
+  }
+}
