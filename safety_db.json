@@ -1,0 +1,23 @@
+
+{
+  "version": "safety-db-2026-02-05",
+  "updated": "2026-02-05T00:00:00.000Z",
+  "whitelisted_domains": [
+    "988lifeline.org",
+    "samhsa.gov",
+    "who.int",
+    "cdc.gov",
+    "kidshealth.org",
+    "redirect.sarsembayevdias7.workers.dev"
+  ],
+  "critical_keywords": [
+    "i want to die",
+    "end my life",
+    "kill myself",
+    "suicide",
+    "self harm",
+    "hurt myself"
+  ],
+  "signatures": [
+  ]
+}
