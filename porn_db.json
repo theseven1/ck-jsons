@@ -1,0 +1,38 @@
+
+{
+  "version": "porn-db-2026-02-05",
+  "updated": "2026-02-05T00:00:00.000Z",
+  "whitelisted_domains": [
+    "who.int",
+    "cdc.gov",
+    "kidshealth.org",
+    "plannedparenthood.org",
+    "redirect.sarsembayevdias7.workers.dev"
+  ],
+  "keywords": [
+    "porn",
+    "xxx",
+    "hentai",
+    "порно",
+     "成人",
+     "tits",
+     "dick",
+    "nsfw",
+    "adult content",
+    "onlyfans"
+  ],
+  "signatures": [
+    {
+      "name": "Age gate / adult warning (common patterns)",
+      "selectors": [
+        
+      ]
+    },
+    {
+      "name": "NSFW label UI (generic)",
+      "selectors": [
+        { "s": "[class*=\"nsfw\"], [data-*=\"nsfw\"], [aria-label*=\"nsfw\"]" }
+      ]
+    }
+  ]
+}
