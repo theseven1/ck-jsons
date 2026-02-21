@@ -1,29 +1,16 @@
-
 {
-  "version": "weapons-db-2026-02-20",
-  "updated": "2026-02-05T00:00:00.000Z",
-  "whitelisted_domains": [
-    "wikipedia.org",
-    "britannica.com",
-    "npr.org",
-    "classlink.com",
-    "katyisd.org",
-    "reuters.com",
-    "apnews.com",
-    "theseven1.github.io",
-  ],
   "keywords": [
     "weapon",
     "gun",
     "firearm",
     "ammo",
     "buy gun",
-     "sell gun",
-     "firearms for sale",
-     "rifle",
-     "pistol",
-     "shotgun",
-     "school shooting",
+    "sell gun",
+    "firearms for sale",
+    "rifle",
+    "pistol",
+    "shotgun",
+    "school shooting",
     "ammunition",
     "explosive",
     "knife"
@@ -32,8 +19,22 @@
     {
       "name": "Ammo/Caliber listing widgets (generic)",
       "selectors": [
-        { "s": "[class*=\"caliber\" i], [data-*=\"caliber\" i], [class*=\"ammo\" i], [data-*=\"ammo\" i]" }
+        {
+          "s": "[class*=\"caliber\" i], [data-*=\"caliber\" i], [class*=\"ammo\" i], [data-*=\"ammo\" i]"
+        }
       ]
     }
+  ],
+  "updated": "2026-02-05T00:00:00.000Z",
+  "version": "weapons-db-2026-02-20",
+  "whitelisted_domains": [
+    "wikipedia.org",
+    "britannica.com",
+    "npr.org",
+    "classlink.com",
+    "katyisd.org",
+    "reuters.com",
+    "apnews.com",
+    "theseven1.github.io"
   ]
 }
