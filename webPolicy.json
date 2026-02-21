@@ -708,7 +708,7 @@
       {
         "CategoryNumber": 100,
         "CategoryName": "Mature - Art",
-        "CustomWildcard": [],
+        "CustomWildcard": ["*read.soraapp.com*"],
         "CustomURL": [],
         "Allow": false
       },
