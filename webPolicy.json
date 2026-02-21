@@ -10,7 +10,7 @@
         "CategoryName": "Unknown",
         "CustomWildcard": [],
         "CustomURL": [],
-        "Allow": true
+        "Allow": false
       },
       {
         "CategoryNumber": 1,
