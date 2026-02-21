@@ -1101,7 +1101,7 @@
         "CategoryNumber": 1008,
         "CategoryName": "Social Networking",
         "CustomWildcard": [],
-        "CustomURL": [],
+        "CustomURL": ["https://mangalib.org/auth/oauth/authorize*"],
         "Allow": false
       },
       {
