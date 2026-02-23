@@ -15,7 +15,7 @@
       {
         "CategoryNumber": 1,
         "CategoryName": "Local Allow",
-        "CustomWildcard": ["*theseven1.github.io*","theseven1.github.io","*roblox.com*","roblox.com*","cineby.gd","*cineby.gd*","*accounts.google.com*","accounts.google.com*","wikipedia.org","*wikipedia.org*","wikipedia.org*","*mail.google.com*","mail.google.com*","mail.google.com"],
+        "CustomWildcard": ["*theseven1.github.io*","theseven1.github.io","*roblox.com*","roblox.com*","cineby.gd","*cineby.gd*","*accounts.google.com*","accounts.google.com*","wikipedia.org","*wikipedia.org*","wikipedia.org*","*mail.google.com*","mail.google.com*","mail.google.com","mega.nz","*mega.nz*","mega.nz*"],
         "CustomURL": ["https://theseven1.github.io/ck-jsons*"],
         "Allow": true
       },
