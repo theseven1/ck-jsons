@@ -1170,7 +1170,7 @@
       {
         "CategoryNumber": 1051,
         "CategoryName": "Allowed AI",
-        "CustomWildcard": [],
+        "CustomWildcard": ["gemini.google.com","*gemini.google.com*","gemini.google.com*"],
         "CustomURL": [],
         "Allow": true
       },
@@ -1179,7 +1179,7 @@
         "CategoryName": "Bing",
         "CustomWildcard": [],
         "CustomURL": [],
-        "Allow": true
+        "Allow": false
       },
       {
         "CategoryNumber": 1084,
