@@ -1135,7 +1135,7 @@
       {
         "CategoryNumber": 1014,
         "CategoryName": "Music Streaming",
-        "CustomWildcard": [],
+        "CustomWildcard": ["spotify.com","spotify.com*","*spotify.com*"],
         "CustomURL": [],
         "Allow": false
       },
