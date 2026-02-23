@@ -1002,7 +1002,7 @@
       {
         "CategoryNumber": 142,
         "CategoryName": "AI - Detective",
-        "CustomWildcard": [],
+        "CustomWildcard": ["originality.ai","*originality.ai*","originality.ai*"],
         "CustomURL": [],
         "Allow": true
       },
