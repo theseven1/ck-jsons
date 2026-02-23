@@ -22,7 +22,7 @@
       {
         "CategoryNumber": 2,
         "CategoryName": "Local Block",
-        "CustomWildcard": [],
+        "CustomWildcard": ["gitlab.com","gitlab.com*","*gitlab.com*"],
         "CustomURL": [],
         "Allow": false
       },
