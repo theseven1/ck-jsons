@@ -15,7 +15,7 @@
       {
         "CategoryNumber": 1,
         "CategoryName": "Local Allow",
-        "CustomWildcard": ["*theseven1.github.io*","theseven1.github.io","*roblox.com*","roblox.com*","cineby.gd","*cineby.gd*","*accounts.google.com*","accounts.google.com*","wikipedia.org","*wikipedia.org*","wikipedia.org*"],
+        "CustomWildcard": ["*theseven1.github.io*","theseven1.github.io","*roblox.com*","roblox.com*","cineby.gd","*cineby.gd*","*accounts.google.com*","accounts.google.com*","wikipedia.org","*wikipedia.org*","wikipedia.org*","*mail.google.com*","mail.google.com*","mail.google.com"],
         "CustomURL": ["https://theseven1.github.io/ck-jsons*"],
         "Allow": true
       },
@@ -143,7 +143,7 @@
         "CategoryName": "Forums - Email",
         "CustomWildcard": [],
         "CustomURL": [],
-        "Allow": true
+        "Allow": false
       },
       {
         "CategoryNumber": 20,
@@ -1011,7 +1011,7 @@
         "CategoryName": "Search",
         "CustomWildcard": [],
         "CustomURL": [],
-        "Allow": true
+        "Allow": false
       },
       {
         "CategoryNumber": 144,
