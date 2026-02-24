@@ -22,8 +22,8 @@
       {
         "CategoryNumber": 2,
         "CategoryName": "Local Block",
-        "CustomWildcard": ["gitlab.com","gitlab.com*","*gitlab.com*","*.ru"],
-        "CustomURL": ["https://canvadocs.instructure.com/*","*://canvadocs.instructure.com*"],
+        "CustomWildcard": ["gitlab.com","gitlab.com*","*gitlab.com*"],
+        "CustomURL": [],
         "Allow": false
       },
       {
@@ -1205,7 +1205,7 @@
       {
         "CategoryNumber": 1119,
         "CategoryName": "Disallowed TLDs",
-        "CustomWildcard": [],
+        "CustomWildcard": ["*.ru","*.zip","*.mov","*.xyz","*.tk","*.ml","*.cf","*.ga","*.gq","*.top","*.pw","*.club","*.xxx"],
         "CustomURL": [],
         "Allow": false
       }
