@@ -1017,7 +1017,7 @@
         "CategoryNumber": 144,
         "CategoryName": "Security - Domain Sharing",
         "CustomWildcard": ["codehs.me","*codehs.me","codehs.me*"],
-        "CustomURL": [],
+        "CustomURL": ["https://static1.codehs.com/gulp*","https://static1.codehs.com/gulp/*","*://static1.codehs.com/gulp*"],
         "Allow": false
       },
       {
