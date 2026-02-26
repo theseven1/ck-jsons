@@ -1016,7 +1016,7 @@
       {
         "CategoryNumber": 144,
         "CategoryName": "Security - Domain Sharing",
-        "CustomWildcard": [],
+        "CustomWildcard": ["codehs.me","*codehs.me","codehs.me*"],
         "CustomURL": [],
         "Allow": false
       },
