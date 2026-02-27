@@ -59,7 +59,7 @@
     }
   },
 
-  "Settings": {"hide_annotations":true,"hide_autoplay":true,"hide_bar":false,"hide_cards":false,"hide_channel":false,"hide_chat":true,"hide_comments":true,"hide_desc":true,"hide_donate":true,"hide_endscreen":false,"hide_feed":false,"hide_header":false,"hide_merch":true,"hide_meta":true,"hide_mix":false,"hide_moreyt":true,"hide_notifs":true,"hide_playlists":true,"hide_prof":false,"hide_recommended":true,"hide_redirect_home":false,"hide_search":false,"hide_shorts":true,"hide_sidebar":false,"hide_subs":false,"hide_trending":true,"hide_podcasts":true,"hide_playables":true},
+  "Settings": {"hide_annotations":true,"hide_autoplay":true,"hide_bar":false,"hide_cards":false,"hide_channel":false,"hide_chat":true,"hide_comments":true,"hide_desc":false,"hide_donate":true,"hide_endscreen":false,"hide_feed":false,"hide_header":false,"hide_merch":true,"hide_meta":true,"hide_mix":false,"hide_moreyt":true,"hide_notifs":true,"hide_playlists":true,"hide_prof":false,"hide_recommended":false,"hide_redirect_home":false,"hide_search":false,"hide_shorts":true,"hide_sidebar":false,"hide_subs":false,"hide_trending":false,"hide_podcasts":true,"hide_playables":true},
   "Detections": {
     "proxy": true,
     "safety": true,
