@@ -324,8 +324,8 @@
         "CategoryNumber": 45,
         "CategoryName": "Entertainment",
         "CustomWildcard": [],
-        "CustomURL": [],
-        "Allow": true
+        "CustomURL": ["https://www.youtube.com/playables*","https://www.youtube.com/playables/*","*://youtube.com/playables*"],
+        "Allow": false
       },
       {
         "CategoryNumber": 46,
