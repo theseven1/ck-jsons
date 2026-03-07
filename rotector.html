@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Roblox Catcher | Safety Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- DOMPurify for XSS Protection (Production Ready) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        osint: {
+                            950: '#0a0a0e',
+                            900: '#12121a',
+                            800: '#1c1c26',
+                            700: '#2d2d3d',
+                            600: '#3f3f5a',
+                            500: '#58a6ff',
+                            primary: '#2196f3',
+                            danger: '#ff4444',
+                            warning: '#ff9800',
+                            success: '#4caf50',
+                            pending: '#f97316',
+                            integration: '#14b8a6',
+                            past: '#4a9eff',
+                            discord: '#5865F2'
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                        'stagger-fade': 'fadeIn 0.4s ease-out backwards'
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: 1, filter: 'brightness(1)' },
+                            '50%': { opacity: .7, filter: 'brightness(1.5)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 }
+                        },
+                        slideUp: {
+                            '0%': { opacity: 0, transform: 'translateY(20px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2d2d3d; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+
+        /* Google Icons Configuration */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        /* Glass & Visual Utilities */
+        .glass-card {
+            background: rgba(28, 28, 38, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .cyber-grid {
+            background-image: 
+                linear-gradient(to right, rgba(88,166,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(88,166,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1c1c26 25%, #2d2d3d 50%, #1c1c26 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .toast-enter { animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .toast-exit { animation: toastSlideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes toastSlideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-osint-950 text-gray-300 font-sans h-screen overflow-hidden flex selection:bg-osint-500/30">
+
+    <!-- Global Background -->
+    <div class="fixed inset-0 cyber-grid z-0 pointer-events-none"></div>
+    <div class="fixed top-[-200px] right-[-200px] w-[600px] h-[600px] bg-osint-500/10 rounded-full blur-[120px] z-0 pointer-events-none"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 glass-card border-r border-osint-800 flex flex-col z-20 h-full relative">
+        <div class="p-6 flex items-center gap-3 border-b border-osint-800">
+            <div class="w-10 h-10 rounded-xl bg-osint-primary flex items-center justify-center text-white shadow-[0_0_15px_rgba(33,150,243,0.4)]">
+                <span class="material-symbols-outlined text-2xl">radar</span>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
+                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.0</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="nav-menu">
+            <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all mb-4">
+                <span class="material-symbols-outlined w-5 text-center text-lg">dashboard</span>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-4">Scanners</div>
+            <a href="#player-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+                <span class="material-symbols-outlined w-5 text-center text-lg">person_search</span>
+                <span class="font-medium text-sm">Player Scan</span>
+            </a>
+            <a href="#recent-players" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+                <span class="material-symbols-outlined w-5 text-center text-lg">history</span>
+                <span class="font-medium text-sm">Recent Players</span>
+            </a>
+
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6">Communities</div>
+            <a href="#group-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+                <span class="material-symbols-outlined w-5 text-center text-lg">manage_search</span>
+                <span class="font-medium text-sm">Group Scan</span>
+            </a>
+            <a href="#recent-groups" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+                <span class="material-symbols-outlined w-5 text-center text-lg">history</span>
+                <span class="font-medium text-sm">Recent Groups</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-osint-800 bg-osint-900/50">
+            <div class="flex items-center gap-3 px-3 py-2 bg-osint-950 rounded-lg border border-osint-800 shadow-inner">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse-glow shadow-[0_0_5px_#4caf50]"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Rotector Network</span>
+                    <span class="text-[10px] font-mono text-green-400">Connected & Secure</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col relative z-10">
+        <!-- Topbar -->
+        <header class="h-16 glass-card border-b border-osint-800 flex items-center justify-between px-8 z-10 sticky top-0">
+            <h2 id="page-title" class="text-lg font-bold text-white tracking-wide">Safety Dashboard</h2>
+            <div class="flex items-center gap-4">
+                <form id="quick-search-form" class="relative">
+                    <input type="text" placeholder="Quick search ID or name..." class="bg-osint-950 border border-osint-700 text-sm rounded-lg px-4 py-1.5 focus:outline-none focus:border-osint-primary focus:ring-1 focus:ring-osint-primary w-64 transition-all font-mono text-gray-300" id="quick-search-input" autocomplete="off">
+                    <button type="submit" class="absolute right-2 top-1 text-gray-500 hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-lg mt-0.5">search</span>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Dynamic View Container -->
+        <div id="app-content" class="flex-1 overflow-y-auto p-8 relative scroll-smooth">
+            <!-- Content injected here via JS -->
+        </div>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 w-80 pointer-events-none"></div>
+
+    <!-- Application Logic -->
+    <script>
+        /**
+         * The Roblox Catcher
+         * Advanced Safety OSINT Dashboard
+         */
+        const App = {
+            // --- Configuration & Constants ---
+            Config: {
+                robloxUsersAPI: 'https://users.roblox.com/v1',
+                robloxThumbnailsAPI: 'https://thumbnails.roblox.com/v1',
+                robloxGroupsAPI: 'https://groups.roblox.com/v1',
+                rotectorAPI: 'https://roscoe.rotector.com/v1/lookup',
+                
+                // Flag mappings aligned with Rotector system
+                flags: {
+                    0: { name: 'Safe / Unflagged', color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/30', icon: 'check_circle' },
+                    1: { name: 'Pending / Queued', color: 'text-osint-pending', bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: 'schedule' },
+                    2: { name: 'Flagged / Unsafe', color: 'text-osint-danger', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: 'warning' },
+                    3: { name: 'Queued', color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', icon: 'hourglass_empty' },
+                    4: { name: 'Integration', color: 'text-osint-integration', bg: 'bg-teal-500/10', border: 'border-teal-500/30', icon: 'hub' },
+                    5: { name: 'Mixed Evidence', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', icon: 'balance' },
+                    6: { name: 'Past Offender', color: 'text-osint-past', bg: 'bg-blue-500/10', border: 'border-blue-500/30', icon: 'history' }
+                },
+
+                discordSources: {
+                    0: { name: 'Bloxlink', icon: 'link' },
+                    1: { name: 'RoVer', icon: 'smart_toy' },
+                    2: { name: 'Profile Bio', icon: 'description' }
+                },
+
+                svgs: {
+                    discord: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" class="w-full h-full fill-current"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.33,46,96.22,53,91.08,65.69,84.69,65.69Z"/></svg>`,
+                    roblox: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-full h-full fill-current"><path d="M5.4 0L0 18.6L18.6 24L24 5.4L5.4 0ZM13.8 14.8C12 15.3 10.2 14.3 9.7 12.5C9.2 10.7 10.2 8.9 12 8.4C13.8 7.9 15.6 8.9 16.1 10.7C16.6 12.5 15.6 14.3 13.8 14.8Z"/></svg>`
+                }
+            },
+
+            // --- State Management ---
+            State: {
+                groupPagination: {
+                    groupId: null,
+                    cursors: [null], // index matches page: 0 is page 1
+                    currentPage: 0,
+                    hasMore: false,
+                    totalCount: 0
+                }
+            },
+
+            // --- Database (Local Storage Wrapper) ---
+            DB: {
+                getKey: (type) => `rc_history_${type}`,
+                getHistory: (type) => JSON.parse(localStorage.getItem(App.DB.getKey(type)) || '[]'),
+                saveHistory: (type, data) => localStorage.setItem(App.DB.getKey(type), JSON.stringify(data)),
+                
+                addRecord: (type, record) => {
+                    let history = App.DB.getHistory(type);
+                    history = history.filter(item => String(item.id) !== String(record.id));
+                    history.unshift({ ...record, timestamp: Date.now() });
+                    if (history.length > 100) history.pop();
+                    App.DB.saveHistory(type, history);
+                }
+            },
+
+            // --- Utilities ---
+            Utils: {
+                sanitize: (str) => DOMPurify.sanitize(str),
+                formatDate: (ts) => {
+                    if (!ts) return 'Unknown Date';
+                    const date = new Date(ts > 1e11 ? ts : ts * 1000);
+                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                },
+                delay: (ms) => new Promise(res => setTimeout(res, ms)),
+                
+                toast: (message, type = 'info') => {
+                    const container = document.getElementById('toast-container');
+                    const toast = document.createElement('div');
+                    
+                    const types = {
+                        success: { icon: 'check_circle', color: 'text-green-400', border: 'border-green-500/30', bg: 'bg-green-500/10' },
+                        error: { icon: 'error', color: 'text-red-400', border: 'border-red-500/30', bg: 'bg-red-500/10' },
+                        info: { icon: 'info', color: 'text-osint-primary', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
+                        warning: { icon: 'warning', color: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-500/10' }
+                    };
+                    
+                    const t = types[type] || types.info;
+                    
+                    toast.className = `glass-card p-4 rounded-xl flex items-start gap-3 pointer-events-auto toast-enter ${t.border} ${t.bg}`;
+                    toast.innerHTML = `
+                        <span class="material-symbols-outlined ${t.color} mt-0.5 text-[22px]">${t.icon}</span>
+                        <div class="flex-1 text-sm font-medium text-gray-200">${App.Utils.sanitize(message)}</div>
+                        <button class="text-gray-500 hover:text-white transition-colors" onclick="this.parentElement.remove()"><span class="material-symbols-outlined text-[20px]">close</span></button>
+                    `;
+                    
+                    container.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.classList.replace('toast-enter', 'toast-exit');
+                        setTimeout(() => toast.remove(), 300);
+                    }, 5000);
+                },
+
+                createSkeleton: (type) => {
+                    if (type === 'dossier') {
+                        return `
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+                                <div class="lg:col-span-4 glass-card rounded-2xl p-6 flex flex-col items-center">
+                                    <div class="w-32 h-32 rounded-2xl skeleton mb-4"></div>
+                                    <div class="w-3/4 h-6 skeleton rounded mb-2"></div>
+                                    <div class="w-1/2 h-4 skeleton rounded mb-6"></div>
+                                    <div class="w-full h-24 skeleton rounded"></div>
+                                </div>
+                                <div class="lg:col-span-8 flex flex-col gap-6">
+                                    <div class="glass-card h-32 rounded-2xl skeleton"></div>
+                                    <div class="glass-card flex-1 min-h-[300px] rounded-2xl skeleton"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    return `<div class="w-full h-64 skeleton rounded-2xl"></div>`;
+                }
+            },
+
+            // --- API Client ---
+            API: {
+                async fetchSafe(url, options = {}) {
+                    try {
+                        const res = await fetch(url, options);
+                        if (!res.ok) {
+                            let errorMsg = `HTTP ${res.status}`;
+                            try { const errData = await res.json(); if(errData.error) errorMsg = errData.error; } catch(e){}
+                            throw new Error(errorMsg);
+                        }
+                        return await res.json();
+                    } catch (error) {
+                        console.error(`API Error [${url}]:`, error);
+                        throw error;
+                    }
+                },
+
+                async resolveRobloxUser(query) {
+                    if (/^\d+$/.test(query)) return parseInt(query, 10);
+                    const data = await this.fetchSafe(`${App.Config.robloxUsersAPI}/usernames/users`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usernames: [query], excludeBannedUsers: false })
+                    });
+                    if (data.data && data.data.length > 0) return data.data[0].id;
+                    throw new Error(`Player "${query}" not found on Roblox.`);
+                },
+
+                async resolveRobloxGroup(query) {
+                    if (/^\d+$/.test(query)) return parseInt(query, 10);
+                    const data = await this.fetchSafe(`${App.Config.robloxGroupsAPI}/groups/search?keyword=${encodeURIComponent(query)}&limit=10`);
+                    if (data.data && data.data.length > 0) return data.data[0].id;
+                    throw new Error(`Group "${query}" not found on Roblox.`);
+                },
+
+                async getRobloxProfile(id) {
+                    return this.fetchSafe(`${App.Config.robloxUsersAPI}/users/${id}`);
+                },
+
+                async getRobloxAvatar(id) {
+                    try {
+                        const data = await this.fetchSafe(`${App.Config.robloxThumbnailsAPI}/users/avatar-headshot?userIds=${id}&size=150x150&format=Webp&isCircular=false`);
+                        return data.data?.[0]?.imageUrl || 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
+                    } catch(e) {
+                        return 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
+                    }
+                },
+
+                async getRobloxGroupProfile(id) {
+                    return this.fetchSafe(`${App.Config.robloxGroupsAPI}/groups/${id}`);
+                },
+
+                async getRobloxGroupIcon(id) {
+                    try {
+                        const data = await this.fetchSafe(`${App.Config.robloxThumbnailsAPI}/groups/icons?groupIds=${id}&size=150x150&format=Webp&isCircular=false`);
+                        return data.data?.[0]?.imageUrl || '';
+                    } catch(e) {
+                        return '';
+                    }
+                },
+
+                // Resolves missing display names via Roblox API
+                async fetchMissingNames(users) {
+                    const missingIds = users.filter(u => !u.name || !u.displayName).map(u => u.id);
+                    if(missingIds.length === 0) return;
+
+                    try {
+                        const res = await fetch(`${App.Config.robloxUsersAPI}/users`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userIds: missingIds, excludeBannedUsers: false })
+                        });
+                        const data = await res.json();
+                        
+                        if(data && data.data) {
+                            data.data.forEach(user => {
+                                // Find placeholders in DOM and update them gracefully
+                                const nameEls = document.querySelectorAll(`.missing-name-${user.id}`);
+                                const displayEls = document.querySelectorAll(`.missing-display-${user.id}`);
+                                
+                                nameEls.forEach(el => {
+                                    el.innerHTML = `@${App.Utils.sanitize(user.name)}`;
+                                    el.classList.remove('opacity-50');
+                                });
+                                displayEls.forEach(el => {
+                                    el.innerHTML = App.Utils.sanitize(user.displayName);
+                                });
+                            });
+                        }
+                    } catch(e) {
+                        console.error('Failed to fetch missing names', e);
+                        missingIds.forEach(id => {
+                            const nameEls = document.querySelectorAll(`.missing-name-${id}`);
+                            const displayEls = document.querySelectorAll(`.missing-display-${id}`);
+                            nameEls.forEach(el => el.innerHTML = `<span class="text-red-400">Data Unavailable</span>`);
+                            displayEls.forEach(el => el.innerHTML = `<span class="text-red-400">Unknown Player</span>`);
+                        });
+                    }
+                }
+            },
+
+            // --- UI Rendering Views ---
+            Views: {
+                contentDiv: document.getElementById('app-content'),
+                titleDiv: document.getElementById('page-title'),
+
+                renderOverview() {
+                    App.Views.titleDiv.innerText = 'Safety Dashboard';
+                    const playersCount = App.DB.getHistory('players').length;
+                    const groupsCount = App.DB.getHistory('groups').length;
+
+                    App.Views.contentDiv.innerHTML = `
+                        <div class="max-w-6xl mx-auto space-y-8 animate-fade-in">
+                            <!-- Hero Section -->
+                            <div class="relative glass-card rounded-3xl p-10 overflow-hidden border border-osint-primary/30 group">
+                                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-osint-primary/10 rounded-full blur-[80px] group-hover:bg-osint-primary/20 transition-all duration-700 pointer-events-none"></div>
+                                <div class="relative z-10 max-w-3xl">
+                                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-osint-primary/10 border border-osint-primary/20 text-osint-primary text-xs font-mono font-bold mb-6">
+                                        <div class="w-2 h-2 rounded-full bg-osint-primary animate-pulse"></div>
+                                        Network Connected
+                                    </div>
+                                    <h2 class="text-4xl font-bold text-white mb-4 tracking-tight">Find Flagged Players & Groups</h2>
+                                    <p class="text-gray-400 text-lg leading-relaxed mb-8">
+                                        Protect your community by instantly checking players and groups against the Rotector database. Detect flagged behavior, linked Discord accounts, and hidden alt accounts to keep your environment safe.
+                                    </p>
+                                    <div class="flex gap-4">
+                                        <a href="#player-lookup" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(33,150,243,0.3)] hover:shadow-[0_0_25px_rgba(33,150,243,0.5)] flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-lg">search</span> Start Scan
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Metrics -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="glass-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors hover:-translate-y-1 duration-300">
+                                    <div class="w-14 h-14 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                                        <span class="material-symbols-outlined text-3xl">inventory_2</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Local History</p>
+                                        <h3 class="text-3xl font-bold text-white font-mono">${playersCount + groupsCount}</h3>
+                                    </div>
+                                </div>
+                                <div class="glass-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors hover:-translate-y-1 duration-300">
+                                    <div class="w-14 h-14 rounded-xl bg-osint-integration/10 text-osint-integration flex items-center justify-center border border-osint-integration/20">
+                                        <span class="material-symbols-outlined text-3xl">dns</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">API Status</p>
+                                        <h3 class="text-2xl font-bold text-white uppercase mt-1">Operational</h3>
+                                    </div>
+                                </div>
+                                <div class="glass-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors hover:-translate-y-1 duration-300">
+                                    <div class="w-14 h-14 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center border border-green-500/20">
+                                        <span class="material-symbols-outlined text-3xl">security</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Protection</p>
+                                        <h3 class="text-xl font-bold text-white uppercase mt-1">Active</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                },
+
+                async renderPlayerLookup(query = null) {
+                    App.Views.titleDiv.innerText = 'Player Safety Scan';
+                    
+                    App.Views.contentDiv.innerHTML = `
+                        <div class="max-w-6xl mx-auto">
+                            <!-- Search Bar -->
+                            <form id="target-search-form" class="relative mb-8 shadow-2xl">
+                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-500">fingerprint</span>
+                                </div>
+                                <input type="text" id="target-query" value="${query || ''}" required placeholder="Enter Roblox Username or ID to scan..." 
+                                    class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-36 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
+                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)]">
+                                    Scan
+                                </button>
+                            </form>
+
+                            <div id="target-results">
+                                ${query ? App.Utils.createSkeleton('dossier') : `
+                                    <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
+                                        <span class="material-symbols-outlined text-7xl mb-4">person_search</span>
+                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Player Input</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
+
+                    const form = document.getElementById('target-search-form');
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const inputQuery = document.getElementById('target-query').value.trim();
+                        if (!inputQuery) return;
+                        
+                        window.location.hash = `#player-lookup-${encodeURIComponent(inputQuery)}`;
+                    });
+
+                    if (query) {
+                        await App.Controllers.executePlayerScan(query);
+                    }
+                },
+
+                async renderGroupLookup(query = null) {
+                    App.Views.titleDiv.innerText = 'Group Safety Scan';
+                    
+                    App.Views.contentDiv.innerHTML = `
+                        <div class="max-w-6xl mx-auto">
+                            <form id="group-search-form" class="relative mb-8 shadow-2xl">
+                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-500">groups</span>
+                                </div>
+                                <input type="text" id="group-query" value="${query || ''}" required placeholder="Enter Group Name or ID to scan..." 
+                                    class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-36 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
+                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)]">
+                                    Scan
+                                </button>
+                            </form>
+
+                            <div id="target-results">
+                                ${query ? App.Utils.createSkeleton('dossier') : `
+                                    <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
+                                        <span class="material-symbols-outlined text-7xl mb-4">account_tree</span>
+                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Group Input</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
+
+                    const form = document.getElementById('group-search-form');
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const inputQuery = document.getElementById('group-query').value.trim();
+                        if (!inputQuery) return;
+                        window.location.hash = `#group-lookup-${encodeURIComponent(inputQuery)}`;
+                    });
+
+                    if (query) {
+                        await App.Controllers.executeGroupScan(query);
+                    }
+                },
+
+                renderHistory(type) {
+                    const isPlayer = type === 'players';
+                    App.Views.titleDiv.innerText = isPlayer ? 'Recent Player Scans' : 'Recent Group Scans';
+                    const records = App.DB.getHistory(type);
+
+                    let html = `<div class="max-w-6xl mx-auto animate-slide-up">`;
+                    
+                    if (records.length === 0) {
+                        html += `
+                            <div class="glass-card rounded-2xl p-16 flex flex-col items-center justify-center text-gray-500 border border-osint-800 border-dashed">
+                                <span class="material-symbols-outlined text-6xl mb-4 opacity-50">inventory_2</span>
+                                <p class="text-lg">No recent scans found.</p>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="glass-card rounded-2xl border border-osint-800 overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="bg-osint-900/80 border-b border-osint-800 text-xs uppercase tracking-widest text-gray-500 font-bold">
+                                                <th class="p-4">Identity</th>
+                                                <th class="p-4">Roblox ID</th>
+                                                <th class="p-4">Safety Status</th>
+                                                <th class="p-4">Scan Date</th>
+                                                <th class="p-4 text-right">View</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-osint-800/50">
+                                            ${records.map((r, i) => {
+                                                const flag = App.Config.flags[r.flagType] || App.Config.flags[0];
+                                                return `
+                                                <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer animate-stagger-fade" style="animation-delay: ${i * 0.05}s" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-lookup-${r.id}'">
+                                                    <td class="p-4 flex items-center gap-4">
+                                                        <div class="w-10 h-10 rounded-full bg-osint-900 border border-osint-700 overflow-hidden flex-shrink-0">
+                                                            <img src="${r.thumb}" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'></svg>'">
+                                                        </div>
+                                                        <span class="font-bold text-white group-hover:text-osint-primary transition-colors">${App.Utils.sanitize(r.name)}</span>
+                                                    </td>
+                                                    <td class="p-4 font-mono text-sm text-gray-400">${r.id}</td>
+                                                    <td class="p-4">
+                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${flag.bg} ${flag.color} ${flag.border}">
+                                                            <span class="material-symbols-outlined text-[14px]">${flag.icon}</span> ${flag.name}
+                                                        </span>
+                                                    </td>
+                                                    <td class="p-4 text-sm text-gray-500 font-mono">${App.Utils.formatDate(r.timestamp)}</td>
+                                                    <td class="p-4 text-right">
+                                                        <button class="w-8 h-8 rounded-lg bg-osint-900 border border-osint-700 text-gray-400 hover:text-white hover:border-osint-primary hover:bg-osint-primary/20 transition-all flex items-center justify-center ml-auto">
+                                                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `}).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    html += `</div>`;
+                    App.Views.contentDiv.innerHTML = html;
+                }
+            },
+
+            // --- Business Logic / Controllers ---
+            Controllers: {
+                
+                getFlagBannerHTML(flagType, confidence, reviewer) {
+                    const flag = App.Config.flags[flagType] || App.Config.flags[0];
+                    const confPercent = confidence ? Math.round(confidence * 100) : null;
+                    
+                    const getRadial = (pct) => {
+                        const c = 2 * Math.PI * 18;
+                        const offset = c - (pct/100)*c;
+                        const col = pct > 80 ? 'text-red-500' : pct > 50 ? 'text-yellow-500' : 'text-green-500';
+                        return `
+                            <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
+                                <svg class="transform -rotate-90 w-12 h-12"><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" class="text-osint-800"/><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" class="transition-all duration-1000 ${col}"/></svg>
+                                <span class="absolute text-[10px] font-bold font-mono text-white">${pct}%</span>
+                            </div>
+                        `;
+                    };
+
+                    return `
+                        <div class="glass-card rounded-2xl p-5 border ${flag.border} ${flag.bg} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-lg transition-shadow">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center ${flag.color} bg-black/20 border ${flag.border}">
+                                    <span class="material-symbols-outlined text-[28px]">${flag.icon}</span>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Rotector Status</p>
+                                    <h3 class="text-2xl font-bold text-white leading-none">${flag.name}</h3>
+                                </div>
+                            </div>
+                            ${confPercent !== null ? `
+                                <div class="flex items-center gap-4 bg-osint-950/50 px-4 py-2 rounded-xl border border-osint-800/50">
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-gray-400 uppercase font-bold">System Confidence</p>
+                                        ${reviewer ? `<p class="text-[10px] text-osint-primary mt-0.5 flex justify-end items-center gap-1"><span class="material-symbols-outlined text-[12px]">person_check</span>${App.Utils.sanitize(reviewer.username)}</p>` : ''}
+                                    </div>
+                                    ${getRadial(confPercent)}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                },
+
+                getEvidenceHTML(reasonsObj) {
+                    if (!reasonsObj || Object.keys(reasonsObj).length === 0) {
+                        return `
+                            <div class="flex flex-col items-center justify-center p-10 text-gray-500 border border-osint-800 border-dashed rounded-xl bg-osint-900/30">
+                                <span class="material-symbols-outlined text-5xl mb-3 opacity-30">folder_open</span>
+                                <p class="font-mono text-sm">No violation evidence on file.</p>
+                            </div>
+                        `;
+                    }
+
+                    return Object.entries(reasonsObj).map(([type, data]) => `
+                        <div class="bg-osint-900 border border-osint-800 rounded-xl p-4 mb-4 shadow-sm relative overflow-hidden hover:-translate-y-0.5 transition-transform">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-osint-danger"></div>
+                            <div class="flex justify-between items-start mb-3 pl-2">
+                                <h4 class="font-bold text-white text-md flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-osint-danger text-[20px]">description</span> ${App.Utils.sanitize(type)}
+                                </h4>
+                                <span class="text-xs font-mono bg-osint-950 px-2 py-1 rounded border border-osint-800 text-gray-400">Conf: ${Math.round(data.confidence*100)}%</span>
+                            </div>
+                            <p class="text-sm text-gray-300 mb-3 pl-2 leading-relaxed">${App.Utils.sanitize(data.message || 'No description provided.')}</p>
+                            ${data.evidence && data.evidence.length ? `
+                                <div class="bg-osint-950 rounded-lg p-3 border border-osint-800 ml-2">
+                                    <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-osint-800 pb-1">Raw Evidence Log</div>
+                                    <ul class="space-y-1.5 font-mono text-xs text-gray-400">
+                                        ${data.evidence.map(ev => `
+                                            <li class="flex items-start gap-2">
+                                                <span class="material-symbols-outlined text-osint-primary text-[14px] mt-0.5 shrink-0">chevron_right</span>
+                                                <span class="break-all mt-0.5">${App.Utils.sanitize(ev)}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                },
+
+                getDiscordHTML(discordData) {
+                    if (!discordData || !discordData.discordAccounts || discordData.discordAccounts.length === 0) {
+                         return `
+                            <div class="flex flex-col items-center justify-center p-8 text-gray-500 border border-osint-800 border-dashed rounded-xl bg-osint-900/30 mt-4">
+                                <div class="w-10 h-10 mb-3 opacity-30">${App.Config.svgs.discord}</div>
+                                <p class="font-mono text-sm">No linked Discord connections found.</p>
+                            </div>
+                        `;
+                    }
+
+                    const accountsHtml = discordData.discordAccounts.map(acc => {
+                        const sourcesHtml = (acc.sources || []).map(s => {
+                            const src = App.Config.discordSources[s];
+                            if(!src) return '';
+                            return `<span class="flex items-center px-2 py-0.5 rounded bg-osint-800 border border-osint-700 text-[10px] font-mono text-gray-300 shadow-sm"><span class="material-symbols-outlined text-[12px] mr-1">${src.icon}</span>${src.name}</span>`;
+                        }).join(' ');
+
+                        const serversHtml = (acc.servers || []).map(srv => {
+                            let tags = '';
+                            if(srv.isTase) tags += `<span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] uppercase font-bold ml-2">TASE</span>`;
+                            if(srv.inGracePeriod) tags += `<span class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[9px] uppercase font-bold ml-2 flex items-center gap-1"><span class="material-symbols-outlined text-[10px]">hourglass_top</span>Grace</span>`;
+                            
+                            const dateStr = srv.joinedAt ? `Joined: ${App.Utils.formatDate(srv.joinedAt)}` : `First Seen: ${App.Utils.formatDate(srv.firstSeenAt)}`;
+                            
+                            return `
+                                <div class="flex justify-between items-center py-2 border-b border-osint-800 last:border-0 hover:bg-osint-800/30 px-2 rounded transition-colors">
+                                    <div class="flex items-center">
+                                        <span class="material-symbols-outlined text-gray-500 mr-2 text-[16px]">dns</span>
+                                        <span class="text-sm font-medium text-gray-200">${App.Utils.sanitize(srv.serverName)}</span>
+                                        ${tags}
+                                    </div>
+                                    <span class="text-xs font-mono text-gray-500">${dateStr}</span>
+                                </div>
+                            `;
+                        }).join('');
+
+                        return `
+                            <div class="bg-osint-900 border border-[#5865F2]/30 rounded-xl mb-4 overflow-hidden hover:border-[#5865F2]/60 transition-colors">
+                                <div class="bg-[#5865F2]/10 px-4 py-3 border-b border-[#5865F2]/20 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-[#5865F2] text-white flex items-center justify-center p-1.5 shadow-[0_0_10px_rgba(88,101,242,0.4)]">
+                                            ${App.Config.svgs.discord}
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-400 font-mono">Discord ID</div>
+                                            <div class="font-bold text-white tracking-wide">${App.Utils.sanitize(acc.id)}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-1.5 flex-wrap">
+                                        ${sourcesHtml}
+                                    </div>
+                                </div>
+                                <div class="p-2">
+                                    <div class="px-2 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tracked Server Memberships</div>
+                                    ${serversHtml || '<div class="p-2 text-xs text-gray-500 italic">No tracked servers.</div>'}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    let altsHtml = '';
+                    if (discordData.altAccounts && discordData.altAccounts.length > 0) {
+                        altsHtml = `
+                            <div class="mt-6">
+                                <h4 class="text-sm font-bold text-white flex items-center gap-2 mb-3 border-b border-osint-800 pb-2">
+                                    <span class="material-symbols-outlined text-osint-integration text-[20px]">hub</span> Connected Alt Accounts
+                                </h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    ${discordData.altAccounts.map(alt => `
+                                        <a href="#player-lookup-${alt.robloxUserId}" class="block bg-osint-900 border border-osint-800 rounded-lg p-3 hover:border-osint-primary hover:bg-osint-800/80 transition-all flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-osint-800 flex items-center justify-center text-gray-400 border border-osint-700">
+                                                <span class="material-symbols-outlined text-[18px]">person</span>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-gray-200 text-sm group-hover:text-osint-primary">${App.Utils.sanitize(alt.robloxUsername)}</div>
+                                                <div class="text-[10px] text-gray-500 font-mono">ID: ${alt.robloxUserId}</div>
+                                            </div>
+                                        </a>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="mt-8 border-t border-osint-800 pt-6 animate-fade-in">
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <div class="w-5 h-5 text-[#5865F2]">${App.Config.svgs.discord}</div> Discord Connections
+                            </h3>
+                            ${accountsHtml}
+                            ${altsHtml}
+                        </div>
+                    `;
+                },
+
+                async executePlayerScan(query) {
+                    const resultsDiv = document.getElementById('target-results');
+                    resultsDiv.innerHTML = App.Utils.createSkeleton('dossier');
+
+                    try {
+                        const userId = await App.API.resolveRobloxUser(query);
+                        
+                        const [rbxProfile, rbxAvatar, rotRes, discRes] = await Promise.allSettled([
+                            App.API.getRobloxProfile(userId),
+                            App.API.getRobloxAvatar(userId),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/roblox/user/${userId}`),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/roblox/user/${userId}/discord`)
+                        ]);
+
+                        if (rbxProfile.status === 'rejected') throw new Error("Player profile extraction failed. Ensure the username or ID is valid.");
+                        
+                        const profile = rbxProfile.value;
+                        const avatar = rbxAvatar.status === 'fulfilled' ? rbxAvatar.value : '';
+                        const rotData = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : { flagType: 0, confidence: 1, reasons: {} };
+                        const discData = discRes.status === 'fulfilled' && discRes.value.success ? discRes.value.data : null;
+
+                        App.DB.addRecord('players', { id: profile.id, name: profile.name, thumb: avatar, flagType: rotData.flagType });
+
+                        resultsDiv.innerHTML = `
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
+                                <!-- ID Card -->
+                                <div class="lg:col-span-4 flex flex-col gap-6">
+                                    <div class="glass-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
+                                        <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent z-0"></div>
+                                        <div class="relative z-10 flex flex-col items-center text-center">
+                                            <div class="w-32 h-32 rounded-full p-1 bg-osint-800 border-2 border-osint-700 shadow-2xl mb-4 relative hover:scale-105 transition-transform duration-300">
+                                                <img src="${avatar}" class="w-full h-full rounded-full object-cover bg-osint-900" alt="Avatar">
+                                                <div class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-osint-900 border-2 border-osint-800 flex items-center justify-center ${App.Config.flags[rotData.flagType]?.color}">
+                                                    <span class="material-symbols-outlined text-[18px]">${App.Config.flags[rotData.flagType]?.icon}</span>
+                                                </div>
+                                            </div>
+                                            <h2 class="text-2xl font-bold text-white mb-1 break-all">${App.Utils.sanitize(profile.displayName)}</h2>
+                                            <p class="text-gray-400 font-mono text-sm mb-4">@${App.Utils.sanitize(profile.name)}</p>
+                                            
+                                            <div class="w-full bg-osint-950 rounded-xl p-3 border border-osint-800 flex justify-between items-center mb-4 shadow-inner">
+                                                <span class="text-xs text-gray-500 uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">id_card</span> User ID</span>
+                                                <span class="font-mono text-osint-primary font-bold tracking-wider">${profile.id}</span>
+                                            </div>
+                                            
+                                            <div class="w-full text-left">
+                                                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">calendar_today</span> Creation Date</p>
+                                                <div class="bg-osint-900/50 rounded-lg p-2.5 text-xs text-gray-300 font-mono border border-osint-800/50 mb-3">
+                                                    ${App.Utils.formatDate(profile.created)}
+                                                </div>
+                                                
+                                                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">subject</span> Profile Bio</p>
+                                                <div class="bg-osint-900/50 rounded-lg p-3 text-xs text-gray-400 font-mono border border-osint-800/50 max-h-32 overflow-y-auto whitespace-pre-wrap scrollbar-styled">
+                                                    ${profile.description ? App.Utils.sanitize(profile.description) : '<span class="italic opacity-50">No description provided.</span>'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
+                                        Open Roblox Profile <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                                    </a>
+                                </div>
+
+                                <!-- Intel Panel -->
+                                <div class="lg:col-span-8 flex flex-col gap-6">
+                                    ${this.getFlagBannerHTML(rotData.flagType, rotData.confidence, rotData.reviewer)}
+                                    
+                                    <div class="glass-card rounded-3xl flex-1 flex flex-col overflow-hidden">
+                                        <div class="bg-osint-900/80 border-b border-osint-800 px-6 py-4 flex items-center gap-3">
+                                            <span class="material-symbols-outlined text-osint-primary">policy</span>
+                                            <h3 class="font-bold text-white tracking-wide">Safety Report</h3>
+                                        </div>
+                                        <div class="p-6 overflow-y-auto max-h-[600px] scrollbar-styled">
+                                            ${this.getEvidenceHTML(rotData.reasons)}
+                                            ${this.getDiscordHTML(discData)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        App.Utils.toast('Player scanned successfully.', 'success');
+
+                    } catch (err) {
+                        resultsDiv.innerHTML = `
+                            <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto mt-10 animate-fade-in">
+                                <span class="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
+                                <h3 class="text-white text-2xl font-bold mb-2">Scan Failed</h3>
+                                <p class="text-gray-400 font-mono">${err.message}</p>
+                            </div>
+                        `;
+                        App.Utils.toast('Scan failed: ' + err.message, 'error');
+                    }
+                },
+
+                // Renders the group tracked users section, replacing previous content
+                renderGroupTrackedUsers(containerId, users, pagination) {
+                    const container = document.getElementById(containerId);
+                    if (!container) return;
+
+                    let html = '';
+                    if (users.length > 0) {
+                        html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">` + 
+                        users.map(u => `
+                            <a href="#player-lookup-${u.id}" class="bg-osint-900 border border-osint-800 rounded-xl p-3 flex items-center gap-3 hover:border-osint-primary hover:bg-osint-800/80 transition-all group/item">
+                                <div class="w-10 h-10 rounded-full bg-osint-950 border border-osint-700 overflow-hidden flex-shrink-0 relative">
+                                    <img src="${u.thumbnailUrl || ''}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <p class="text-sm font-bold text-gray-200 truncate group-hover/item:text-osint-primary transition-colors missing-display-${u.id}">
+                                        ${u.displayName ? App.Utils.sanitize(u.displayName) : '<span class="material-symbols-outlined animate-spin-slow text-[14px] align-middle mr-1 text-gray-500">progress_activity</span><span class="text-gray-500">Loading...</span>'}
+                                    </p>
+                                    <p class="text-[10px] text-gray-500 font-mono truncate missing-name-${u.id} ${!u.name ? 'opacity-50' : ''}">
+                                        ${u.name ? '@' + App.Utils.sanitize(u.name) : 'Fetching name...'} 
+                                        ${u.isActive ? '' : '<span class="text-red-400 ml-1 font-sans font-bold">[Left Group]</span>'}
+                                    </p>
+                                </div>
+                                <span class="material-symbols-outlined text-osint-800 group-hover/item:text-osint-primary transition-colors">chevron_right</span>
+                            </a>
+                        `).join('') + `</div>`;
+                        
+                        // Pagination UI
+                        if (pagination && pagination.totalCount > 50) {
+                            const hasPrev = pagination.currentPage > 0;
+                            const hasNext = pagination.hasMore;
+                            html += `
+                                <div class="flex items-center justify-between mt-5 bg-osint-950/50 px-4 py-2 rounded-xl border border-osint-800">
+                                    <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
+                                            ${!hasPrev ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(-1)">
+                                        <span class="material-symbols-outlined text-sm">arrow_back</span> Prev
+                                    </button>
+                                    <span class="text-xs text-gray-400 font-mono font-medium">Page ${pagination.currentPage + 1} <span class="opacity-50 ml-1">(Total: ${pagination.totalCount})</span></span>
+                                    <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
+                                            ${!hasNext ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(1, '${pagination.nextCursor}')">
+                                        Next <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                    </button>
+                                </div>
+                            `;
+                        }
+
+                    } else {
+                        html = `
+                            <div class="p-8 text-center border border-osint-800 border-dashed rounded-xl bg-osint-900/30 mt-4">
+                                <span class="material-symbols-outlined text-4xl mb-2 text-gray-600">verified_user</span>
+                                <p class="text-sm font-mono text-gray-500">No internally flagged members detected in this group.</p>
+                            </div>
+                        `;
+                    }
+                    container.innerHTML = html;
+
+                    // Trigger async fetch for missing names
+                    App.API.fetchMissingNames(users);
+                },
+
+                // Pagination logic wrapper
+                async changeGroupPage(direction, nextCursor = null) {
+                    const state = App.State.groupPagination;
+                    if (!state.groupId) return;
+
+                    const targetPage = state.currentPage + direction;
+                    let cursorToUse = state.cursors[targetPage]; // Could be null if page 0
+
+                    if (direction === 1) {
+                        // Moving forward, save the cursor for the next page if we don't have it
+                        if(state.cursors.length <= targetPage) {
+                            state.cursors.push(nextCursor);
+                        }
+                        cursorToUse = state.cursors[targetPage];
+                    }
+
+                    // Show loading state inline
+                    document.getElementById('tracked-users-wrapper').innerHTML = `
+                        <div class="flex justify-center p-10"><span class="material-symbols-outlined animate-spin-slow text-4xl text-osint-primary">progress_activity</span></div>
+                    `;
+
+                    try {
+                        let url = `${App.Config.rotectorAPI}/roblox/group/${state.groupId}/tracked-users?limit=50`;
+                        if (cursorToUse) url += `&cursor=${cursorToUse}`;
+                        
+                        const res = await App.API.fetchSafe(url);
+                        
+                        if (res.success) {
+                            state.currentPage = targetPage;
+                            state.hasMore = res.data.hasMore;
+                            this.renderGroupTrackedUsers('tracked-users-wrapper', res.data.users, state);
+                        }
+                    } catch(e) {
+                        App.Utils.toast('Failed to load page: ' + e.message, 'error');
+                    }
+                },
+
+                async executeGroupScan(query) {
+                    const resultsDiv = document.getElementById('target-results');
+                    resultsDiv.innerHTML = App.Utils.createSkeleton('dossier');
+
+                    try {
+                        const groupId = await App.API.resolveRobloxGroup(query);
+                        
+                        const [rbxGroup, rbxIcon, rotRes, trackedRes] = await Promise.allSettled([
+                            App.API.getRobloxGroupProfile(groupId),
+                            App.API.getRobloxGroupIcon(groupId),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/roblox/group/${groupId}`),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/roblox/group/${groupId}/tracked-users?limit=50`)
+                        ]);
+
+                        if (rbxGroup.status === 'rejected') throw new Error("Group profile extraction failed.");
+                        
+                        const group = rbxGroup.value;
+                        const icon = rbxIcon.status === 'fulfilled' ? rbxIcon.value : '';
+                        const rotData = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : { flagType: 0, confidence: 1 };
+                        
+                        const trackedData = trackedRes.status === 'fulfilled' && trackedRes.value.success ? trackedRes.value.data : { users: [], totalCount: 0, hasMore: false };
+                        
+                        // Initialize pagination state
+                        App.State.groupPagination = {
+                            groupId: groupId,
+                            cursors: [null],
+                            currentPage: 0,
+                            hasMore: trackedData.hasMore,
+                            totalCount: trackedData.totalCount
+                        };
+
+                        App.DB.addRecord('groups', {
+                            id: group.id,
+                            name: group.name,
+                            thumb: icon,
+                            flagType: rotData.flagType
+                        });
+
+                        resultsDiv.innerHTML = `
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
+                                <!-- Org Card -->
+                                <div class="lg:col-span-4 flex flex-col gap-6">
+                                    <div class="glass-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
+                                        <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent z-0"></div>
+                                        <div class="relative z-10 flex flex-col items-center text-center">
+                                            <div class="w-32 h-32 rounded-2xl p-1 bg-osint-800 border-2 border-osint-700 shadow-xl mb-4 hover:scale-105 transition-transform duration-300">
+                                                <img src="${icon}" class="w-full h-full rounded-xl object-cover bg-osint-900" alt="Group Icon">
+                                            </div>
+                                            <h2 class="text-2xl font-bold text-white mb-3 break-all">${App.Utils.sanitize(group.name)}</h2>
+                                            
+                                            <div class="w-full bg-osint-950 rounded-xl p-3 border border-osint-800 flex justify-between items-center mb-4 shadow-inner">
+                                                <span class="text-xs text-gray-500 uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">tag</span> Group ID</span>
+                                                <span class="font-mono text-osint-primary font-bold tracking-wider">${group.id}</span>
+                                            </div>
+
+                                            <div class="w-full flex gap-2 mb-4">
+                                                <div class="flex-1 bg-osint-900/80 rounded-lg p-2 border border-osint-800">
+                                                    <div class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[12px]">group</span> Members</div>
+                                                    <div class="font-mono text-white font-medium mt-0.5">${group.memberCount?.toLocaleString() || 0}</div>
+                                                </div>
+                                                <div class="flex-1 bg-osint-900/80 rounded-lg p-2 border border-osint-800 overflow-hidden">
+                                                    <div class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[12px]">shield_person</span> Owner</div>
+                                                    <div class="font-mono text-gray-300 truncate mt-0.5 text-xs" title="${group.owner?.username || ''}">${group.owner?.username ? App.Utils.sanitize(group.owner.username) : 'None'}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="w-full text-left">
+                                                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">notes</span> Description</p>
+                                                <div class="bg-osint-900/50 rounded-lg p-3 text-xs text-gray-400 font-mono border border-osint-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap scrollbar-styled">
+                                                    ${group.description ? App.Utils.sanitize(group.description) : '<span class="italic opacity-50">No description provided.</span>'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="https://www.roblox.com/groups/${group.id}" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
+                                        Open Roblox Group <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                                    </a>
+                                </div>
+
+                                <!-- Intel Panel -->
+                                <div class="lg:col-span-8 flex flex-col gap-6">
+                                    ${this.getFlagBannerHTML(rotData.flagType, rotData.confidence, null)}
+                                    
+                                    <div class="glass-card rounded-3xl flex-1 flex flex-col overflow-hidden">
+                                        <div class="bg-osint-900/80 border-b border-osint-800 px-6 py-4 flex justify-between items-center">
+                                            <div class="flex items-center gap-3">
+                                                <span class="material-symbols-outlined text-osint-primary">groups</span>
+                                                <h3 class="font-bold text-white tracking-wide">Flagged Members</h3>
+                                            </div>
+                                            <span class="bg-osint-950 px-2 py-1 rounded-lg text-xs font-mono text-gray-300 border border-osint-800 shadow-inner flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[12px] text-osint-danger">warning</span>
+                                                ${trackedData.totalCount} Tracked
+                                            </span>
+                                        </div>
+                                        <div class="p-6 overflow-y-auto max-h-[600px] scrollbar-styled">
+                                            <p class="text-sm text-gray-400">Known flagged individuals detected currently or previously within this group.</p>
+                                            <div id="tracked-users-wrapper"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        // Render tracked users and start fetch for empty names
+                        this.renderGroupTrackedUsers('tracked-users-wrapper', trackedData.users, App.State.groupPagination);
+                        
+                        App.Utils.toast('Group scanned successfully.', 'success');
+
+                    } catch (err) {
+                        resultsDiv.innerHTML = `
+                            <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto mt-10 animate-fade-in">
+                                <span class="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
+                                <h3 class="text-white text-2xl font-bold mb-2">Scan Failed</h3>
+                                <p class="text-gray-400 font-mono">${err.message}</p>
+                            </div>
+                        `;
+                        App.Utils.toast('Scan failed: ' + err.message, 'error');
+                    }
+                }
+            },
+
+            // --- Router ---
+            Router: {
+                init() {
+                    window.addEventListener('hashchange', () => this.handle());
+                    
+                    document.getElementById('quick-search-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const val = document.getElementById('quick-search-input').value.trim();
+                        if(val) {
+                            window.location.hash = `#player-lookup-${encodeURIComponent(val)}`;
+                            document.getElementById('quick-search-input').value = '';
+                        }
+                    });
+
+                    this.handle();
+                },
+
+                handle() {
+                    const hash = window.location.hash || '#overview';
+                    
+                    document.querySelectorAll('.nav-link').forEach(el => {
+                        el.classList.remove('text-white', 'bg-osint-800', 'border-r-2', 'border-osint-primary');
+                        if (hash.startsWith(el.getAttribute('href').split('-lookup')[0])) {
+                            el.classList.add('text-white', 'bg-osint-800', 'border-r-2', 'border-osint-primary');
+                        }
+                    });
+
+                    const routeMap = {
+                        '#overview': () => App.Views.renderOverview(),
+                        '#recent-players': () => App.Views.renderHistory('players'),
+                        '#recent-groups': () => App.Views.renderHistory('groups')
+                    };
+
+                    App.Views.contentDiv.innerHTML = '';
+                    App.Views.contentDiv.scrollTop = 0;
+
+                    if (routeMap[hash]) {
+                        routeMap[hash]();
+                    } else if (hash.startsWith('#player-lookup')) {
+                        const param = hash.replace('#player-lookup', '').replace(/^-/, '');
+                        App.Views.renderPlayerLookup(param ? decodeURIComponent(param) : null);
+                    } else if (hash.startsWith('#group-lookup')) {
+                        const param = hash.replace('#group-lookup', '').replace(/^-/, '');
+                        App.Views.renderGroupLookup(param ? decodeURIComponent(param) : null);
+                    } else {
+                        routeMap['#overview']();
+                    }
+                }
+            }
+        };
+
+        // --- Boot Application ---
+        window.onload = () => {
+            App.Router.init();
+        };
+
+    </script>
+</body>
+</html>
