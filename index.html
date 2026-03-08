@@ -1966,17 +1966,15 @@
                         treeLayout(root);
 
                         // Draw Links
+                        const linkGen = d3.linkHorizontal().x(d => d.y).y(d => d.x);
                         const link = g.selectAll(".link").data(root.links(), d => d.target.data.id);
                         
                         const linkEnter = link.enter().append("path")
                             .attr("class", "link")
-                            .attr("d", d => {
-                                const o = {x: d.source.x, y: d.source.y};
-                                return d3.linkHorizontal().x(d => d.y).y(d => d.x)({source: o, target: o});
-                            });
+                            .attr("d", d => linkGen({source: d.source, target: d.source}));
                             
                         link.merge(linkEnter).transition().duration(400)
-                            .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x));
+                            .attr("d", linkGen);
                             
                         link.exit().transition().duration(300).attr("opacity", 0).remove();
 
@@ -2000,11 +1998,7 @@
                         nodeEnter.append("circle")
                             .attr("r", 20)
                             .attr("fill", "#1c1c26")
-                            .attr("stroke", d => {
-                                if (d.data.type === 'target') return '#2196f3'; // blue
-                                if (d.data.type === 'group') return '#14b8a6'; // teal
-                                return d.data.flag ? '#ef4444' : '#9ca3af'; // red (flagged) or gray (clear)
-                            });
+                            .attr("stroke", d => d.data.color || (d.data.flag ? '#ef4444' : '#9ca3af'));
 
                         nodeEnter.append("image")
                             .attr("href", d => d.data.avatar || 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular')
@@ -2046,24 +2040,22 @@
                         const flagsContainer = document.getElementById('tt-flags');
                         
                         let badgeText = '';
-                        let bannerColors = '';
 
                         if (data.type === 'target') {
                             badgeText = 'TARGET ROOT';
-                            bannerColors = 'from-blue-600/30 to-blue-900/40 border-blue-500/30';
-                            document.getElementById('tt-avatar').classList.replace('border-osint-950', 'border-osint-primary');
                         } else if (data.type === 'group') {
                             badgeText = data.flag ? 'FLAGGED GROUP' : 'GROUP';
-                            bannerColors = data.flag ? 'from-red-600/30 to-red-900/40 border-red-500/30' : 'from-teal-600/30 to-teal-900/40 border-teal-500/30';
-                            document.getElementById('tt-avatar').className = `absolute -bottom-6 left-4 w-14 h-14 rounded-full border-4 ${data.flag ? 'border-osint-danger' : 'border-osint-integration'} bg-osint-800 object-cover shadow-lg`;
                         } else {
                             badgeText = data.flag ? 'FLAGGED CONNECTION' : 'CLEARED CONNECTION';
-                            bannerColors = data.flag ? 'from-red-600/30 to-red-900/40 border-red-500/30' : 'from-gray-600/30 to-gray-800/40 border-gray-500/30';
-                            document.getElementById('tt-avatar').className = `absolute -bottom-6 left-4 w-14 h-14 rounded-full border-4 ${data.flag ? 'border-osint-danger' : 'border-gray-500'} bg-osint-800 object-cover shadow-lg`;
                         }
 
                         badge.innerText = badgeText;
-                        banner.className = `h-14 bg-gradient-to-r ${bannerColors} border-b border-osint-700 w-full relative`;
+                        
+                        // Dynamically apply the node's specific backend color to the tooltip UI
+                        const colorHex = data.color || '#3f3f5a';
+                        banner.style.background = `linear-gradient(to right, ${colorHex}50, #12121a)`;
+                        banner.style.borderBottomColor = colorHex;
+                        document.getElementById('tt-avatar').style.borderColor = colorHex;
 
                         let flagsHtml = '';
                         if (data.flagData) {
