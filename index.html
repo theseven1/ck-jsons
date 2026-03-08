@@ -22,8 +22,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- DOMPurify for XSS Protection -->
+    <!-- DOMPurify & D3.js for Mind Mapping -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -144,6 +145,13 @@
         #sidebar.collapsed .sidebar-bottom-panel button { padding: 0.5rem 0; justify-content: center; }
         #sidebar.collapsed .api-status { padding: 0.5rem 0; justify-content: center; background: transparent; border: none; box-shadow: none; }
 
+        /* Mind Map D3 Classes */
+        .node circle { stroke: #2d2d3d; stroke-width: 2px; transition: r 0.2s; cursor: pointer; }
+        .node:hover circle { stroke: #58a6ff; }
+        .node text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #e0e0e0; pointer-events: none; text-shadow: 0px 2px 4px rgba(0,0,0,0.8); }
+        .link { stroke: #3f3f5a; stroke-opacity: 0.6; }
+        .mindmap-tooltip { position: absolute; padding: 8px 12px; background: rgba(18, 18, 26, 0.95); color: #fff; border: 1px solid #3f3f5a; border-radius: 8px; font-size: 12px; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 50; }
+
         /* Staggered Animations */
         .stagger-1 { animation: slideUp 0.4s ease-out 0.05s forwards; opacity: 0; }
         .stagger-2 { animation: slideUp 0.4s ease-out 0.1s forwards; opacity: 0; }
@@ -164,7 +172,7 @@
             </div>
             <div class="sidebar-text flex-shrink-0">
                 <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
-                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.6</p>
+                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.7</p>
             </div>
         </div>
 
@@ -245,7 +253,7 @@
         </header>
 
         <!-- Dynamic View Container -->
-        <div id="app-content" class="flex-1 overflow-y-auto p-8 relative scroll-smooth">
+        <div id="app-content" class="flex-1 overflow-y-auto p-8 relative scroll-smooth flex flex-col">
             <!-- Content injected here via JS -->
         </div>
     </main>
@@ -287,6 +295,8 @@
             // --- Configuration & Constants ---
             Config: {
                 rotectorAPI: 'https://roscoe.rotector.com/v1',
+                // WebSocket server (Must be configured in your Nginx and EC2 instance)
+                wsURL: 'wss://catchthem.mk-7.org/ws', 
                 
                 flags: {
                     0: { name: 'Not Flagged', color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/30', icon: 'check_circle', hex: '#9ca3af' },
@@ -319,7 +329,8 @@
                     totalCount: 0,
                     allUsersCache: [] 
                 },
-                pipWindow: null 
+                pipWindow: null,
+                analysisWS: null
             },
 
             // --- Database (Local Storage Wrapper) ---
@@ -445,7 +456,7 @@
                 createSkeleton: (type) => {
                     if (type === 'dossier') {
                         return `
-                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in w-full max-w-6xl mx-auto">
                                 <div class="lg:col-span-4 ui-card rounded-2xl p-6 flex flex-col items-center">
                                     <div class="w-32 h-32 rounded-2xl skeleton mb-4"></div>
                                     <div class="w-3/4 h-6 skeleton rounded mb-2"></div>
@@ -625,7 +636,7 @@
                     const gCount = App.DB.getHistory('groups').length;
                     
                     App.Views.contentDiv.innerHTML = `
-                        <div class="max-w-4xl mx-auto animate-slide-up space-y-6">
+                        <div class="max-w-4xl mx-auto animate-slide-up space-y-6 w-full">
                             
                             <!-- Integrations -->
                             <div class="ui-card rounded-3xl p-8 border border-osint-800">
@@ -722,7 +733,7 @@
                     const groupsCount = Array.isArray(groupsHistory) ? groupsHistory.length : 0;
 
                     App.Views.contentDiv.innerHTML = `
-                        <div class="max-w-6xl mx-auto space-y-8 animate-fade-in">
+                        <div class="max-w-6xl mx-auto space-y-8 animate-fade-in w-full">
                             <div class="relative ui-card rounded-3xl p-10 overflow-hidden border border-osint-primary/30 group">
                                 <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-osint-primary/10 rounded-full blur-[80px] group-hover:bg-osint-primary/20 transition-all duration-700 pointer-events-none"></div>
                                 <div class="relative z-10 max-w-3xl">
@@ -790,7 +801,7 @@
                         const groupsFlagged = stats.data?.totalFlaggedGroups || 0;
 
                         App.Views.contentDiv.innerHTML = `
-                            <div class="max-w-6xl mx-auto space-y-6 animate-slide-up">
+                            <div class="max-w-6xl mx-auto space-y-6 animate-slide-up w-full">
                                 <div class="bg-osint-900 border border-osint-800 rounded-3xl p-8 text-center relative overflow-hidden">
                                     <div class="absolute inset-0 cyber-grid opacity-50"></div>
                                     <div class="relative z-10">
@@ -836,7 +847,7 @@
 
                 renderSearchTemplate(type, query, limit) {
                     return `
-                        <div class="max-w-6xl mx-auto">
+                        <div class="max-w-6xl mx-auto w-full">
                             <form id="target-search-form" class="relative mb-8 shadow-2xl flex gap-3">
                                 <div class="relative flex-1">
                                     <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
@@ -879,7 +890,7 @@
                     let records = App.DB.getHistory(type);
                     if (!Array.isArray(records)) records = [];
 
-                    let html = `<div class="max-w-6xl mx-auto animate-fade-in">`;
+                    let html = `<div class="max-w-6xl mx-auto animate-fade-in w-full">`;
                     
                     if (records.length === 0) {
                         html += `
@@ -1326,7 +1337,7 @@
                                 try {
                                     const data = await App.API.getXTrackerData(id);
                                     if (data && (Array.isArray(data.alts) && data.alts.length > 0 || Array.isArray(data.evidence) && data.evidence.length > 0)) {
-                                        xtMap[id] = data;
+                                        xtMap[id] = true;
                                     }
                                 } catch(e) {}
                             }));
@@ -1367,7 +1378,6 @@
                         });
                         html += `</div>`;
 
-                        // Pagination controls
                         if (searchData.previousPageCursor || searchData.nextPageCursor) {
                             html += `
                                 <div class="flex items-center justify-between mt-6 bg-osint-950/50 px-4 py-3 rounded-xl border border-osint-800">
@@ -1390,7 +1400,6 @@
                 },
 
                 async executeGroupSearch(query, limit = 25, cursor = '') {
-                    // ID Bypass routing for direct navigation via URL
                     if (query && /^\d+$/.test(query)) {
                         window.location.hash = `#group-dossier?id=${query}`;
                         return;
@@ -1491,93 +1500,9 @@
                     }
                 },
 
-                async executeDiscordLookup(query) {
-                    App.Views.titleDiv.innerText = 'Discord Intelligence';
-                    App.Views.contentDiv.innerHTML = `
-                        <div class="max-w-6xl mx-auto">
-                            <form id="discord-search-form" class="relative mb-8 shadow-2xl flex gap-3">
-                                <div class="relative flex-1">
-                                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                        <span class="material-symbols-outlined text-gray-500">hub</span>
-                                    </div>
-                                    <input type="text" id="discord-query" value="${query || ''}" required placeholder="Enter Exact Discord ID (e.g. 1332382707707023441)" 
-                                        class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-colors font-mono text-lg shadow-inner">
-                                </div>
-                                <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-colors shadow-[0_0_10px_rgba(33,150,243,0.3)] flex items-center gap-2">
-                                    Analyze
-                                </button>
-                            </form>
-                            <div id="target-results">
-                                ${query ? App.Utils.createSkeleton('dossier') : `
-                                    <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
-                                        <div class="w-20 h-20 mb-4 fill-current">${App.Config.svgs.discord}</div>
-                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Discord ID</p>
-                                    </div>
-                                `}
-                            </div>
-                        </div>
-                    `;
-
-                    document.getElementById('discord-search-form').addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        const q = document.getElementById('discord-query').value.trim();
-                        if (q) window.location.hash = `#discord-lookup?id=${encodeURIComponent(q)}`;
-                    });
-
-                    if(!query) return;
-                    
-                    const resDiv = document.getElementById('target-results');
-                    try {
-                        const data = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/discord/user/${query}`);
-                        if(!data.success) throw new Error("No intelligence found for this Discord ID.");
-
-                        const d = data.data;
-                        const serversHtml = d.servers.map(srv => {
-                            let tags = '';
-                            if(srv.isTase) tags += `<span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] uppercase font-bold ml-2">TASE</span>`;
-                            if(srv.inGracePeriod) tags += `<span class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[9px] uppercase font-bold ml-2">Grace</span>`;
-                            const dateStr = srv.joinedAt ? `Joined: ${App.Utils.formatDate(srv.joinedAt)}` : `First Seen: ${App.Utils.formatDate(srv.firstSeenAt)}`;
-                            return `
-                                <div class="flex justify-between items-center py-3 border-b border-osint-800 last:border-0">
-                                    <div class="flex items-center"><span class="material-symbols-outlined text-gray-500 mr-2 text-[18px]">dns</span><span class="font-medium text-gray-200">${App.Utils.sanitize(srv.serverName)}</span>${tags}</div>
-                                    <span class="text-xs font-mono text-gray-500">${dateStr}</span>
-                                </div>
-                            `;
-                        }).join('');
-
-                        const connectionsHtml = d.connections.map(c => `
-                            <a href="#player-dossier?id=${c.robloxUserId}" class="block bg-osint-900 border border-osint-800 p-4 rounded-xl hover:border-osint-primary transition-colors flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-osint-800 flex items-center justify-center text-gray-400"><span class="material-symbols-outlined">person</span></div>
-                                    <div>
-                                        <div class="font-bold text-white text-lg">${App.Utils.sanitize(c.robloxUsername)}</div>
-                                        <div class="text-xs text-gray-500 font-mono">UID: ${c.robloxUserId}</div>
-                                    </div>
-                                </div>
-                                <span class="material-symbols-outlined text-gray-600">chevron_right</span>
-                            </a>
-                        `).join('');
-
-                        resDiv.innerHTML = `
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
-                                <div class="ui-card rounded-2xl p-6">
-                                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-osint-800 pb-2"><span class="material-symbols-outlined text-osint-primary">link</span> Roblox Connections</h3>
-                                    <div class="space-y-3">${connectionsHtml || '<p class="text-gray-500">No direct Roblox connections found.</p>'}</div>
-                                </div>
-                                <div class="ui-card rounded-2xl p-6">
-                                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-osint-800 pb-2"><span class="material-symbols-outlined text-osint-integration">dns</span> Server Memberships</h3>
-                                    <div class="bg-osint-900/50 rounded-xl px-4 py-1 border border-osint-800">${serversHtml || '<p class="text-gray-500 py-3">No tracked servers.</p>'}</div>
-                                </div>
-                            </div>
-                        `;
-                    } catch(err) {
-                        resDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Lookup Failed: ${err.message}</div>`;
-                    }
-                },
-
                 async executePlayerDossier(userId) {
                     const resultsDiv = document.getElementById('app-content');
-                    resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto">${App.Utils.createSkeleton('dossier')}</div>`;
+                    resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto w-full">${App.Utils.createSkeleton('dossier')}</div>`;
 
                     try {
                         const [rbxProfile, rbxAvatar, rotRes, discRes, xtRes] = await Promise.allSettled([
@@ -1598,12 +1523,10 @@
                             hasRotData = true;
                         }
 
-                        // Fully failed extraction case (Banned/Deleted user and no history)
                         if (isInvisible && !hasRotData) {
                             throw new Error("User not found on Roblox and no historical data exists in our databases.");
                         }
                         
-                        // Synthesize missing profile via Invisible Support
                         const profile = isInvisible ? {
                             id: userId,
                             name: "Unknown_Hidden",
@@ -1616,7 +1539,6 @@
                         const discData = (discRes.status === 'fulfilled' && discRes.value?.success && discRes.value?.data) ? discRes.value.data : null;
                         const xtData = (xtRes.status === 'fulfilled' && xtRes.value) ? xtRes.value : null;
 
-                        // Save lookup to history
                         App.DB.addRecord('players', { 
                             id: profile.id, 
                             name: profile.name, 
@@ -1625,21 +1547,15 @@
                             flagType: rotData.flagType 
                         });
 
-                        // Set Embed Meta Tags Dynamically
                         const flag = App.Config.flags[rotData.flagType] || App.Config.flags[0];
                         let embedDesc = `Roblox ID: ${profile.id}\nSafety Status: ${flag.name}`;
                         if (rotData.reasons && Object.keys(rotData.reasons).length > 0) {
                             embedDesc += `\n\nFlags Detected:\n` + Object.keys(rotData.reasons).map(r => `• ${r}`).join('\n');
                         }
-                        App.Utils.updateMetaTags(
-                            `[${flag.name}] ${profile.displayName} (@${profile.name}) - Dossier`,
-                            embedDesc,
-                            avatar,
-                            flag.hex
-                        );
+                        App.Utils.updateMetaTags(`[${flag.name}] ${profile.displayName} (@${profile.name}) - Dossier`, embedDesc, avatar, flag.hex);
 
                         resultsDiv.innerHTML = `
-                            <div class="max-w-6xl mx-auto">
+                            <div class="max-w-6xl mx-auto w-full">
                                 <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1 transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800 w-fit"><span class="material-symbols-outlined text-sm">arrow_back</span> Back to Results</button>
                                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
                                     <!-- ID Card -->
@@ -1676,7 +1592,10 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-colors active:scale-[0.98]">
+                                        <button onclick="window.location.hash='#analyze?id=${profile.id}'" class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-osint-primary hover:text-white hover:border-osint-primary transition-colors active:scale-[0.98]">
+                                            <span class="material-symbols-outlined text-[16px]">troubleshoot</span> Deep Analyze (Mind Map)
+                                        </button>
+                                        <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-gray-500 transition-colors active:scale-[0.98]">
                                             Open Roblox Profile <span class="material-symbols-outlined text-[16px]">open_in_new</span>
                                         </a>
                                     </div>
@@ -1717,7 +1636,7 @@
 
                 async executeGroupDossier(groupId) {
                     const resultsDiv = document.getElementById('app-content');
-                    resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto">${App.Utils.createSkeleton('dossier')}</div>`;
+                    resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto w-full">${App.Utils.createSkeleton('dossier')}</div>`;
 
                     try {
                         const [rbxGroup, rbxIcon, rotRes, trackedRes] = await Promise.allSettled([
@@ -1737,12 +1656,10 @@
                             hasRotData = true;
                         }
 
-                        // Fully failed extraction case (Banned/Deleted group and no history)
                         if (isInvisible && !hasRotData) {
                             throw new Error("Group not found on Roblox and no historical data exists in our databases.");
                         }
                         
-                        // Synthesize missing group profile via Invisible Support
                         const group = isInvisible ? {
                             id: groupId,
                             name: "Invisible Group",
@@ -1768,21 +1685,14 @@
                             App.State.groupPagination.cursors.push(trackedData.nextCursor);
                         }
 
-                        // Save lookup to history safely
                         App.DB.addRecord('groups', { id: group.id, name: group.name, thumb: icon, flagType: rotData.flagType });
 
-                        // Set Embed Meta Tags Dynamically
                         const flag = App.Config.flags[rotData.flagType] || App.Config.flags[0];
                         let embedDesc = `Group ID: ${group.id}\nMembers: ${group.memberCount?.toLocaleString() || 0}\nSafety Status: ${flag.name}`;
-                        App.Utils.updateMetaTags(
-                            `[${flag.name}] Group: ${group.name} - Dossier`,
-                            embedDesc,
-                            icon,
-                            flag.hex
-                        );
+                        App.Utils.updateMetaTags(`[${flag.name}] Group: ${group.name} - Dossier`, embedDesc, icon, flag.hex);
 
                         resultsDiv.innerHTML = `
-                            <div class="max-w-6xl mx-auto">
+                            <div class="max-w-6xl mx-auto w-full">
                                 <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1 transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800 w-fit"><span class="material-symbols-outlined text-sm">arrow_back</span> Back to Results</button>
                                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
                                     <!-- Org Card -->
@@ -1948,7 +1858,7 @@
                         if (res.success) {
                             state.currentPage = targetPage;
                             state.hasMore = res.data.hasMore;
-                            state.nextCursor = res.data.nextCursor; // Update next cursor for the forward button
+                            state.nextCursor = res.data.nextCursor; 
 
                             const newUsers = res.data.users || [];
                             newUsers.forEach(u => {
@@ -1961,12 +1871,227 @@
                                 }
                             });
 
-                            // Only pass pagination state that contains nextCursor to the render func
                             this.renderGroupTrackedUsers('tracked-users-wrapper', newUsers, state);
                         }
                     } catch(e) {
                         App.Utils.toast('Failed to load page: ' + e.message, 'error');
                     }
+                },
+
+                // --- Realtime Mind Map Analyzer ---
+                renderAnalysis(userId) {
+                    App.Views.titleDiv.innerText = 'Deep Inspection Analyzer';
+                    App.Views.contentDiv.innerHTML = `
+                        <div class="flex flex-col h-full w-full animate-fade-in">
+                            <div class="flex justify-between items-center mb-4 px-4 py-3 ui-card border border-osint-800 rounded-xl relative z-10 shadow-lg">
+                                <div class="flex items-center gap-3">
+                                    <button onclick="window.history.back()" class="text-gray-400 hover:text-white transition-colors flex items-center justify-center">
+                                        <span class="material-symbols-outlined">arrow_back</span>
+                                    </button>
+                                    <div>
+                                        <h3 class="font-bold text-white text-sm">Real-time Mind Map</h3>
+                                        <p id="analyze-status" class="text-[10px] font-mono text-osint-primary flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-osint-primary animate-pulse"></span> Connecting to network...
+                                        </p>
+                                    </div>
+                                </div>
+                                <button onclick="App.Controllers.stopAnalysis()" id="analyze-stop-btn" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors hidden">
+                                    Halt Operation
+                                </button>
+                            </div>
+                            
+                            <div class="flex-1 relative ui-card rounded-2xl border border-osint-800 overflow-hidden bg-[#0a0a0e]/50" id="mindmap-container">
+                                <svg id="mindmap-svg" class="w-full h-full absolute inset-0 cursor-move"></svg>
+                                <div id="mindmap-tooltip" class="mindmap-tooltip"></div>
+                            </div>
+                        </div>
+                    `;
+
+                    this.startAnalysisSocket(userId);
+                },
+
+                stopAnalysis() {
+                    if (App.State.analysisWS) {
+                        App.State.analysisWS.close();
+                        App.State.analysisWS = null;
+                        document.getElementById('analyze-status').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> Operation Halted`;
+                        document.getElementById('analyze-stop-btn').classList.add('hidden');
+                        App.Utils.toast("Analysis aborted by user.", "warning");
+                    }
+                },
+
+                startAnalysisSocket(userId) {
+                    if (App.State.analysisWS) App.State.analysisWS.close();
+
+                    const container = document.getElementById('mindmap-container');
+                    const svg = d3.select("#mindmap-svg");
+                    const tooltip = d3.select("#mindmap-tooltip");
+                    const statusText = document.getElementById('analyze-status');
+                    const stopBtn = document.getElementById('analyze-stop-btn');
+
+                    let width = container.clientWidth;
+                    let height = container.clientHeight;
+
+                    const zoom = d3.zoom().scaleExtent([0.1, 4]).on("zoom", (event) => {
+                        g.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+
+                    const g = svg.append("g");
+                    const linkGroup = g.append("g").attr("class", "links");
+                    const nodeGroup = g.append("g").attr("class", "nodes");
+
+                    let nodes = [];
+                    let links = [];
+
+                    const simulation = d3.forceSimulation(nodes)
+                        .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+                        .force("charge", d3.forceManyBody().strength(-300))
+                        .force("center", d3.forceCenter(width / 2, height / 2))
+                        .force("collide", d3.forceCollide().radius(30));
+
+                    const updateGraph = () => {
+                        const link = linkGroup.selectAll("line").data(links, d => d.source.id + "-" + d.target.id);
+                        link.exit().remove();
+                        const linkEnter = link.enter().append("line").attr("class", "link");
+                        const linkMerged = linkEnter.merge(link);
+
+                        const node = nodeGroup.selectAll("g.node").data(nodes, d => d.id);
+                        node.exit().remove();
+                        
+                        const nodeEnter = node.enter().append("g")
+                            .attr("class", "node")
+                            .call(d3.drag()
+                                .on("start", dragstarted)
+                                .on("drag", dragged)
+                                .on("end", dragended));
+
+                        nodeEnter.append("circle")
+                            .attr("r", d => d.type === 'target' ? 20 : (d.type === 'group' ? 12 : 16))
+                            .attr("fill", d => {
+                                if (d.type === 'target') return '#2196f3';
+                                if (d.type === 'group') return '#14b8a6';
+                                return d.flagged ? '#ef4444' : '#f97316';
+                            });
+
+                        nodeEnter.append("text")
+                            .attr("dy", 28)
+                            .attr("text-anchor", "middle")
+                            .text(d => d.label);
+
+                        nodeEnter.on("mouseover", (event, d) => {
+                            tooltip.transition().duration(200).style("opacity", 1);
+                            tooltip.html(`<b>${d.label}</b><br><span style="color:#aaa">${d.type.toUpperCase()} ID: ${d.rawId}</span>${d.flagged ? '<br><span style="color:#ef4444; font-weight:bold;">FLAGGED</span>' : ''}`)
+                                .style("left", (event.pageX + 15) + "px")
+                                .style("top", (event.pageY - 28) + "px");
+                        }).on("mouseout", () => {
+                            tooltip.transition().duration(500).style("opacity", 0);
+                        }).on("click", (event, d) => {
+                            if (d.type === 'user' || d.type === 'target') {
+                                window.open(`#player-dossier?id=${d.rawId}`, '_blank');
+                            } else if (d.type === 'group') {
+                                window.open(`#group-dossier?id=${d.rawId}`, '_blank');
+                            }
+                        });
+
+                        const nodeMerged = nodeEnter.merge(node);
+
+                        simulation.nodes(nodes).on("tick", () => {
+                            linkMerged
+                                .attr("x1", d => d.source.x)
+                                .attr("y1", d => d.source.y)
+                                .attr("x2", d => d.target.x)
+                                .attr("y2", d => d.target.y);
+                            nodeMerged
+                                .attr("transform", d => `translate(${d.x},${d.y})`);
+                        });
+
+                        simulation.force("link").links(links);
+                        simulation.alpha(1).restart();
+                    };
+
+                    function dragstarted(event, d) {
+                        if (!event.active) simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x; d.fy = d.y;
+                    }
+                    function dragged(event, d) {
+                        d.fx = event.x; d.fy = event.y;
+                    }
+                    function dragended(event, d) {
+                        if (!event.active) simulation.alphaTarget(0);
+                        d.fx = null; d.fy = null;
+                    }
+
+                    // WebSocket Connection
+                    try {
+                        const ws = new WebSocket(App.Config.wsURL);
+                        App.State.analysisWS = ws;
+
+                        ws.onopen = () => {
+                            stopBtn.classList.remove('hidden');
+                            ws.send(JSON.stringify({ action: 'analyze', userId: userId }));
+                        };
+
+                        ws.onmessage = (event) => {
+                            const msg = JSON.parse(event.data);
+
+                            if (msg.type === 'status') {
+                                statusText.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-osint-primary animate-pulse"></span> ${App.Utils.sanitize(msg.msg)}`;
+                            } 
+                            else if (msg.type === 'error') {
+                                statusText.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> ${App.Utils.sanitize(msg.msg)}`;
+                                stopBtn.classList.add('hidden');
+                                App.Utils.toast(msg.msg, 'error');
+                            }
+                            else if (msg.type === 'init') {
+                                nodes.push({ id: msg.node.id, rawId: msg.node.rawId, label: msg.node.label, type: 'target', flagged: true });
+                                updateGraph();
+                            }
+                            else if (msg.type === 'add_node') {
+                                if (!nodes.find(n => n.id === msg.node.id)) {
+                                    nodes.push({ id: msg.node.id, rawId: msg.node.rawId, label: msg.node.label, type: msg.node.type, flagged: msg.node.flag });
+                                    updateGraph();
+                                }
+                            }
+                            else if (msg.type === 'add_link') {
+                                if (!links.find(l => l.source.id === msg.source && l.target.id === msg.target)) {
+                                    links.push({ source: msg.source, target: msg.target });
+                                    updateGraph();
+                                }
+                            }
+                            else if (msg.type === 'done') {
+                                statusText.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Analysis Complete`;
+                                stopBtn.classList.add('hidden');
+                                App.Utils.toast("Deep inspection finished.", "success");
+                            }
+                        };
+
+                        ws.onerror = () => {
+                            statusText.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Connection Failed`;
+                            stopBtn.classList.add('hidden');
+                            App.Utils.toast("Could not connect to analyzer backend.", "error");
+                        };
+
+                        ws.onclose = () => {
+                            if (stopBtn && !stopBtn.classList.contains('hidden')) {
+                                stopBtn.classList.add('hidden');
+                            }
+                        };
+
+                    } catch (err) {
+                        App.Utils.toast("WebSocket initialization failed.", "error");
+                    }
+
+                    // Resize observer for the SVG
+                    const resizeObserver = new ResizeObserver(entries => {
+                        for (let entry of entries) {
+                            width = entry.contentRect.width;
+                            height = entry.contentRect.height;
+                            simulation.force("center", d3.forceCenter(width / 2, height / 2));
+                            simulation.alpha(0.3).restart();
+                        }
+                    });
+                    resizeObserver.observe(container);
                 },
 
                 toggleFallbackPip() {
@@ -1997,8 +2122,6 @@
                         });
                         App.State.pipWindow = pip;
 
-                        // To prevent FPS lag in games while the PiP runs, we completely strip 
-                        // heavy CSS paints like box-shadows, animations (no spinning loaders), and transitions.
                         const style = pip.document.createElement('style');
                         style.textContent = `
                             body { margin: 0; background: #0a0a0e; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
@@ -2053,13 +2176,12 @@
                             try {
                                 let userId = val;
                                 let username = val;
-                                // We are within the exact same javascript context, so App is available!
                                 if (!/^\d+$/.test(val)) {
                                     const url = App.API.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
                                     const res = await fetch(url, {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                                        body: JSON.stringify({ usernames: [val], excludeBannedUsers: false })
+                                        body: JSON.stringify({ usernames: [val], excludeBannedUsers: true }) // Fallback logic embedded natively
                                     });
                                     const data = await res.json();
                                     if (data.data && data.data.length > 0) {
@@ -2079,12 +2201,10 @@
                                 const flagType = rotData.flagType;
                                 let flag = App.Config.flags[flagType] || App.Config.flags[0];
 
-                                // Overlay XTracker Flag if they only have safe/past base flags
                                 if ((flagType === 0 || flagType === 6) && xtData && (Array.isArray(xtData.alts) && xtData.alts.length > 0 || Array.isArray(xtData.evidence) && xtData.evidence.length > 0)) {
                                     flag = { name: 'XTracker Flag', color: '#ef4444', bg: '#ef444415', border: '#ef444450', hex: '#ef4444' };
                                 }
 
-                                // Add to history
                                 App.DB.addRecord('players', { id: userId, name: username, displayName: username, thumb: avatar, flagType: flagType });
 
                                 resDiv.innerHTML = `
@@ -2126,7 +2246,20 @@
                         let userId = query;
                         let username = query;
                         if (!/^\d+$/.test(query)) {
-                            userId = await App.API.resolveRobloxUser(query);
+                            // Implemented fallback array search directly into the PIP
+                            const url = App.API.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
+                            const res = await fetch(url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                body: JSON.stringify({ usernames: [query], excludeBannedUsers: true })
+                            });
+                            const data = await res.json();
+                            if (data.data && data.data.length > 0) {
+                                userId = data.data[0].id;
+                                username = data.data[0].name;
+                            } else {
+                                throw new Error('User not found.');
+                            }
                         }
 
                         const [avatar, rotRes, xtData] = await Promise.all([
@@ -2247,11 +2380,17 @@
                         }
                     });
 
+                    // Cleanup lingering WebSockets when navigating away from analyze view
+                    if (path !== '#analyze' && App.State.analysisWS) {
+                        App.State.analysisWS.close();
+                        App.State.analysisWS = null;
+                    }
+
                     App.Views.contentDiv.innerHTML = '';
                     App.Views.contentDiv.scrollTop = 0;
 
                     // Reset Default SEO meta tags
-                    if (!path.includes('dossier')) {
+                    if (!path.includes('dossier') && !path.includes('analyze')) {
                         App.Utils.updateMetaTags(
                             'Catch Them | Safety Dashboard',
                             'Protect your community by checking players and groups against our comprehensive safety database.',
@@ -2270,6 +2409,7 @@
                         case '#discord-lookup': App.Controllers.executeDiscordLookup(params.get('id')); break;
                         case '#player-dossier': App.Controllers.executePlayerDossier(params.get('id')); break;
                         case '#group-dossier': App.Controllers.executeGroupDossier(params.get('id')); break;
+                        case '#analyze': App.Controllers.renderAnalysis(params.get('id')); break;
                         case '#settings': App.Views.renderSettings(); break;
                         default:
                             if (path.startsWith('#player-lookup-')) {
