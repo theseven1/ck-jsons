@@ -509,8 +509,8 @@
                 async getXTrackerData(id) {
                     if (localStorage.getItem('rc_xtracker_enabled') === 'false') return null;
                     try {
-                        const res = await fetch(`https://catchthem.mk-7.org/proxy/https://api.xtracker.xyz/api/registry/user?id=${id}`, {
-                            headers: { 'Authorization': 'uSWxNE0X1AeD5WYImi9ZjA'  }
+                        const res = await fetch(`https://api.xtracker.xyz/api/registry/user?id=${id}`, {
+                            headers: { 'Authorization': 'uSWxNE0X1AeD5WYImi9ZjA' }
                         });
                         if (res.status === 404) return null; // Normal if not in DB
                         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1162,7 +1162,6 @@
                 },
 
                 getXTrackerHTML(xtData) {
-                    // Only render if data exists and has meaningful content
                     if (!xtData) return '';
                     
                     const hasAlts = Array.isArray(xtData.alts) && xtData.alts.length > 0;
@@ -1187,7 +1186,6 @@
                                     let urlHtml = '';
                                     if (ev.url) {
                                         let rawUrl = ev.url;
-                                        // Auto-convert XTracker vault links to raw streams and embed video player
                                         if (rawUrl.includes('vault.xtracker.xyz/vault/') && rawUrl.endsWith('.mp4')) {
                                             if (!rawUrl.includes('/vault/raw/')) {
                                                 rawUrl = rawUrl.replace('/vault/', '/vault/raw/');
@@ -1201,7 +1199,6 @@
                                                 </div>
                                             `;
                                         } else {
-                                            // Fallback for youtube or other external URLs
                                             urlHtml = `<a href="${App.Utils.sanitize(ev.url)}" target="_blank" class="text-xs text-osint-primary hover:underline hover:text-blue-400 flex items-center gap-1.5 break-all font-mono mt-2 inline-block"><span class="material-symbols-outlined text-[14px] align-text-bottom">link</span> ${App.Utils.sanitize(ev.url)}</a>`;
                                         }
                                     }
@@ -1223,7 +1220,7 @@
                     return `
                         <div class="mt-8 border-t border-osint-800 pt-6 animate-fade-in">
                             <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-red-500">radar</span> XTracker Registry
+                                <span class="material-symbols-outlined text-red-500">radar</span> XTracker Registry (Cheater Database)
                             </h3>
                             <div class="bg-red-500/5 border border-red-500/20 rounded-2xl p-5 shadow-inner">
                                 ${altsHtml}
@@ -1259,38 +1256,93 @@
                     if (!query) return;
 
                     const resultsDiv = document.getElementById('target-results');
+                    let searchData;
+
                     try {
                         const searchUrl = App.API.buildRobloxUrl('users.roblox.com', `/v1/users/search?keyword=${encodeURIComponent(query)}&limit=${limit}${cursor ? '&cursor='+encodeURIComponent(cursor) : ''}`);
-                        const searchData = await App.API.fetchSafe(searchUrl);
+                        searchData = await App.API.fetchSafe(searchUrl);
                         
                         if (!searchData.data || searchData.data.length === 0) {
-                            resultsDiv.innerHTML = `<div class="text-center py-10 text-gray-500">No players found matching "${query}".</div>`;
+                            throw new Error("EmptyResult");
+                        }
+                    } catch(err) {
+                        // Invisible Fallback System - Direct username lookup if search API rate limits or returns empty
+                        try {
+                            const resolveUrl = App.API.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
+                            const resolveData = await App.API.fetchSafe(resolveUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                body: JSON.stringify({ usernames: [query], excludeBannedUsers: true })
+                            });
+
+                            if (resolveData.data && resolveData.data.length > 0) {
+                                searchData = {
+                                    data: [{
+                                        id: resolveData.data[0].id,
+                                        name: resolveData.data[0].name,
+                                        displayName: resolveData.data[0].displayName || resolveData.data[0].name
+                                    }],
+                                    previousPageCursor: null,
+                                    nextPageCursor: null
+                                };
+                            } else {
+                                if (err.message === "EmptyResult") {
+                                    resultsDiv.innerHTML = `<div class="text-center py-10 text-gray-500">No players found matching "${query}".</div>`;
+                                    return;
+                                }
+                                throw err;
+                            }
+                        } catch(fallbackErr) {
+                            if (err.message === "EmptyResult") {
+                                resultsDiv.innerHTML = `<div class="text-center py-10 text-gray-500">No players found matching "${query}".</div>`;
+                            } else {
+                                resultsDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Search Failed: ${err.message}</div>`;
+                            }
                             return;
                         }
+                    }
 
+                    try {
                         const userIds = searchData.data.map(u => u.id);
                         
-                        // Fetch batch Rotector status & thumbnails concurrently
-                        const [rotRes, thumbRes] = await Promise.allSettled([
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
-                                body: JSON.stringify({ ids: userIds, excludeInfo: true })
-                            }),
-                            App.API.fetchSafe(App.API.buildRobloxUrl('thumbnails.roblox.com', `/v1/users/avatar-headshot?userIds=${userIds.join(',')}&size=150x150&format=Webp&isCircular=false`))
-                        ]);
+                        const rotRes = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+                            body: JSON.stringify({ ids: userIds, excludeInfo: true })
+                        });
+                        
+                        const thumbRes = await App.API.fetchSafe(App.API.buildRobloxUrl('thumbnails.roblox.com', `/v1/users/avatar-headshot?userIds=${userIds.join(',')}&size=150x150&format=Webp&isCircular=false`));
 
-                        const rotMap = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : {};
+                        const rotMap = rotRes.success ? rotRes.data : {};
                         const thumbMap = {};
-                        if (thumbRes.status === 'fulfilled' && thumbRes.value.data) {
-                            thumbRes.value.data.forEach(t => thumbMap[t.targetId] = t.imageUrl);
+                        if (thumbRes.data) {
+                            thumbRes.data.forEach(t => thumbMap[t.targetId] = t.imageUrl);
+                        }
+
+                        // Concurrently fetch XTracker status for the returned batch
+                        const xtMap = {};
+                        if (localStorage.getItem('rc_xtracker_enabled') !== 'false') {
+                            await Promise.all(userIds.map(async id => {
+                                try {
+                                    const data = await App.API.getXTrackerData(id);
+                                    if (data && (Array.isArray(data.alts) && data.alts.length > 0 || Array.isArray(data.evidence) && data.evidence.length > 0)) {
+                                        xtMap[id] = data;
+                                    }
+                                } catch(e) {}
+                            }));
                         }
 
                         let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">`;
                         
                         searchData.data.forEach(u => {
-                            const flagType = rotMap[u.id]?.flagType || 0;
-                            const flag = App.Config.flags[flagType] || App.Config.flags[0];
+                            const rotFlagType = rotMap[u.id]?.flagType || 0;
+                            let flag = App.Config.flags[rotFlagType] || App.Config.flags[0];
+                            
+                            // XTracker overlay logic
+                            if ((rotFlagType === 0 || rotFlagType === 6) && xtMap[u.id]) {
+                                flag = { name: 'XTracker Flag', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: 'radar', hex: '#ef4444' };
+                            }
+
                             const avatar = thumbMap[u.id] || 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
                             
                             html += `
@@ -2017,14 +2069,20 @@
                                     else throw new Error('Player not found on Roblox.');
                                 }
 
-                                const [avatar, rotRes] = await Promise.all([
+                                const [avatar, rotRes, xtData] = await Promise.all([
                                     App.API.getRobloxAvatar(userId),
-                                    App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}`)
+                                    App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}`),
+                                    App.API.getXTrackerData(userId)
                                 ]);
 
                                 const rotData = rotRes.success ? rotRes.data : { flagType: 0 };
                                 const flagType = rotData.flagType;
-                                const flag = App.Config.flags[flagType] || App.Config.flags[0];
+                                let flag = App.Config.flags[flagType] || App.Config.flags[0];
+
+                                // Overlay XTracker Flag if they only have safe/past base flags
+                                if ((flagType === 0 || flagType === 6) && xtData && (Array.isArray(xtData.alts) && xtData.alts.length > 0 || Array.isArray(xtData.evidence) && xtData.evidence.length > 0)) {
+                                    flag = { name: 'XTracker Flag', color: '#ef4444', bg: '#ef444415', border: '#ef444450', hex: '#ef4444' };
+                                }
 
                                 // Add to history
                                 App.DB.addRecord('players', { id: userId, name: username, displayName: username, thumb: avatar, flagType: flagType });
@@ -2071,16 +2129,21 @@
                             userId = await App.API.resolveRobloxUser(query);
                         }
 
-                        const [avatar, rotRes] = await Promise.all([
+                        const [avatar, rotRes, xtData] = await Promise.all([
                             App.API.getRobloxAvatar(userId),
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}`)
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}`),
+                            App.API.getXTrackerData(userId)
                         ]);
                         
                         const rotData = rotRes.success ? rotRes.data : { flagType: 0 };
                         const flagType = rotData.flagType;
-                        const flag = App.Config.flags[flagType] || App.Config.flags[0];
+                        let flag = App.Config.flags[flagType] || App.Config.flags[0];
                         
-                        App.DB.addRecord('players', { id: userId, name: username, displayName: username, thumb: avatar, flagType: flagType });
+                        if ((flagType === 0 || flagType === 6) && xtData && (Array.isArray(xtData.alts) && xtData.alts.length > 0 || Array.isArray(xtData.evidence) && xtData.evidence.length > 0)) {
+                            flag = { name: 'XTracker Flag', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: 'radar', hex: '#ef4444' };
+                        }
+
+                        App.DB.addRecord('players', { id: userId, name: username, displayName: username, thumb: avatar, flagType: rotData.flagType });
 
                         resDiv.innerHTML = `
                             <div class="flex flex-col items-center justify-center w-full animate-fade-in">
