@@ -124,6 +124,11 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(120%); opacity: 0; }
         }
+
+        /* Staggered Animations */
+        .stagger-1 { animation-delay: 0.05s; opacity: 0; animation-fill-mode: forwards; }
+        .stagger-2 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+        .stagger-3 { animation-delay: 0.15s; opacity: 0; animation-fill-mode: forwards; }
     </style>
 </head>
 <body class="bg-osint-950 text-gray-300 font-sans h-screen overflow-hidden flex selection:bg-osint-500/30">
@@ -140,7 +145,7 @@
             </div>
             <div>
                 <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
-                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.3</p>
+                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.4</p>
             </div>
         </div>
 
@@ -619,11 +624,11 @@
                                     <input type="text" id="target-query" value="${query || ''}" required placeholder="Search for a ${type === 'player' ? 'Player Username' : 'Group Name'}..." 
                                         class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
                                 </div>
-                                <select id="target-limit" class="bg-osint-900 border-2 border-osint-800 text-white rounded-2xl px-4 py-4 focus:outline-none focus:border-osint-primary transition-all text-lg font-bold">
-                                    <option value="10" ${limit=='10'?'selected':''}>10</option>
-                                    <option value="25" ${limit=='25'?'selected':''}>25</option>
-                                    <option value="50" ${limit=='50'?'selected':''}>50</option>
-                                    <option value="100" ${limit=='100'?'selected':''}>100</option>
+                                <select id="target-limit" class="bg-osint-900 border-2 border-osint-800 text-white rounded-2xl px-4 py-4 focus:outline-none focus:border-osint-primary transition-all text-lg font-bold cursor-pointer">
+                                    <option value="10" ${limit=='10'?'selected':''}>10 limits</option>
+                                    <option value="25" ${limit=='25'?'selected':''}>25 limits</option>
+                                    <option value="50" ${limit=='50'?'selected':''}>50 limits</option>
+                                    <option value="100" ${limit=='100'?'selected':''}>100 limits</option>
                                 </select>
                                 <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)]">
                                     Search
@@ -647,9 +652,249 @@
                     `;
                 },
 
+                renderHistory(type) {
+                    const isPlayer = type === 'players';
+                    App.Views.titleDiv.innerText = isPlayer ? 'Recent Player Scans' : 'Recent Group Scans';
+                    const records = App.DB.getHistory(type);
+
+                    let html = `<div class="max-w-6xl mx-auto animate-slide-up">`;
+                    
+                    if (records.length === 0) {
+                        html += `
+                            <div class="glass-card rounded-2xl p-16 flex flex-col items-center justify-center text-gray-500 border border-osint-800 border-dashed">
+                                <span class="material-symbols-outlined text-[60px] mb-4 opacity-50">history</span>
+                                <p class="text-lg">No recent scans found.</p>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="glass-card rounded-2xl border border-osint-800 overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="bg-osint-900/80 border-b border-osint-800 text-xs uppercase tracking-widest text-gray-500 font-bold">
+                                                <th class="p-4">Identity</th>
+                                                <th class="p-4">Roblox ID</th>
+                                                <th class="p-4">Safety Status</th>
+                                                <th class="p-4">Scan Date</th>
+                                                <th class="p-4 text-right">View</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-osint-800/50">
+                                            ${records.map((r, i) => {
+                                                const flag = App.Config.flags[r.flagType] || App.Config.flags[0];
+                                                const displayName = App.Utils.sanitize(r.displayName || r.name);
+                                                return `
+                                                <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer stagger-${(i%3)+1}" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-dossier?id=${r.id}'">
+                                                    <td class="p-4 flex items-center gap-4">
+                                                        <div class="w-10 h-10 rounded-full bg-osint-900 border border-osint-700 overflow-hidden flex-shrink-0">
+                                                            <img src="${r.thumb}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                                        </div>
+                                                        <span class="font-bold text-white group-hover:text-osint-primary transition-colors">${displayName}</span>
+                                                    </td>
+                                                    <td class="p-4 font-mono text-sm text-gray-400">${r.id}</td>
+                                                    <td class="p-4">
+                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${flag.bg} ${flag.color} ${flag.border}">
+                                                            <span class="material-symbols-outlined text-[14px]">${flag.icon}</span> ${flag.name}
+                                                        </span>
+                                                    </td>
+                                                    <td class="p-4 text-sm text-gray-500 font-mono">${App.Utils.formatDate(r.timestamp)}</td>
+                                                    <td class="p-4 text-right">
+                                                        <button class="w-8 h-8 rounded-lg bg-osint-900 border border-osint-700 text-gray-400 hover:text-white hover:border-osint-primary hover:bg-osint-primary/20 transition-all flex items-center justify-center ml-auto">
+                                                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `}).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    html += `</div>`;
+                    App.Views.contentDiv.innerHTML = html;
+                }
+            },
+
+            // --- Business Logic / Controllers ---
+            Controllers: {
+                
+                getFlagBannerHTML(flagType, confidence, reviewer) {
+                    const flag = App.Config.flags[flagType] || App.Config.flags[0];
+                    const confPercent = confidence ? Math.round(confidence * 100) : null;
+                    
+                    const getRadial = (pct) => {
+                        const c = 2 * Math.PI * 18;
+                        const offset = c - (pct/100)*c;
+                        const col = pct > 80 ? 'text-red-500' : pct > 50 ? 'text-yellow-500' : 'text-green-500';
+                        return `
+                            <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
+                                <svg class="transform -rotate-90 w-12 h-12"><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" class="text-osint-800"/><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" class="transition-all duration-1000 ${col}"/></svg>
+                                <span class="absolute text-[10px] font-bold font-mono text-white">${pct}%</span>
+                            </div>
+                        `;
+                    };
+
+                    return `
+                        <div class="glass-card rounded-2xl p-5 border ${flag.border} ${flag.bg} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-lg transition-shadow">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center ${flag.color} bg-black/20 border ${flag.border}">
+                                    <span class="material-symbols-outlined text-[28px]">${flag.icon}</span>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Safety Status</p>
+                                    <h3 class="text-2xl font-bold text-white leading-none">${flag.name}</h3>
+                                </div>
+                            </div>
+                            ${confPercent !== null ? `
+                                <div class="flex items-center gap-4 bg-osint-950/50 px-4 py-2 rounded-xl border border-osint-800/50">
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-gray-400 uppercase font-bold">System Confidence</p>
+                                        ${reviewer ? `<p class="text-[10px] text-osint-primary mt-0.5 flex justify-end items-center gap-1"><span class="material-symbols-outlined text-[12px]">person_check</span>${App.Utils.sanitize(reviewer.username)}</p>` : ''}
+                                    </div>
+                                    ${getRadial(confPercent)}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                },
+
+                getEvidenceHTML(reasonsObj) {
+                    if (!reasonsObj || Object.keys(reasonsObj).length === 0) {
+                        return `
+                            <div class="flex flex-col items-center justify-center p-10 text-gray-500 border border-osint-800 border-dashed rounded-xl bg-osint-900/30">
+                                <span class="material-symbols-outlined text-5xl mb-3 opacity-30">folder_open</span>
+                                <p class="font-mono text-sm">No violation evidence on file.</p>
+                            </div>
+                        `;
+                    }
+
+                    return Object.entries(reasonsObj).map(([type, data]) => `
+                        <div class="bg-osint-900 border border-osint-800 rounded-xl p-4 mb-4 shadow-sm relative overflow-hidden hover:-translate-y-0.5 transition-transform">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-osint-danger"></div>
+                            <div class="flex justify-between items-start mb-3 pl-2">
+                                <h4 class="font-bold text-white text-md flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-osint-danger text-[20px]">description</span> ${App.Utils.sanitize(type)}
+                                </h4>
+                                <span class="text-xs font-mono bg-osint-950 px-2 py-1 rounded border border-osint-800 text-gray-400">Conf: ${Math.round(data.confidence*100)}%</span>
+                            </div>
+                            <p class="text-sm text-gray-300 mb-3 pl-2 leading-relaxed">${App.Utils.sanitize(data.message || 'No description provided.')}</p>
+                            ${data.evidence && data.evidence.length ? `
+                                <div class="bg-osint-950 rounded-lg p-3 border border-osint-800 ml-2">
+                                    <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-osint-800 pb-1">Raw Evidence Log</div>
+                                    <ul class="space-y-1.5 font-mono text-xs text-gray-400">
+                                        ${data.evidence.map(ev => `
+                                            <li class="flex items-start gap-2">
+                                                <span class="material-symbols-outlined text-osint-primary text-[14px] mt-0.5 shrink-0">chevron_right</span>
+                                                <span class="break-all mt-0.5">${App.Utils.sanitize(ev)}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                },
+
+                getDiscordHTML(discordData) {
+                    if (!discordData || !discordData.discordAccounts || discordData.discordAccounts.length === 0) {
+                         return `
+                            <div class="flex flex-col items-center justify-center p-8 text-gray-500 border border-osint-800 border-dashed rounded-xl bg-osint-900/30 mt-4">
+                                <div class="w-10 h-10 mb-3 opacity-30">${App.Config.svgs.discord}</div>
+                                <p class="font-mono text-sm">No linked Discord connections found.</p>
+                            </div>
+                        `;
+                    }
+
+                    const accountsHtml = discordData.discordAccounts.map(acc => {
+                        const sourcesHtml = (acc.sources || []).map(s => {
+                            const src = App.Config.discordSources[s];
+                            if(!src) return '';
+                            return `<span class="flex items-center px-2 py-0.5 rounded bg-osint-800 border border-osint-700 text-[10px] font-mono text-gray-300 shadow-sm"><span class="material-symbols-outlined text-[12px] mr-1">${src.icon}</span>${src.name}</span>`;
+                        }).join(' ');
+
+                        const serversHtml = (acc.servers || []).map(srv => {
+                            let tags = '';
+                            if(srv.isTase) tags += `<span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] uppercase font-bold ml-2">TASE</span>`;
+                            if(srv.inGracePeriod) tags += `<span class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[9px] uppercase font-bold ml-2 flex items-center gap-1"><span class="material-symbols-outlined text-[10px]">hourglass_top</span>Grace</span>`;
+                            
+                            const dateStr = srv.joinedAt ? `Joined: ${App.Utils.formatDate(srv.joinedAt)}` : `First Seen: ${App.Utils.formatDate(srv.firstSeenAt)}`;
+                            
+                            return `
+                                <div class="flex justify-between items-center py-2 border-b border-osint-800 last:border-0 hover:bg-osint-800/30 px-2 rounded transition-colors">
+                                    <div class="flex items-center">
+                                        <span class="material-symbols-outlined text-gray-500 mr-2 text-[16px]">dns</span>
+                                        <span class="text-sm font-medium text-gray-200">${App.Utils.sanitize(srv.serverName)}</span>
+                                        ${tags}
+                                    </div>
+                                    <span class="text-xs font-mono text-gray-500">${dateStr}</span>
+                                </div>
+                            `;
+                        }).join('');
+
+                        return `
+                            <div class="bg-osint-900 border border-[#5865F2]/30 rounded-xl mb-4 overflow-hidden hover:border-[#5865F2]/60 transition-colors">
+                                <div class="bg-[#5865F2]/10 px-4 py-3 border-b border-[#5865F2]/20 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-[#5865F2] text-white flex items-center justify-center p-1.5 shadow-[0_0_10px_rgba(88,101,242,0.4)]">
+                                            ${App.Config.svgs.discord}
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-400 font-mono">Discord ID</div>
+                                            <div class="font-bold text-white tracking-wide">${App.Utils.sanitize(acc.id)}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-1.5 flex-wrap">
+                                        ${sourcesHtml}
+                                    </div>
+                                </div>
+                                <div class="p-2">
+                                    <div class="px-2 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tracked Server Memberships</div>
+                                    ${serversHtml || '<div class="p-2 text-xs text-gray-500 italic">No tracked servers.</div>'}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    let altsHtml = '';
+                    if (discordData.altAccounts && discordData.altAccounts.length > 0) {
+                        altsHtml = `
+                            <div class="mt-6">
+                                <h4 class="text-sm font-bold text-white flex items-center gap-2 mb-3 border-b border-osint-800 pb-2">
+                                    <span class="material-symbols-outlined text-osint-integration text-[20px]">hub</span> Connected Alt Accounts
+                                </h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    ${discordData.altAccounts.map(alt => `
+                                        <a href="#player-dossier?id=${alt.robloxUserId}" class="block bg-osint-900 border border-osint-800 rounded-lg p-3 hover:border-osint-primary hover:bg-osint-800/80 transition-all flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-osint-800 flex items-center justify-center text-gray-400 border border-osint-700">
+                                                <span class="material-symbols-outlined text-[18px]">person</span>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-gray-200 text-sm group-hover:text-osint-primary">${App.Utils.sanitize(alt.robloxUsername)}</div>
+                                                <div class="text-[10px] text-gray-500 font-mono">ID: ${alt.robloxUserId}</div>
+                                            </div>
+                                        </a>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="mt-8 border-t border-osint-800 pt-6 animate-fade-in">
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <div class="w-5 h-5 text-[#5865F2]">${App.Config.svgs.discord}</div> Discord Connections
+                            </h3>
+                            ${accountsHtml}
+                            ${altsHtml}
+                        </div>
+                    `;
+                },
+
                 async executePlayerSearch(query, limit = 25, cursor = '') {
                     App.Views.titleDiv.innerText = 'Player Search';
-                    App.Views.contentDiv.innerHTML = this.renderSearchTemplate('player', query, limit);
+                    App.Views.contentDiv.innerHTML = App.Views.renderSearchTemplate('player', query, limit);
 
                     document.getElementById('target-search-form').addEventListener('submit', (e) => {
                         e.preventDefault();
@@ -676,7 +921,7 @@
                         const [rotRes, thumbRes] = await Promise.allSettled([
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
                                 body: JSON.stringify({ ids: userIds, excludeInfo: true })
                             }),
                             App.API.fetchSafe(App.API.buildRobloxUrl('thumbnails.roblox.com', `/v1/users/avatar-headshot?userIds=${userIds.join(',')}&size=150x150&format=Webp&isCircular=false`))
@@ -741,7 +986,7 @@
 
                 async executeGroupSearch(query, limit = 25, cursor = '') {
                     App.Views.titleDiv.innerText = 'Group Search';
-                    App.Views.contentDiv.innerHTML = this.renderSearchTemplate('group', query, limit);
+                    App.Views.contentDiv.innerHTML = App.Views.renderSearchTemplate('group', query, limit);
 
                     document.getElementById('target-search-form').addEventListener('submit', (e) => {
                         e.preventDefault();
@@ -767,7 +1012,7 @@
                         const [rotRes, thumbRes] = await Promise.allSettled([
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
                                 body: JSON.stringify({ ids: groupIds, excludeInfo: true })
                             }),
                             App.API.fetchSafe(App.API.buildRobloxUrl('thumbnails.roblox.com', `/v1/groups/icons?groupIds=${groupIds.join(',')}&size=150x150&format=Webp&isCircular=false`))
@@ -932,7 +1177,13 @@
                         const rotData = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : { flagType: 0, confidence: 1, reasons: {} };
                         const discData = discRes.status === 'fulfilled' && discRes.value.success ? discRes.value.data : null;
 
-                        App.DB.addRecord('players', { id: profile.id, name: profile.name, thumb: avatar, flagType: rotData.flagType });
+                        App.DB.addRecord('players', { 
+                            id: profile.id, 
+                            name: profile.name, 
+                            displayName: profile.displayName,
+                            thumb: avatar, 
+                            flagType: rotData.flagType 
+                        });
 
                         resultsDiv.innerHTML = `
                             <div class="max-w-6xl mx-auto">
@@ -1437,22 +1688,24 @@
 
                     switch(path) {
                         case '#overview': App.Views.renderOverview(); break;
-                        case '#statistics': App.Views.renderStatistics(); break;
+                        case '#statistics': App.Controllers.renderStatistics(); break;
                         case '#recent-players': App.Views.renderHistory('players'); break;
                         case '#recent-groups': App.Views.renderHistory('groups'); break;
-                        case '#player-search': App.Views.renderPlayerSearch(params.get('q'), params.get('limit'), params.get('cursor')); break;
-                        case '#group-search': App.Views.renderGroupSearch(params.get('q'), params.get('limit'), params.get('cursor')); break;
-                        case '#discord-lookup': App.Views.executeDiscordLookup(params.get('id')); break;
-                        case '#player-dossier': App.Views.executePlayerDossier(params.get('id')); break;
-                        case '#group-dossier': App.Views.executeGroupDossier(params.get('id')); break;
+                        case '#player-search': App.Controllers.executePlayerSearch(params.get('q'), params.get('limit'), params.get('cursor')); break;
+                        case '#group-search': App.Controllers.executeGroupSearch(params.get('q'), params.get('limit'), params.get('cursor')); break;
+                        case '#discord-lookup': App.Controllers.executeDiscordLookup(params.get('id')); break;
+                        case '#player-dossier': App.Controllers.executePlayerDossier(params.get('id')); break;
+                        case '#group-dossier': App.Controllers.executeGroupDossier(params.get('id')); break;
+                        case '#player-lookup': App.Views.renderPlayerLookup(); break;
+                        case '#group-lookup': App.Views.renderGroupLookup(); break;
                         default:
                             // Legacy backward compatibility
                             if (path.startsWith('#player-lookup-')) {
                                 const id = path.replace('#player-lookup-', '');
-                                App.Views.executePlayerDossier(id);
+                                App.Controllers.executePlayerDossier(id);
                             } else if (path.startsWith('#group-lookup-')) {
                                 const id = path.replace('#group-lookup-', '');
-                                App.Views.executeGroupDossier(id);
+                                App.Controllers.executeGroupDossier(id);
                             } else {
                                 App.Views.renderOverview();
                             }
