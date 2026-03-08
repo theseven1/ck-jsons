@@ -750,7 +750,7 @@
                                     <div class="absolute inset-0 cyber-grid opacity-50"></div>
                                     <div class="relative z-10">
                                         <h2 class="text-3xl font-bold text-white mb-2">Network Impact</h2>
-                                        <p class="text-gray-400 mb-8">Data currently tracked and verified by the Rotector safety system.</p>
+                                        <p class="text-gray-400 mb-8">Data currently tracked and verified by the outsourced safety system.</p>
                                         
                                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                             <div class="bg-osint-950 p-6 rounded-2xl border border-osint-800 hover:border-osint-danger/50 transition-colors duration-300">
@@ -1146,8 +1146,7 @@
                         }
 
                         const userIds = searchData.data.map(u => u.id);
-                        
-                        // Fetch batch Rotector status & thumbnails concurrently
+                    
                         const [rotRes, thumbRes] = await Promise.allSettled([
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user`, {
                                 method: 'POST',
@@ -1424,7 +1423,7 @@
 
                         // Fully failed extraction case (Banned/Deleted user and no history)
                         if (isInvisible && !hasRotData) {
-                            throw new Error("User not found on Roblox and no historical data exists in Rotector.");
+                            throw new Error("User not found on Roblox and no historical data exists in Outsourced Safety System.");
                         }
                         
                         // Synthesize missing profile via Invisible Support
@@ -1433,7 +1432,7 @@
                             name: "Unknown_Hidden",
                             displayName: "Invisible User",
                             created: null,
-                            description: "⚠️ This user profile could not be loaded from Roblox (likely deleted, banned, or hidden). Data shown is based on Rotector's historical logs."
+                            description: "⚠️ This user profile could not be loaded from Roblox (likely deleted, banned, or hidden). Data shown is based on OSS's historical logs."
                         } : rbxProfile.value;
 
                         const avatar = rbxAvatar.status === 'fulfilled' && rbxAvatar.value ? rbxAvatar.value : 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
@@ -1561,7 +1560,7 @@
 
                         // Fully failed extraction case (Banned/Deleted group and no history)
                         if (isInvisible && !hasRotData) {
-                            throw new Error("Group not found on Roblox and no historical data exists in Rotector.");
+                            throw new Error("Group not found on Roblox and no historical data exists in Outsourced Safety System.");
                         }
                         
                         // Synthesize missing group profile via Invisible Support
@@ -1570,7 +1569,7 @@
                             name: "Invisible Group",
                             memberCount: 0,
                             owner: null,
-                            description: "⚠️ This group profile could not be loaded from Roblox (likely deleted or locked). Data shown is based on Rotector's historical logs."
+                            description: "⚠️ This group profile could not be loaded from Roblox (likely deleted or locked). Data shown is based on Outsourced Safety System's historical logs."
                         } : rbxGroup.value;
 
                         const icon = rbxIcon.status === 'fulfilled' && rbxIcon.value ? rbxIcon.value : 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
