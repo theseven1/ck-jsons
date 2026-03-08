@@ -145,7 +145,7 @@
             </div>
             <div>
                 <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
-                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.4</p>
+                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.5</p>
             </div>
         </div>
 
@@ -224,7 +224,7 @@
     <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 w-80 pointer-events-none"></div>
 
     <!-- Fallback Small Panel Widget (If Native PIP fails) -->
-    <div id="pip-widget" class="hidden fixed bottom-6 left-72 w-80 glass-card rounded-2xl shadow-2xl z-50 flex-col overflow-hidden transition-all duration-300 border border-osint-primary/30 animate-scale-in">
+    <div id="pip-widget" class="hidden fixed bottom-6 left-72 w-[340px] glass-card rounded-2xl shadow-2xl z-50 flex-col overflow-hidden transition-all duration-300 border border-osint-primary/30 animate-scale-in">
         <div class="bg-osint-900/80 px-4 py-3 flex justify-between items-center border-b border-osint-800 cursor-move" id="pip-header">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-osint-primary text-lg">bolt</span>
@@ -236,7 +236,7 @@
         </div>
         <div class="p-4 bg-osint-950/90">
             <form id="pip-form" class="flex gap-2 mb-3">
-                <input type="text" id="pip-input" placeholder="User ID" class="flex-1 bg-osint-900 border border-osint-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-osint-primary" autocomplete="off">
+                <input type="text" id="pip-input" placeholder="User ID or Name" class="flex-1 bg-osint-900 border border-osint-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-osint-primary" autocomplete="off">
                 <button type="submit" class="bg-osint-primary hover:bg-blue-500 text-white rounded-lg px-3 py-1.5 transition-colors">
                     <span class="material-symbols-outlined text-sm">search</span>
                 </button>
@@ -336,7 +336,7 @@
                 
                 toast: (message, type = 'info') => {
                     // Only show toasts for errors or specific events to avoid spam
-                    if(type === 'success' && message.includes('scanned successfully')) return;
+                    if(type === 'success' && message.includes('successfully')) return;
 
                     const container = document.getElementById('toast-container');
                     const toast = document.createElement('div');
@@ -625,10 +625,10 @@
                                         class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
                                 </div>
                                 <select id="target-limit" class="bg-osint-900 border-2 border-osint-800 text-white rounded-2xl px-4 py-4 focus:outline-none focus:border-osint-primary transition-all text-lg font-bold cursor-pointer">
-                                    <option value="10" ${limit=='10'?'selected':''}>10 limits</option>
-                                    <option value="25" ${limit=='25'?'selected':''}>25 limits</option>
-                                    <option value="50" ${limit=='50'?'selected':''}>50 limits</option>
-                                    <option value="100" ${limit=='100'?'selected':''}>100 limits</option>
+                                    <option value="10" ${limit=='10'?'selected':''}>10 per page</option>
+                                    <option value="25" ${limit=='25'?'selected':''}>25 per page</option>
+                                    <option value="50" ${limit=='50'?'selected':''}>50 per page</option>
+                                    <option value="100" ${limit=='100'?'selected':''}>100 per page</option>
                                 </select>
                                 <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)]">
                                     Search
@@ -683,7 +683,7 @@
                                         <tbody class="divide-y divide-osint-800/50">
                                             ${records.map((r, i) => {
                                                 const flag = App.Config.flags[r.flagType] || App.Config.flags[0];
-                                                const displayName = App.Utils.sanitize(r.displayName || r.name);
+                                                const displayName = App.Utils.sanitize(r.displayName || r.name || 'Unknown');
                                                 return `
                                                 <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer stagger-${(i%3)+1}" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-dossier?id=${r.id}'">
                                                     <td class="p-4 flex items-center gap-4">
@@ -1523,8 +1523,10 @@
                             .badge { display: inline-block; padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: bold; margin-bottom: 12px; border: 1px solid currentColor; text-transform: uppercase; letter-spacing: 0.5px; }
                             .title { font-size: 20px; font-weight: bold; color: white; margin: 0; word-break: break-all; }
                             .subtitle { font-size: 12px; color: #aaa; margin: 4px 0 0 0; font-family: monospace; }
-                            .link { display: inline-block; margin-top: 20px; padding: 8px 16px; background: #1c1c26; color: #fff; border: 1px solid #2d2d3d; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.2s; }
+                            .link { display: inline-block; margin-top: 20px; padding: 8px 16px; background: #1c1c26; color: #fff; border: 1px solid #2d2d3d; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.2s; width: 100%; }
                             .link:hover { background: #2d2d3d; }
+                            .avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #1c1c26; margin-right: 16px; }
+                            .profile-row { display: flex; align-items: center; width: 100%; text-align: left; background: #1c1c26; padding: 12px; border-radius: 12px; border: 1px solid #2d2d3d; margin-bottom: 16px; }
                             @keyframes spin { to { transform: rotate(360deg); } }
                             .spinner { width: 30px; height: 30px; border: 3px solid #1c1c26; border-top-color: #2196f3; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px; }
                         `;
@@ -1561,6 +1563,7 @@
                             
                             try {
                                 let userId = val;
+                                let username = val;
                                 // We are within the exact same javascript context, so App is available!
                                 if (!/^\d+$/.test(val)) {
                                     const url = App.API.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
@@ -1570,18 +1573,34 @@
                                         body: JSON.stringify({ usernames: [val], excludeBannedUsers: false })
                                     });
                                     const data = await res.json();
-                                    if (data.data && data.data.length > 0) userId = data.data[0].id;
+                                    if (data.data && data.data.length > 0) {
+                                        userId = data.data[0].id;
+                                        username = data.data[0].name;
+                                    }
                                     else throw new Error('Player not found on Roblox.');
                                 }
 
-                                const data = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/plaintext`);
-                                const flagType = parseInt(data);
+                                const [avatar, rotRes] = await Promise.all([
+                                    App.API.getRobloxAvatar(userId),
+                                    App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}`)
+                                ]);
+
+                                const rotData = rotRes.success ? rotRes.data : { flagType: 0 };
+                                const flagType = rotData.flagType;
                                 const flag = App.Config.flags[flagType] || App.Config.flags[0];
 
+                                // Add to history
+                                App.DB.addRecord('players', { id: userId, name: username, displayName: username, thumb: avatar, flagType: flagType });
+
                                 resDiv.innerHTML = `
-                                    <div class="badge" style="color: ${flag.hex}; background: ${flag.hex}15; border-color: ${flag.hex}50;">${flag.name}</div>
-                                    <p class="title">UID: ${userId}</p>
-                                    <p class="subtitle">Scan Complete</p>
+                                    <div class="profile-row" style="border-color: ${flag.hex}40;">
+                                        <img src="${avatar}" class="avatar" style="border: 2px solid ${flag.hex}; box-shadow: 0 0 10px ${flag.hex}30;">
+                                        <div style="min-width: 0; flex: 1;">
+                                            <div class="title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${username}</div>
+                                            <div class="subtitle">UID: ${userId}</div>
+                                        </div>
+                                    </div>
+                                    <div class="badge" style="color: ${flag.hex}; background: ${flag.hex}15; border-color: ${flag.hex}50; width: 100%; box-sizing: border-box; text-align: center; padding: 12px; margin: 0;">${flag.name}</div>
                                     <a href="#" id="view-full-btn" class="link">Open Full Report</a>
                                 `;
                                 
@@ -1609,17 +1628,37 @@
                     const resDiv = document.getElementById('pip-results');
                     resDiv.innerHTML = `<span class="material-symbols-outlined animate-spin-slow text-2xl text-osint-primary">progress_activity</span>`;
                     try {
-                        const userId = await App.API.resolveRobloxUser(query);
-                        const data = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/plaintext`);
+                        let userId = query;
+                        let username = query;
+                        if (!/^\d+$/.test(query)) {
+                            userId = await App.API.resolveRobloxUser(query);
+                        }
+
+                        const [avatar, rotRes] = await Promise.all([
+                            App.API.getRobloxAvatar(userId),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}`)
+                        ]);
                         
-                        const flagType = parseInt(data);
+                        const rotData = rotRes.success ? rotRes.data : { flagType: 0 };
+                        const flagType = rotData.flagType;
                         const flag = App.Config.flags[flagType] || App.Config.flags[0];
                         
+                        App.DB.addRecord('players', { id: userId, name: username, displayName: username, thumb: avatar, flagType: flagType });
+
                         resDiv.innerHTML = `
-                            <div class="flex flex-col items-center justify-center p-3 w-full h-full animate-fade-in">
-                                <span class="material-symbols-outlined text-3xl ${flag.color} mb-1">${flag.icon}</span>
-                                <span class="font-bold text-white">${flag.name}</span>
-                                <a href="#player-dossier?id=${userId}" onclick="App.Controllers.toggleFallbackPip()" class="text-xs text-osint-primary hover:underline mt-2">View Full Report</a>
+                            <div class="flex flex-col items-center justify-center w-full animate-fade-in">
+                                <div class="flex items-center gap-3 w-full mb-3 text-left">
+                                    <img src="${avatar}" class="w-12 h-12 rounded-full border-2 bg-osint-900 object-cover shrink-0 shadow-lg" style="border-color: ${flag.hex}">
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="font-bold text-white text-base truncate">${App.Utils.sanitize(username)}</h4>
+                                        <p class="text-[10px] text-gray-500 font-mono truncate mt-0.5">UID: ${userId}</p>
+                                    </div>
+                                </div>
+                                <div class="w-full p-2.5 rounded-lg border text-left flex items-center gap-2 mb-3" style="background: ${flag.hex}10; border-color: ${flag.hex}30; color: ${flag.hex};">
+                                    <span class="material-symbols-outlined text-[18px]">${flag.icon}</span>
+                                    <span class="text-sm font-bold uppercase tracking-wider">${flag.name}</span>
+                                </div>
+                                <a href="#player-dossier?id=${userId}" onclick="App.Controllers.toggleFallbackPip()" class="w-full py-2 bg-osint-800 hover:bg-osint-700 rounded-lg text-xs font-medium text-white transition-colors border border-osint-700 block text-center">Open Full Report</a>
                             </div>
                         `;
                     } catch(err) {
