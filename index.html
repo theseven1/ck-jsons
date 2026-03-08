@@ -164,7 +164,7 @@
             </div>
             <div class="sidebar-text flex-shrink-0">
                 <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
-                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.5</p>
+                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.6</p>
             </div>
         </div>
 
@@ -214,11 +214,11 @@
             <button onclick="App.Controllers.openNativePip()" class="w-full bg-osint-800 hover:bg-osint-700 text-white rounded-lg py-2 flex items-center justify-center gap-2 transition-colors border border-osint-700 hover:border-osint-primary/50 text-sm font-medium shadow-sm" title="Small Panel">
                 <span class="material-symbols-outlined text-lg flex-shrink-0">picture_in_picture_alt</span> <span class="sidebar-text flex-shrink-0">Small Panel</span>
             </button>
-            <div class="flex items-center gap-3 px-3 py-2 bg-osint-950 rounded-lg border border-osint-800 shadow-inner mt-1 api-status transition-all" title="API Connected">
+            <div class="flex items-center gap-3 px-3 py-2 bg-osint-950 rounded-lg border border-osint-800 shadow-inner mt-1 api-status transition-all" title="Safety Provider Connected">
                 <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_#4caf50] flex-shrink-0"></div>
                 <div class="flex flex-col sidebar-text flex-shrink-0">
-                    <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider">API</span>
-                    <span class="text-[10px] font-mono text-green-400">Connected</span>
+                    <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Safety Provider</span>
+                    <span class="text-[10px] font-mono text-green-400">Connected & Secure</span>
                 </div>
             </div>
         </div>
@@ -506,6 +506,21 @@
                     }
                 },
 
+                async getXTrackerData(id) {
+                    if (localStorage.getItem('rc_xtracker_enabled') === 'false') return null;
+                    try {
+                        const res = await fetch(`https://api.xtracker.xyz/api/registry/user?id=${id}`, {
+                            headers: { 'Authorization': 'uSWxNE0X1AeD5WYImi9ZjA' }
+                        });
+                        if (res.status === 404) return null; // Normal if not in DB
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        return await res.json();
+                    } catch (e) {
+                        console.warn('XTracker API Error:', e);
+                        return null; // Gracefully fail
+                    }
+                },
+
                 async resolveRobloxUser(username) {
                     const url = this.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
                     const res = await this.fetchSafe(url, {
@@ -605,22 +620,51 @@
                 renderSettings() {
                     App.Views.titleDiv.innerText = 'Application Settings';
                     const currentProxy = localStorage.getItem('rc_proxy_preference') || 'catchthem';
+                    const xtEnabled = localStorage.getItem('rc_xtracker_enabled') !== 'false';
                     const pCount = App.DB.getHistory('players').length;
                     const gCount = App.DB.getHistory('groups').length;
                     
                     App.Views.contentDiv.innerHTML = `
                         <div class="max-w-4xl mx-auto animate-slide-up space-y-6">
+                            
+                            <!-- Integrations -->
+                            <div class="ui-card rounded-3xl p-8 border border-osint-800">
+                                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-osint-primary">extension</span> Outsource Integrations
+                                </h3>
+                                <p class="text-gray-400 text-sm mb-6">Manage external intelligence sources and cheater databases linked to the dashboard.</p>
+                                
+                                <div class="space-y-4">
+                                    <label class="flex justify-between items-center p-4 rounded-xl border ${xtEnabled ? 'border-osint-primary bg-osint-primary/10' : 'border-osint-800 bg-osint-900/50 hover:bg-osint-800/50'} cursor-pointer transition-colors">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20 shrink-0">
+                                                <span class="material-symbols-outlined text-[20px]">radar</span>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-white text-md">XTracker Intelligence</h4>
+                                                <p class="text-xs text-gray-400 mt-1">Cross-references the XTracker cheater database for exploit evidence and linked alts.</p>
+                                            </div>
+                                        </div>
+                                        <div class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer" ${xtEnabled ? 'checked' : ''} onchange="App.Controllers.toggleXTracker(this.checked)">
+                                            <div class="w-11 h-6 bg-osint-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-300 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-osint-primary"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Proxies -->
                             <div class="ui-card rounded-3xl p-8 border border-osint-800">
                                 <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
                                     <span class="material-symbols-outlined text-osint-primary">dns</span> Proxy Configuration
                                 </h3>
                                 <p class="text-gray-400 text-sm mb-6">If you are experiencing HTTP 429 (Too Many Requests) errors when scanning players, you can change the proxy server used to communicate with the Roblox API.</p>
                                 
-                                <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <label class="flex items-start gap-4 p-4 rounded-xl border ${currentProxy === 'catchthem' ? 'border-osint-primary bg-osint-primary/10' : 'border-osint-800 bg-osint-900/50 hover:bg-osint-800/50'} cursor-pointer transition-colors" onclick="App.Controllers.setProxy('catchthem')">
                                         <div class="pt-1"><input type="radio" name="proxy" value="catchthem" ${currentProxy === 'catchthem' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
                                         <div>
-                                            <h4 class="font-bold text-white text-md">Catch Them Proxy (Recommended)</h4>
+                                            <h4 class="font-bold text-white text-md">Catch Them Proxy</h4>
                                             <p class="text-xs text-gray-500 font-mono mt-1">catchthem.mk-7.org/proxy/...</p>
                                         </div>
                                     </label>
@@ -629,7 +673,7 @@
                                         <div class="pt-1"><input type="radio" name="proxy" value="roproxy" ${currentProxy === 'roproxy' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
                                         <div>
                                             <h4 class="font-bold text-white text-md">RoProxy</h4>
-                                            <p class="text-xs text-gray-500 font-mono mt-1">Replaces roblox.com with roproxy.com directly</p>
+                                            <p class="text-xs text-gray-500 font-mono mt-1">roproxy.com routes directly</p>
                                         </div>
                                     </label>
                                     
@@ -645,12 +689,13 @@
                                         <div class="pt-1"><input type="radio" name="proxy" value="direct" ${currentProxy === 'direct' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
                                         <div>
                                             <h4 class="font-bold text-white text-md">Direct Connection</h4>
-                                            <p class="text-xs text-gray-500 font-mono mt-1">Connect directly to roblox.com (No Proxy)</p>
+                                            <p class="text-xs text-gray-500 font-mono mt-1">No Proxy (May cause CORS)</p>
                                         </div>
                                     </label>
                                 </div>
                             </div>
 
+                            <!-- Data -->
                             <div class="ui-card rounded-3xl p-8 border border-osint-800">
                                 <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
                                     <span class="material-symbols-outlined text-osint-danger">delete_forever</span> Data Management
@@ -687,7 +732,7 @@
                                     </div>
                                     <h2 class="text-4xl font-bold text-white mb-4 tracking-tight">Find predators in Roblox!</h2>
                                     <p class="text-gray-400 text-lg leading-relaxed mb-8">
-                                        Protect your community by checking players and groups against our comprehensive safety database. Detect flagged behavior, linked Discord accounts, and hidden alt accounts to keep your environment safe.
+                                        Protect your community by checking players and groups against our comprehensive safety databases. Detect flagged behavior, linked Discord accounts, exploit evidence, and hidden alt accounts to keep your environment safe.
                                     </p>
                                     <div class="flex gap-4">
                                         <a href="#player-search" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-colors shadow-[0_0_15px_rgba(33,150,243,0.3)] hover:shadow-[0_0_25px_rgba(33,150,243,0.5)] flex items-center gap-2">
@@ -858,7 +903,7 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-osint-800/50">
-                                            ${records.map((r, i) => {
+                                            ${records.map((r) => {
                                                 try {
                                                     if (!r || typeof r !== 'object') return '';
                                                     const flag = App.Config.flags[r.flagType] || App.Config.flags[0];
@@ -867,7 +912,7 @@
                                                     const thumb = r.thumb || '';
                                                     
                                                     return `
-                                                    <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer stagger-${(i%3)+1}" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-dossier?id=${id}'">
+                                                    <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-dossier?id=${id}'">
                                                         <td class="p-4 flex items-center gap-4">
                                                             <div class="w-10 h-10 rounded-full bg-osint-900 border border-osint-700 overflow-hidden flex-shrink-0">
                                                                 <img src="${thumb}" loading="lazy" class="w-full h-full object-cover" onerror="this.style.display='none'">
@@ -925,6 +970,12 @@
                     App.Views.renderSettings();
                 },
 
+                toggleXTracker(enabled) {
+                    localStorage.setItem('rc_xtracker_enabled', enabled ? 'true' : 'false');
+                    App.Utils.toast(`XTracker Intelligence ${enabled ? 'enabled' : 'disabled'}.`, 'success');
+                    App.Views.renderSettings();
+                },
+
                 getFlagBannerHTML(flagType, confidence, reviewer) {
                     const flag = App.Config.flags[flagType] || App.Config.flags[0];
                     const confPercent = confidence ? Math.round(confidence * 100) : null;
@@ -965,7 +1016,7 @@
                     `;
                 },
 
-                getRotectorBadges(rotData) {
+                getProviderBadges(rotData) {
                     if (!rotData) return '';
                     let badges = [];
                     if (rotData.isLocked) badges.push(`<span class="bg-red-500/10 text-red-400 border border-red-500/30 px-2 py-1 rounded-md text-[10px] uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">lock</span> Locked Record</span>`);
@@ -1110,6 +1161,49 @@
                     `;
                 },
 
+                getXTrackerHTML(xtData) {
+                    // Only render if data exists and has meaningful content
+                    if (!xtData || (!xtData.alts?.length && !xtData.evidence?.length)) return '';
+                    
+                    const altsHtml = (xtData.alts && xtData.alts.length > 0) ? `
+                        <div class="mb-4">
+                            <h5 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Known Alts</h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${xtData.alts.map(alt => `<span class="px-2 py-1 bg-osint-950 rounded-md text-xs font-mono text-gray-300 border border-osint-800">${App.Utils.sanitize(alt)}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : '';
+
+                    const evidenceHtml = (xtData.evidence && xtData.evidence.length > 0) ? `
+                        <div>
+                            <h5 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Exploit Evidence</h5>
+                            <div class="space-y-3">
+                                ${xtData.evidence.map(ev => `
+                                    <div class="bg-osint-950 border border-osint-800 rounded-lg p-3 hover:border-red-500/50 transition-colors">
+                                        <div class="flex justify-between items-start mb-1.5">
+                                            <span class="font-bold text-red-400 text-sm flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">pest_control</span> ${App.Utils.sanitize(ev.reason)}</span>
+                                            <span class="text-xs font-mono text-gray-500 bg-osint-900 px-2 py-0.5 rounded border border-osint-800">${ev.date ? App.Utils.sanitize(ev.date.split(' ')[0]) : 'Unknown Date'}</span>
+                                        </div>
+                                        ${ev.url ? `<a href="${App.Utils.sanitize(ev.url)}" target="_blank" class="text-xs text-osint-primary hover:underline hover:text-blue-400 flex items-center gap-1.5 break-all font-mono"><span class="material-symbols-outlined text-[14px]">link</span> ${App.Utils.sanitize(ev.url)}</a>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : '';
+
+                    return `
+                        <div class="mt-8 border-t border-osint-800 pt-6 animate-fade-in">
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-red-500">radar</span> XTracker Registry (Cheater Database)
+                            </h3>
+                            <div class="bg-red-500/5 border border-red-500/20 rounded-2xl p-5 shadow-inner">
+                                ${altsHtml}
+                                ${evidenceHtml}
+                            </div>
+                        </div>
+                    `;
+                },
+
                 async executePlayerSearch(query, limit = 25, cursor = '') {
                     // ID Bypass routing for direct navigation via URL
                     if (query && /^\d+$/.test(query)) {
@@ -1146,7 +1240,8 @@
                         }
 
                         const userIds = searchData.data.map(u => u.id);
-                    
+                        
+                        // Fetch batch Rotector status & thumbnails concurrently
                         const [rotRes, thumbRes] = await Promise.allSettled([
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user`, {
                                 method: 'POST',
@@ -1404,11 +1499,12 @@
                     resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto">${App.Utils.createSkeleton('dossier')}</div>`;
 
                     try {
-                        const [rbxProfile, rbxAvatar, rotRes, discRes] = await Promise.allSettled([
+                        const [rbxProfile, rbxAvatar, rotRes, discRes, xtRes] = await Promise.allSettled([
                             App.API.getRobloxProfile(userId),
                             App.API.getRobloxAvatar(userId),
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}`),
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/discord`)
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/discord`),
+                            App.API.getXTrackerData(userId)
                         ]);
 
                         const isInvisible = rbxProfile.status === 'rejected';
@@ -1423,7 +1519,7 @@
 
                         // Fully failed extraction case (Banned/Deleted user and no history)
                         if (isInvisible && !hasRotData) {
-                            throw new Error("User not found on Roblox and no historical data exists in Outsourced Safety System.");
+                            throw new Error("User not found on Roblox and no historical data exists in our databases.");
                         }
                         
                         // Synthesize missing profile via Invisible Support
@@ -1432,11 +1528,12 @@
                             name: "Unknown_Hidden",
                             displayName: "Invisible User",
                             created: null,
-                            description: "⚠️ This user profile could not be loaded from Roblox (likely deleted, banned, or hidden). Data shown is based on OSS's historical logs."
+                            description: "⚠️ This user profile could not be loaded from Roblox (likely deleted, banned, or hidden). Data shown is based on the outsourced safety provider's historical logs."
                         } : rbxProfile.value;
 
                         const avatar = rbxAvatar.status === 'fulfilled' && rbxAvatar.value ? rbxAvatar.value : 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
                         const discData = (discRes.status === 'fulfilled' && discRes.value?.success && discRes.value?.data) ? discRes.value.data : null;
+                        const xtData = (xtRes.status === 'fulfilled' && xtRes.value) ? xtRes.value : null;
 
                         // Save lookup to history
                         App.DB.addRecord('players', { 
@@ -1478,7 +1575,7 @@
                                                 <h2 class="text-2xl font-bold text-white mb-1 break-all">${App.Utils.sanitize(profile.displayName)}</h2>
                                                 <p class="text-gray-400 font-mono text-sm mb-2">@${App.Utils.sanitize(profile.name)}</p>
                                                 
-                                                ${this.getRotectorBadges(rotData)}
+                                                ${this.getProviderBadges(rotData)}
 
                                                 <div class="w-full bg-osint-950 rounded-xl p-3 border border-osint-800 flex justify-between items-center mb-4 shadow-inner">
                                                     <span class="text-xs text-gray-500 uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">id_card</span> User ID</span>
@@ -1515,6 +1612,7 @@
                                             <div class="p-6 overflow-y-auto max-h-[600px] scrollbar-styled">
                                                 ${this.getEvidenceHTML(rotData.reasons)}
                                                 ${this.getDiscordHTML(discData)}
+                                                ${this.getXTrackerHTML(xtData)}
                                             </div>
                                         </div>
                                     </div>
@@ -1560,7 +1658,7 @@
 
                         // Fully failed extraction case (Banned/Deleted group and no history)
                         if (isInvisible && !hasRotData) {
-                            throw new Error("Group not found on Roblox and no historical data exists in Outsourced Safety System.");
+                            throw new Error("Group not found on Roblox and no historical data exists in our databases.");
                         }
                         
                         // Synthesize missing group profile via Invisible Support
@@ -1569,7 +1667,7 @@
                             name: "Invisible Group",
                             memberCount: 0,
                             owner: null,
-                            description: "⚠️ This group profile could not be loaded from Roblox (likely deleted or locked). Data shown is based on Outsourced Safety System's historical logs."
+                            description: "⚠️ This group profile could not be loaded from Roblox (likely deleted or locked). Data shown is based on the outsourced safety provider's historical logs."
                         } : rbxGroup.value;
 
                         const icon = rbxIcon.status === 'fulfilled' && rbxIcon.value ? rbxIcon.value : 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
@@ -1616,7 +1714,7 @@
                                                 </div>
                                                 <h2 class="text-2xl font-bold text-white mb-3 break-all">${App.Utils.sanitize(group.name)}</h2>
                                                 
-                                                ${this.getRotectorBadges(rotData)}
+                                                ${this.getProviderBadges(rotData)}
 
                                                 <div class="w-full bg-osint-950 rounded-xl p-3 border border-osint-800 flex justify-between items-center mb-4 shadow-inner">
                                                     <span class="text-xs text-gray-500 uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">tag</span> Group ID</span>
