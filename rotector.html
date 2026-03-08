@@ -47,7 +47,7 @@
                     animation: {
                         'spin-slow': 'spin 3s linear infinite',
                         'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
                         'slide-up': 'slideUp 0.4s ease-out forwards',
                         'scale-in': 'scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
                     },
@@ -61,7 +61,7 @@
                             '100%': { opacity: 1 }
                         },
                         slideUp: {
-                            '0%': { opacity: 0, transform: 'translateY(20px)' },
+                            '0%': { opacity: 0, transform: 'translateY(15px)' },
                             '100%': { opacity: 1, transform: 'translateY(0)' }
                         },
                         scaleIn: {
@@ -124,11 +124,6 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(120%); opacity: 0; }
         }
-
-        /* Staggered Animations */
-        .stagger-1 { animation-delay: 0.05s; opacity: 0; animation-fill-mode: forwards; }
-        .stagger-2 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
-        .stagger-3 { animation-delay: 0.15s; opacity: 0; animation-fill-mode: forwards; }
     </style>
 </head>
 <body class="bg-osint-950 text-gray-300 font-sans h-screen overflow-hidden flex selection:bg-osint-500/30">
@@ -145,7 +140,7 @@
             </div>
             <div>
                 <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
-                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.2</p>
+                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.3</p>
             </div>
         </div>
 
@@ -160,14 +155,18 @@
                 <span class="font-medium text-sm">Global Stats</span>
             </a>
 
-            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-4">Lookups</div>
-            <a href="#player-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-4">Scanners</div>
+            <a href="#player-search" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
                 <span class="material-symbols-outlined w-5 text-center text-lg">person_search</span>
-                <span class="font-medium text-sm">Player Scan</span>
+                <span class="font-medium text-sm">Player Search</span>
             </a>
-            <a href="#group-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+            <a href="#group-search" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
                 <span class="material-symbols-outlined w-5 text-center text-lg">manage_search</span>
-                <span class="font-medium text-sm">Group Scan</span>
+                <span class="font-medium text-sm">Group Search</span>
+            </a>
+            <a href="#discord-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+                <span class="material-symbols-outlined w-5 text-center text-lg">hub</span>
+                <span class="font-medium text-sm">Discord Lookup</span>
             </a>
 
             <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6">History</div>
@@ -183,15 +182,8 @@
 
         <div class="p-4 border-t border-osint-800 bg-osint-900/50 flex flex-col gap-3">
             <button onclick="App.Controllers.openNativePip()" class="w-full bg-osint-800 hover:bg-osint-700 text-white rounded-lg py-2 flex items-center justify-center gap-2 transition-colors border border-osint-700 hover:border-osint-primary/50 text-sm font-medium shadow-sm">
-                <span class="material-symbols-outlined text-lg">picture_in_picture_alt</span> Quick PIP
+                <span class="material-symbols-outlined text-lg">picture_in_picture_alt</span> Small Panel
             </button>
-            <div class="flex flex-col gap-1.5 mt-1">
-                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Network Proxy</label>
-                <select id="proxy-selector" class="bg-osint-950 border border-osint-800 text-xs rounded-md p-1.5 text-gray-300 w-full focus:outline-none focus:border-osint-primary transition-colors">
-                    <option value="roproxy">RoProxy (Default)</option>
-                    <option value="corsproxy">CorsProxy.io</option>
-                </select>
-            </div>
             <div class="flex items-center gap-3 px-3 py-2 bg-osint-950 rounded-lg border border-osint-800 shadow-inner mt-1">
                 <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse-glow shadow-[0_0_5px_#4caf50]"></div>
                 <div class="flex flex-col">
@@ -226,12 +218,12 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 w-80 pointer-events-none"></div>
 
-    <!-- Fallback Quick PiP Widget (If Native PIP fails) -->
+    <!-- Fallback Small Panel Widget (If Native PIP fails) -->
     <div id="pip-widget" class="hidden fixed bottom-6 left-72 w-80 glass-card rounded-2xl shadow-2xl z-50 flex-col overflow-hidden transition-all duration-300 border border-osint-primary/30 animate-scale-in">
         <div class="bg-osint-900/80 px-4 py-3 flex justify-between items-center border-b border-osint-800 cursor-move" id="pip-header">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-osint-primary text-lg">bolt</span>
-                <span class="font-bold text-sm text-white">Quick Scan (Fallback)</span>
+                <span class="font-bold text-sm text-white">Small Panel (Fallback)</span>
             </div>
             <button onclick="App.Controllers.toggleFallbackPip()" class="text-gray-400 hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-lg">close</span>
@@ -239,7 +231,7 @@
         </div>
         <div class="p-4 bg-osint-950/90">
             <form id="pip-form" class="flex gap-2 mb-3">
-                <input type="text" id="pip-input" placeholder="Username or ID" class="flex-1 bg-osint-900 border border-osint-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-osint-primary" autocomplete="off">
+                <input type="text" id="pip-input" placeholder="User ID" class="flex-1 bg-osint-900 border border-osint-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-osint-primary" autocomplete="off">
                 <button type="submit" class="bg-osint-primary hover:bg-blue-500 text-white rounded-lg px-3 py-1.5 transition-colors">
                     <span class="material-symbols-outlined text-sm">search</span>
                 </button>
@@ -261,15 +253,14 @@
             Config: {
                 rotectorAPI: 'https://roscoe.rotector.com/v1',
                 
-                // Flag mappings aligned with Rotector system
                 flags: {
-                    0: { name: 'Not Flagged', color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/30', icon: 'check_circle' },
-                    1: { name: 'Under Review', color: 'text-osint-pending', bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: 'schedule' },
-                    2: { name: 'Unsafe', color: 'text-osint-danger', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: 'warning' },
-                    3: { name: 'Queued', color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', icon: 'hourglass_empty' },
-                    4: { name: 'Integration', color: 'text-osint-integration', bg: 'bg-teal-500/10', border: 'border-teal-500/30', icon: 'hub' },
-                    5: { name: 'Mixed', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', icon: 'balance' },
-                    6: { name: 'Past Offender', color: 'text-osint-past', bg: 'bg-blue-500/10', border: 'border-blue-500/30', icon: 'history' }
+                    0: { name: 'Not Flagged', color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/30', icon: 'check_circle', hex: '#9ca3af' },
+                    1: { name: 'Under Review', color: 'text-osint-pending', bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: 'schedule', hex: '#f97316' },
+                    2: { name: 'Unsafe', color: 'text-osint-danger', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: 'warning', hex: '#ef4444' },
+                    3: { name: 'Queued', color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', icon: 'hourglass_empty', hex: '#818cf8' },
+                    4: { name: 'Integration', color: 'text-osint-integration', bg: 'bg-teal-500/10', border: 'border-teal-500/30', icon: 'hub', hex: '#14b8a6' },
+                    5: { name: 'Mixed Evidence', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', icon: 'balance', hex: '#facc15' },
+                    6: { name: 'Past Offender', color: 'text-osint-past', bg: 'bg-blue-500/10', border: 'border-blue-500/30', icon: 'history', hex: '#60a5fa' }
                 },
 
                 discordSources: {
@@ -279,8 +270,7 @@
                 },
 
                 svgs: {
-                    discord: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" class="w-full h-full fill-current"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.33,46,96.22,53,91.08,65.69,84.69,65.69Z"/></svg>`,
-                    roblox: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-full h-full fill-current"><path d="M5.4 0L0 18.6L18.6 24L24 5.4L5.4 0ZM13.8 14.8C12 15.3 10.2 14.3 9.7 12.5C9.2 10.7 10.2 8.9 12 8.4C13.8 7.9 15.6 8.9 16.1 10.7C16.6 12.5 15.6 14.3 13.8 14.8Z"/></svg>`
+                    discord: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" class="w-full h-full fill-current"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.33,46,96.22,53,91.08,65.69,84.69,65.69Z"/></svg>`
                 }
             },
 
@@ -288,13 +278,13 @@
             State: {
                 groupPagination: {
                     groupId: null,
-                    cursors: [null], // Index maps to page (0 = page 1 cursor is null)
+                    cursors: [null], // index maps to page: [null, 'cursorForPage2', 'cursorForPage3']
                     currentPage: 0,
                     hasMore: false,
                     totalCount: 0,
-                    allUsersCache: [] // Cache to hold users to avoid refetching missing names repeatedly
+                    allUsersCache: [] 
                 },
-                pipWindow: null // Reference to native PIP window
+                pipWindow: null 
             },
 
             // --- Database (Local Storage Wrapper) ---
@@ -319,22 +309,18 @@
                 formatDate: (ts) => {
                     if (!ts) return 'Unknown Date';
                     let date;
-                    // Handle ISO Strings directly (e.g. "2019-05-28T01:18:33.9Z")
                     if (typeof ts === 'string') {
                         date = new Date(ts);
                     } else {
-                        // Handle Unix timestamps
+                        // Handle Unix timestamps (seconds vs ms)
                         date = new Date(ts > 1e11 ? ts : ts * 1000);
                     }
                     
                     if (isNaN(date.getTime())) return 'Invalid Date';
                     
                     return date.toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric',
-                        hour: '2-digit', 
-                        minute: '2-digit'
+                        year: 'numeric', month: 'short', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
                     });
                 },
                 
@@ -342,10 +328,11 @@
                     if (num === null || num === undefined) return '0';
                     return new Intl.NumberFormat().format(num);
                 },
-
-                delay: (ms) => new Promise(res => setTimeout(res, ms)),
                 
                 toast: (message, type = 'info') => {
+                    // Only show toasts for errors or specific events to avoid spam
+                    if(type === 'success' && message.includes('scanned successfully')) return;
+
                     const container = document.getElementById('toast-container');
                     const toast = document.createElement('div');
                     
@@ -355,7 +342,6 @@
                         info: { icon: 'info', color: 'text-osint-primary', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
                         warning: { icon: 'warning', color: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-500/10' }
                     };
-                    
                     const t = types[type] || types.info;
                     
                     toast.className = `glass-card p-4 rounded-xl flex items-start gap-3 pointer-events-auto toast-enter ${t.border} ${t.bg} shadow-lg`;
@@ -366,7 +352,6 @@
                     `;
                     
                     container.appendChild(toast);
-                    
                     setTimeout(() => {
                         toast.classList.replace('toast-enter', 'toast-exit');
                         setTimeout(() => toast.remove(), 400);
@@ -396,18 +381,10 @@
 
             // --- API Client ---
             API: {
-                // Dynamically build Roblox API URLs based on proxy setting
+                // Always uses corsproxy.io to fix CORS + Preflight (OPTIONS) issues completely
                 buildRobloxUrl(domain, endpoint) {
-                    const proxy = localStorage.getItem('rc_proxy') || 'roproxy';
                     const fullUrl = `https://${domain}${endpoint}`;
-                    
-                    if (proxy === 'corsproxy') {
-                        // Uses corsproxy.io wrapper
-                        return `https://corsproxy.io/?${encodeURIComponent(fullUrl)}`;
-                    } else {
-                        // Uses roproxy domain swap
-                        return `https://${domain.replace('.roblox.com', '.roproxy.com')}${endpoint}`;
-                    }
+                    return `https://corsproxy.io/?${encodeURIComponent(fullUrl)}`;
                 },
 
                 async fetchSafe(url, options = {}) {
@@ -423,27 +400,6 @@
                         console.error(`API Error [${url}]:`, error);
                         throw error;
                     }
-                },
-
-                async resolveRobloxUser(query) {
-                    if (/^\d+$/.test(query)) return parseInt(query, 10);
-                    const url = this.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
-                    
-                    const data = await this.fetchSafe(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
-                        body: JSON.stringify({ usernames: [query], excludeBannedUsers: false })
-                    });
-                    if (data.data && data.data.length > 0) return data.data[0].id;
-                    throw new Error(`Player "${query}" not found on Roblox.`);
-                },
-
-                async resolveRobloxGroup(query) {
-                    if (/^\d+$/.test(query)) return parseInt(query, 10);
-                    const url = this.buildRobloxUrl('groups.roblox.com', `/v1/groups/search?keyword=${encodeURIComponent(query)}&limit=10`);
-                    const data = await this.fetchSafe(url);
-                    if (data.data && data.data.length > 0) return data.data[0].id;
-                    throw new Error(`Group "${query}" not found on Roblox.`);
                 },
 
                 async getRobloxProfile(id) {
@@ -480,7 +436,7 @@
                     return this.fetchSafe(`${App.Config.rotectorAPI}/stats`);
                 },
 
-                // Batch fetch missing usernames from Roblox API safely with Proxy wrapper
+                // Batch fetch missing usernames from Roblox API securely
                 async fetchMissingNames(users) {
                     const missingIds = users.filter(u => !u.name || !u.displayName).map(u => u.id);
                     if (missingIds.length === 0) return;
@@ -489,15 +445,11 @@
                         const url = this.buildRobloxUrl('users.roblox.com', '/v1/users');
                         const res = await fetch(url, {
                             method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'accept': 'application/json' 
-                            },
+                            headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
                             body: JSON.stringify({ userIds: missingIds, excludeBannedUsers: false })
                         });
                         
                         const data = await res.json();
-                        
                         if(data && data.data) {
                             data.data.forEach(user => {
                                 // Update DOM elements gracefully
@@ -513,7 +465,7 @@
                                     el.innerHTML = App.Utils.sanitize(user.displayName);
                                 });
 
-                                // Update local cache so pagination doesn't lose it if we go back
+                                // Update local cache
                                 const cachedUser = App.State.groupPagination.allUsersCache.find(u => u.id === user.id);
                                 if (cachedUser) {
                                     cachedUser.name = user.name;
@@ -545,7 +497,6 @@
 
                     App.Views.contentDiv.innerHTML = `
                         <div class="max-w-6xl mx-auto space-y-8 animate-fade-in">
-                            <!-- Hero Section -->
                             <div class="relative glass-card rounded-3xl p-10 overflow-hidden border border-osint-primary/30 group">
                                 <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-osint-primary/10 rounded-full blur-[80px] group-hover:bg-osint-primary/20 transition-all duration-700 pointer-events-none"></div>
                                 <div class="relative z-10 max-w-3xl">
@@ -553,12 +504,12 @@
                                         <div class="w-2 h-2 rounded-full bg-osint-primary animate-pulse"></div>
                                         Network Connected
                                     </div>
-                                    <h2 class="text-4xl font-bold text-white mb-4 tracking-tight">Find flagged players in Roblox.</h2>
+                                    <h2 class="text-4xl font-bold text-white mb-4 tracking-tight">Find predators in Roblox!</h2>
                                     <p class="text-gray-400 text-lg leading-relaxed mb-8">
-                                        Protect your community by checking players and groups against our comprehensive safety database. Instantly view flagged histories, linked Discord profiles, and known alt accounts.
+                                        Protect your community by checking players and groups against our comprehensive safety database. Detect flagged behavior, linked Discord accounts, and hidden alt accounts to keep your environment safe.
                                     </p>
                                     <div class="flex gap-4">
-                                        <a href="#player-lookup" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(33,150,243,0.3)] hover:shadow-[0_0_25px_rgba(33,150,243,0.5)] flex items-center gap-2">
+                                        <a href="#player-search" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(33,150,243,0.3)] hover:shadow-[0_0_25px_rgba(33,150,243,0.5)] flex items-center gap-2">
                                             <span class="material-symbols-outlined text-lg">search</span> Start Scan
                                         </a>
                                         <a href="#statistics" class="bg-osint-800 hover:bg-osint-700 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-all border border-osint-700 hover:border-osint-primary/50 flex items-center gap-2">
@@ -568,7 +519,6 @@
                                 </div>
                             </div>
 
-                            <!-- Quick Metrics -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div class="glass-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors hover:-translate-y-1 duration-300">
                                     <div class="w-14 h-14 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
@@ -608,8 +558,6 @@
 
                     try {
                         const stats = await App.API.getStatistics();
-                        
-                        // Parse stats
                         const totalFlagged = stats.data?.totalFlaggedUsers || 0;
                         const totalConfirmed = stats.data?.totalConfirmedUsers || 0;
                         const totalBanned = stats.data?.totalBannedUsers || 0;
@@ -660,333 +608,316 @@
                     }
                 },
 
-                async renderPlayerLookup(query = null) {
-                    App.Views.titleDiv.innerText = 'Player Safety Scan';
-                    
-                    App.Views.contentDiv.innerHTML = `
-                        <div class="max-w-6xl mx-auto">
-                            <!-- Search Bar -->
-                            <form id="target-search-form" class="relative mb-8 shadow-2xl">
-                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                    <span class="material-symbols-outlined text-gray-500">person_search</span>
-                                </div>
-                                <input type="text" id="target-query" value="${query || ''}" required placeholder="Enter Roblox Username or ID to scan..." 
-                                    class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-36 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
-                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)]">
-                                    Scan
-                                </button>
-                            </form>
-
-                            <div id="target-results">
-                                ${query ? App.Utils.createSkeleton('dossier') : `
-                                    <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
-                                        <span class="material-symbols-outlined text-[80px] mb-4">badge</span>
-                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Player Input</p>
-                                    </div>
-                                `}
-                            </div>
-                        </div>
-                    `;
-
-                    const form = document.getElementById('target-search-form');
-                    form.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const inputQuery = document.getElementById('target-query').value.trim();
-                        if (!inputQuery) return;
-                        window.location.hash = `#player-lookup-${encodeURIComponent(inputQuery)}`;
-                    });
-
-                    if (query) {
-                        await App.Controllers.executePlayerScan(query);
-                    }
-                },
-
-                async renderGroupLookup(query = null) {
-                    App.Views.titleDiv.innerText = 'Group Safety Scan';
-                    
-                    App.Views.contentDiv.innerHTML = `
-                        <div class="max-w-6xl mx-auto">
-                            <form id="group-search-form" class="relative mb-8 shadow-2xl">
-                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                    <span class="material-symbols-outlined text-gray-500">manage_search</span>
-                                </div>
-                                <input type="text" id="group-query" value="${query || ''}" required placeholder="Enter Group Name or ID to scan..." 
-                                    class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-36 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
-                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)]">
-                                    Scan
-                                </button>
-                            </form>
-
-                            <div id="target-results">
-                                ${query ? App.Utils.createSkeleton('dossier') : `
-                                    <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
-                                        <span class="material-symbols-outlined text-[80px] mb-4">groups</span>
-                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Group Input</p>
-                                    </div>
-                                `}
-                            </div>
-                        </div>
-                    `;
-
-                    const form = document.getElementById('group-search-form');
-                    form.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const inputQuery = document.getElementById('group-query').value.trim();
-                        if (!inputQuery) return;
-                        window.location.hash = `#group-lookup-${encodeURIComponent(inputQuery)}`;
-                    });
-
-                    if (query) {
-                        await App.Controllers.executeGroupScan(query);
-                    }
-                },
-
-                renderHistory(type) {
-                    const isPlayer = type === 'players';
-                    App.Views.titleDiv.innerText = isPlayer ? 'Recent Player Scans' : 'Recent Group Scans';
-                    const records = App.DB.getHistory(type);
-
-                    let html = `<div class="max-w-6xl mx-auto animate-slide-up">`;
-                    
-                    if (records.length === 0) {
-                        html += `
-                            <div class="glass-card rounded-2xl p-16 flex flex-col items-center justify-center text-gray-500 border border-osint-800 border-dashed">
-                                <span class="material-symbols-outlined text-[60px] mb-4 opacity-50">history</span>
-                                <p class="text-lg">No recent scans found.</p>
-                            </div>
-                        `;
-                    } else {
-                        html += `
-                            <div class="glass-card rounded-2xl border border-osint-800 overflow-hidden">
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr class="bg-osint-900/80 border-b border-osint-800 text-xs uppercase tracking-widest text-gray-500 font-bold">
-                                                <th class="p-4">Identity</th>
-                                                <th class="p-4">Roblox ID</th>
-                                                <th class="p-4">Safety Status</th>
-                                                <th class="p-4">Scan Date</th>
-                                                <th class="p-4 text-right">View</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-osint-800/50">
-                                            ${records.map((r, i) => {
-                                                const flag = App.Config.flags[r.flagType] || App.Config.flags[0];
-                                                return `
-                                                <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer stagger-${(i%3)+1}" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-lookup-${r.id}'">
-                                                    <td class="p-4 flex items-center gap-4">
-                                                        <div class="w-10 h-10 rounded-full bg-osint-900 border border-osint-700 overflow-hidden flex-shrink-0">
-                                                            <img src="${r.thumb}" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'></svg>'">
-                                                        </div>
-                                                        <span class="font-bold text-white group-hover:text-osint-primary transition-colors">${App.Utils.sanitize(r.name)}</span>
-                                                    </td>
-                                                    <td class="p-4 font-mono text-sm text-gray-400">${r.id}</td>
-                                                    <td class="p-4">
-                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${flag.bg} ${flag.color} ${flag.border}">
-                                                            <span class="material-symbols-outlined text-[14px]">${flag.icon}</span> ${flag.name}
-                                                        </span>
-                                                    </td>
-                                                    <td class="p-4 text-sm text-gray-500 font-mono">${App.Utils.formatDate(r.timestamp)}</td>
-                                                    <td class="p-4 text-right">
-                                                        <button class="w-8 h-8 rounded-lg bg-osint-900 border border-osint-700 text-gray-400 hover:text-white hover:border-osint-primary hover:bg-osint-primary/20 transition-all flex items-center justify-center ml-auto">
-                                                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            `}).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    html += `</div>`;
-                    App.Views.contentDiv.innerHTML = html;
-                }
-            },
-
-            // --- Business Logic / Controllers ---
-            Controllers: {
-                
-                getFlagBannerHTML(flagType, confidence, reviewer) {
-                    const flag = App.Config.flags[flagType] || App.Config.flags[0];
-                    const confPercent = confidence ? Math.round(confidence * 100) : null;
-                    
-                    const getRadial = (pct) => {
-                        const c = 2 * Math.PI * 18;
-                        const offset = c - (pct/100)*c;
-                        const col = pct > 80 ? 'text-red-500' : pct > 50 ? 'text-yellow-500' : 'text-green-500';
-                        return `
-                            <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
-                                <svg class="transform -rotate-90 w-12 h-12"><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" class="text-osint-800"/><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" class="transition-all duration-1000 ${col}"/></svg>
-                                <span class="absolute text-[10px] font-bold font-mono text-white">${pct}%</span>
-                            </div>
-                        `;
-                    };
-
+                renderSearchTemplate(type, query, limit) {
                     return `
-                        <div class="glass-card rounded-2xl p-5 border ${flag.border} ${flag.bg} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-lg transition-shadow">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full flex items-center justify-center ${flag.color} bg-black/20 border ${flag.border}">
-                                    <span class="material-symbols-outlined text-[28px]">${flag.icon}</span>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Safety Status</p>
-                                    <h3 class="text-2xl font-bold text-white leading-none">${flag.name}</h3>
-                                </div>
-                            </div>
-                            ${confPercent !== null ? `
-                                <div class="flex items-center gap-4 bg-osint-950/50 px-4 py-2 rounded-xl border border-osint-800/50">
-                                    <div class="text-right">
-                                        <p class="text-[10px] text-gray-400 uppercase font-bold">System Confidence</p>
-                                        ${reviewer ? `<p class="text-[10px] text-osint-primary mt-0.5 flex justify-end items-center gap-1"><span class="material-symbols-outlined text-[12px]">person_check</span>${App.Utils.sanitize(reviewer.username)}</p>` : ''}
+                        <div class="max-w-6xl mx-auto">
+                            <form id="target-search-form" class="relative mb-8 shadow-2xl flex gap-3">
+                                <div class="relative flex-1">
+                                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                        <span class="material-symbols-outlined text-gray-500">${type === 'player' ? 'person_search' : 'manage_search'}</span>
                                     </div>
-                                    ${getRadial(confPercent)}
+                                    <input type="text" id="target-query" value="${query || ''}" required placeholder="Search for a ${type === 'player' ? 'Player Username' : 'Group Name'}..." 
+                                        class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
                                 </div>
-                            ` : ''}
+                                <select id="target-limit" class="bg-osint-900 border-2 border-osint-800 text-white rounded-2xl px-4 py-4 focus:outline-none focus:border-osint-primary transition-all text-lg font-bold">
+                                    <option value="10" ${limit=='10'?'selected':''}>10</option>
+                                    <option value="25" ${limit=='25'?'selected':''}>25</option>
+                                    <option value="50" ${limit=='50'?'selected':''}>50</option>
+                                    <option value="100" ${limit=='100'?'selected':''}>100</option>
+                                </select>
+                                <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)]">
+                                    Search
+                                </button>
+                            </form>
+
+                            <div id="target-results">
+                                ${query ? `
+                                    <div class="flex flex-col items-center justify-center py-20 text-osint-primary animate-fade-in">
+                                        <span class="material-symbols-outlined animate-spin-slow text-5xl mb-4">progress_activity</span>
+                                        <p class="font-bold tracking-widest uppercase">Executing Network Search...</p>
+                                    </div>
+                                ` : `
+                                    <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
+                                        <span class="material-symbols-outlined text-[80px] mb-4">${type === 'player' ? 'badge' : 'groups'}</span>
+                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Search Input</p>
+                                    </div>
+                                `}
+                            </div>
                         </div>
                     `;
                 },
 
-                getEvidenceHTML(reasonsObj) {
-                    if (!reasonsObj || Object.keys(reasonsObj).length === 0) {
-                        return `
-                            <div class="flex flex-col items-center justify-center p-10 text-gray-500 border border-osint-800 border-dashed rounded-xl bg-osint-900/30">
-                                <span class="material-symbols-outlined text-5xl mb-3 opacity-30">folder_open</span>
-                                <p class="font-mono text-sm">No violation evidence on file.</p>
-                            </div>
-                        `;
-                    }
+                async executePlayerSearch(query, limit = 25, cursor = '') {
+                    App.Views.titleDiv.innerText = 'Player Search';
+                    App.Views.contentDiv.innerHTML = this.renderSearchTemplate('player', query, limit);
 
-                    return Object.entries(reasonsObj).map(([type, data]) => `
-                        <div class="bg-osint-900 border border-osint-800 rounded-xl p-4 mb-4 shadow-sm relative overflow-hidden hover:-translate-y-0.5 transition-transform">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-osint-danger"></div>
-                            <div class="flex justify-between items-start mb-3 pl-2">
-                                <h4 class="font-bold text-white text-md flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-osint-danger text-[20px]">description</span> ${App.Utils.sanitize(type)}
-                                </h4>
-                                <span class="text-xs font-mono bg-osint-950 px-2 py-1 rounded border border-osint-800 text-gray-400">Conf: ${Math.round(data.confidence*100)}%</span>
-                            </div>
-                            <p class="text-sm text-gray-300 mb-3 pl-2 leading-relaxed">${App.Utils.sanitize(data.message || 'No description provided.')}</p>
-                            ${data.evidence && data.evidence.length ? `
-                                <div class="bg-osint-950 rounded-lg p-3 border border-osint-800 ml-2">
-                                    <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-osint-800 pb-1">Raw Evidence Log</div>
-                                    <ul class="space-y-1.5 font-mono text-xs text-gray-400">
-                                        ${data.evidence.map(ev => `
-                                            <li class="flex items-start gap-2">
-                                                <span class="material-symbols-outlined text-osint-primary text-[14px] mt-0.5 shrink-0">chevron_right</span>
-                                                <span class="break-all mt-0.5">${App.Utils.sanitize(ev)}</span>
-                                            </li>
-                                        `).join('')}
-                                    </ul>
+                    document.getElementById('target-search-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const q = document.getElementById('target-query').value.trim();
+                        const l = document.getElementById('target-limit').value;
+                        if (q) window.location.hash = `#player-search?q=${encodeURIComponent(q)}&limit=${l}`;
+                    });
+
+                    if (!query) return;
+
+                    const resultsDiv = document.getElementById('target-results');
+                    try {
+                        const searchUrl = App.API.buildRobloxUrl('users.roblox.com', `/v1/users/search?keyword=${encodeURIComponent(query)}&limit=${limit}${cursor ? '&cursor='+encodeURIComponent(cursor) : ''}`);
+                        const searchData = await App.API.fetchSafe(searchUrl);
+                        
+                        if (!searchData.data || searchData.data.length === 0) {
+                            resultsDiv.innerHTML = `<div class="text-center py-10 text-gray-500">No players found matching "${query}".</div>`;
+                            return;
+                        }
+
+                        const userIds = searchData.data.map(u => u.id);
+                        
+                        // Fetch batch Rotector status & thumbnails concurrently
+                        const [rotRes, thumbRes] = await Promise.allSettled([
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ ids: userIds, excludeInfo: true })
+                            }),
+                            App.API.fetchSafe(App.API.buildRobloxUrl('thumbnails.roblox.com', `/v1/users/avatar-headshot?userIds=${userIds.join(',')}&size=150x150&format=Webp&isCircular=false`))
+                        ]);
+
+                        const rotMap = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : {};
+                        const thumbMap = {};
+                        if (thumbRes.status === 'fulfilled' && thumbRes.value.data) {
+                            thumbRes.value.data.forEach(t => thumbMap[t.targetId] = t.imageUrl);
+                        }
+
+                        let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">`;
+                        
+                        searchData.data.forEach(u => {
+                            const flagType = rotMap[u.id]?.flagType || 0;
+                            const flag = App.Config.flags[flagType] || App.Config.flags[0];
+                            const avatar = thumbMap[u.id] || 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
+                            
+                            html += `
+                                <div class="glass-card rounded-xl p-4 flex flex-col gap-3 border-t-2 ${flag.border.replace('/30','')} hover:bg-osint-800/50 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${avatar}" class="w-12 h-12 rounded-full border border-osint-700 bg-osint-900 object-cover shrink-0">
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="font-bold text-white text-sm truncate">${App.Utils.sanitize(u.displayName)}</h4>
+                                            <p class="text-xs text-gray-400 font-mono truncate">@${App.Utils.sanitize(u.name)}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${flag.bg} ${flag.color}">
+                                            <span class="material-symbols-outlined text-[12px]">${flag.icon}</span> ${flag.name}
+                                        </span>
+                                        <a href="#player-dossier?id=${u.id}" class="text-xs font-bold text-osint-primary hover:text-white transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800">
+                                            View Dossier
+                                        </a>
+                                    </div>
                                 </div>
-                            ` : ''}
-                        </div>
-                    `).join('');
+                            `;
+                        });
+                        html += `</div>`;
+
+                        // Pagination controls
+                        if (searchData.previousPageCursor || searchData.nextPageCursor) {
+                            html += `
+                                <div class="flex items-center justify-between mt-6 bg-osint-950/50 px-4 py-3 rounded-xl border border-osint-800">
+                                    <a ${searchData.previousPageCursor ? `href="#player-search?q=${encodeURIComponent(query)}&limit=${limit}&cursor=${searchData.previousPageCursor}"` : ''} 
+                                        class="px-4 py-2 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold transition-colors flex items-center gap-2 ${!searchData.previousPageCursor ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}">
+                                        <span class="material-symbols-outlined text-sm">arrow_back</span> Prev
+                                    </a>
+                                    <a ${searchData.nextPageCursor ? `href="#player-search?q=${encodeURIComponent(query)}&limit=${limit}&cursor=${searchData.nextPageCursor}"` : ''} 
+                                        class="px-4 py-2 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold transition-colors flex items-center gap-2 ${!searchData.nextPageCursor ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}">
+                                        Next <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                    </a>
+                                </div>
+                            `;
+                        }
+
+                        resultsDiv.innerHTML = html;
+                    } catch(err) {
+                        resultsDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Search Failed: ${err.message}</div>`;
+                    }
                 },
 
-                getDiscordHTML(discordData) {
-                    if (!discordData || !discordData.discordAccounts || discordData.discordAccounts.length === 0) {
-                         return `
-                            <div class="flex flex-col items-center justify-center p-8 text-gray-500 border border-osint-800 border-dashed rounded-xl bg-osint-900/30 mt-4">
-                                <div class="w-10 h-10 mb-3 opacity-30">${App.Config.svgs.discord}</div>
-                                <p class="font-mono text-sm">No linked Discord connections found.</p>
-                            </div>
-                        `;
+                async executeGroupSearch(query, limit = 25, cursor = '') {
+                    App.Views.titleDiv.innerText = 'Group Search';
+                    App.Views.contentDiv.innerHTML = this.renderSearchTemplate('group', query, limit);
+
+                    document.getElementById('target-search-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const q = document.getElementById('target-query').value.trim();
+                        const l = document.getElementById('target-limit').value;
+                        if (q) window.location.hash = `#group-search?q=${encodeURIComponent(q)}&limit=${l}`;
+                    });
+
+                    if (!query) return;
+
+                    const resultsDiv = document.getElementById('target-results');
+                    try {
+                        const searchUrl = App.API.buildRobloxUrl('groups.roblox.com', `/v1/groups/search?keyword=${encodeURIComponent(query)}&limit=${limit}${cursor ? '&cursor='+encodeURIComponent(cursor) : ''}`);
+                        const searchData = await App.API.fetchSafe(searchUrl);
+                        
+                        if (!searchData.data || searchData.data.length === 0) {
+                            resultsDiv.innerHTML = `<div class="text-center py-10 text-gray-500">No groups found matching "${query}".</div>`;
+                            return;
+                        }
+
+                        const groupIds = searchData.data.map(g => g.id);
+                        
+                        const [rotRes, thumbRes] = await Promise.allSettled([
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ ids: groupIds, excludeInfo: true })
+                            }),
+                            App.API.fetchSafe(App.API.buildRobloxUrl('thumbnails.roblox.com', `/v1/groups/icons?groupIds=${groupIds.join(',')}&size=150x150&format=Webp&isCircular=false`))
+                        ]);
+
+                        const rotMap = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : {};
+                        const thumbMap = {};
+                        if (thumbRes.status === 'fulfilled' && thumbRes.value.data) {
+                            thumbRes.value.data.forEach(t => thumbMap[t.targetId] = t.imageUrl);
+                        }
+
+                        let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">`;
+                        
+                        searchData.data.forEach(g => {
+                            const flagType = rotMap[g.id]?.flagType || 0;
+                            const flag = App.Config.flags[flagType] || App.Config.flags[0];
+                            const icon = thumbMap[g.id] || '';
+                            
+                            html += `
+                                <div class="glass-card rounded-xl p-4 flex flex-col gap-3 border-t-2 ${flag.border.replace('/30','')} hover:bg-osint-800/50 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${icon}" class="w-12 h-12 rounded-lg border border-osint-700 bg-osint-900 object-cover shrink-0" onerror="this.style.display='none'">
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="font-bold text-white text-sm truncate">${App.Utils.sanitize(g.name)}</h4>
+                                            <p class="text-xs text-gray-500 font-mono truncate">ID: ${g.id} • Mem: ${App.Utils.formatNumber(g.memberCount)}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${flag.bg} ${flag.color}">
+                                            <span class="material-symbols-outlined text-[12px]">${flag.icon}</span> ${flag.name}
+                                        </span>
+                                        <a href="#group-dossier?id=${g.id}" class="text-xs font-bold text-osint-primary hover:text-white transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800">
+                                            View Dossier
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += `</div>`;
+
+                        if (searchData.previousPageCursor || searchData.nextPageCursor) {
+                            html += `
+                                <div class="flex items-center justify-between mt-6 bg-osint-950/50 px-4 py-3 rounded-xl border border-osint-800">
+                                    <a ${searchData.previousPageCursor ? `href="#group-search?q=${encodeURIComponent(query)}&limit=${limit}&cursor=${searchData.previousPageCursor}"` : ''} 
+                                        class="px-4 py-2 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold transition-colors flex items-center gap-2 ${!searchData.previousPageCursor ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}">
+                                        <span class="material-symbols-outlined text-sm">arrow_back</span> Prev
+                                    </a>
+                                    <a ${searchData.nextPageCursor ? `href="#group-search?q=${encodeURIComponent(query)}&limit=${limit}&cursor=${searchData.nextPageCursor}"` : ''} 
+                                        class="px-4 py-2 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold transition-colors flex items-center gap-2 ${!searchData.nextPageCursor ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}">
+                                        Next <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                    </a>
+                                </div>
+                            `;
+                        }
+
+                        resultsDiv.innerHTML = html;
+                    } catch(err) {
+                        resultsDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Search Failed: ${err.message}</div>`;
                     }
+                },
 
-                    const accountsHtml = discordData.discordAccounts.map(acc => {
-                        const sourcesHtml = (acc.sources || []).map(s => {
-                            const src = App.Config.discordSources[s];
-                            if(!src) return '';
-                            return `<span class="flex items-center px-2 py-0.5 rounded bg-osint-800 border border-osint-700 text-[10px] font-mono text-gray-300 shadow-sm"><span class="material-symbols-outlined text-[12px] mr-1">${src.icon}</span>${src.name}</span>`;
-                        }).join(' ');
+                async executeDiscordLookup(query) {
+                    App.Views.titleDiv.innerText = 'Discord Intelligence';
+                    App.Views.contentDiv.innerHTML = `
+                        <div class="max-w-6xl mx-auto">
+                            <form id="discord-search-form" class="relative mb-8 shadow-2xl flex gap-3">
+                                <div class="relative flex-1">
+                                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                        <span class="material-symbols-outlined text-gray-500">hub</span>
+                                    </div>
+                                    <input type="text" id="discord-query" value="${query || ''}" required placeholder="Enter Exact Discord ID (e.g. 1332382707707023441)" 
+                                        class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
+                                </div>
+                                <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)] flex items-center gap-2">
+                                    Analyze
+                                </button>
+                            </form>
+                            <div id="target-results">
+                                ${query ? App.Utils.createSkeleton('dossier') : `
+                                    <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
+                                        <div class="w-20 h-20 mb-4 fill-current">${App.Config.svgs.discord}</div>
+                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Discord ID</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
 
-                        const serversHtml = (acc.servers || []).map(srv => {
+                    document.getElementById('discord-search-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const q = document.getElementById('discord-query').value.trim();
+                        if (q) window.location.hash = `#discord-lookup?id=${encodeURIComponent(q)}`;
+                    });
+
+                    if(!query) return;
+                    
+                    const resDiv = document.getElementById('target-results');
+                    try {
+                        const data = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/discord/user/${query}`);
+                        if(!data.success) throw new Error("No intelligence found for this Discord ID.");
+
+                        const d = data.data;
+                        const serversHtml = d.servers.map(srv => {
                             let tags = '';
                             if(srv.isTase) tags += `<span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] uppercase font-bold ml-2">TASE</span>`;
-                            if(srv.inGracePeriod) tags += `<span class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[9px] uppercase font-bold ml-2 flex items-center gap-1"><span class="material-symbols-outlined text-[10px]">hourglass_top</span>Grace</span>`;
-                            
+                            if(srv.inGracePeriod) tags += `<span class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[9px] uppercase font-bold ml-2">Grace</span>`;
                             const dateStr = srv.joinedAt ? `Joined: ${App.Utils.formatDate(srv.joinedAt)}` : `First Seen: ${App.Utils.formatDate(srv.firstSeenAt)}`;
-                            
                             return `
-                                <div class="flex justify-between items-center py-2 border-b border-osint-800 last:border-0 hover:bg-osint-800/30 px-2 rounded transition-colors">
-                                    <div class="flex items-center">
-                                        <span class="material-symbols-outlined text-gray-500 mr-2 text-[16px]">dns</span>
-                                        <span class="text-sm font-medium text-gray-200">${App.Utils.sanitize(srv.serverName)}</span>
-                                        ${tags}
-                                    </div>
+                                <div class="flex justify-between items-center py-3 border-b border-osint-800 last:border-0">
+                                    <div class="flex items-center"><span class="material-symbols-outlined text-gray-500 mr-2 text-[18px]">dns</span><span class="font-medium text-gray-200">${App.Utils.sanitize(srv.serverName)}</span>${tags}</div>
                                     <span class="text-xs font-mono text-gray-500">${dateStr}</span>
                                 </div>
                             `;
                         }).join('');
 
-                        return `
-                            <div class="bg-osint-900 border border-[#5865F2]/30 rounded-xl mb-4 overflow-hidden hover:border-[#5865F2]/60 transition-colors">
-                                <div class="bg-[#5865F2]/10 px-4 py-3 border-b border-[#5865F2]/20 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-[#5865F2] text-white flex items-center justify-center p-1.5 shadow-[0_0_10px_rgba(88,101,242,0.4)]">
-                                            ${App.Config.svgs.discord}
-                                        </div>
-                                        <div>
-                                            <div class="text-xs text-gray-400 font-mono">Discord ID</div>
-                                            <div class="font-bold text-white tracking-wide">${App.Utils.sanitize(acc.id)}</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-1.5 flex-wrap">
-                                        ${sourcesHtml}
+                        const connectionsHtml = d.connections.map(c => `
+                            <a href="#player-dossier?id=${c.robloxUserId}" class="block bg-osint-900 border border-osint-800 p-4 rounded-xl hover:border-osint-primary transition-colors flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-osint-800 flex items-center justify-center text-gray-400"><span class="material-symbols-outlined">person</span></div>
+                                    <div>
+                                        <div class="font-bold text-white text-lg">${App.Utils.sanitize(c.robloxUsername)}</div>
+                                        <div class="text-xs text-gray-500 font-mono">UID: ${c.robloxUserId}</div>
                                     </div>
                                 </div>
-                                <div class="p-2">
-                                    <div class="px-2 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tracked Server Memberships</div>
-                                    ${serversHtml || '<div class="p-2 text-xs text-gray-500 italic">No tracked servers.</div>'}
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
+                                <span class="material-symbols-outlined text-gray-600">chevron_right</span>
+                            </a>
+                        `).join('');
 
-                    let altsHtml = '';
-                    if (discordData.altAccounts && discordData.altAccounts.length > 0) {
-                        altsHtml = `
-                            <div class="mt-6">
-                                <h4 class="text-sm font-bold text-white flex items-center gap-2 mb-3 border-b border-osint-800 pb-2">
-                                    <span class="material-symbols-outlined text-osint-integration text-[20px]">hub</span> Connected Alt Accounts
-                                </h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    ${discordData.altAccounts.map(alt => `
-                                        <a href="#player-lookup-${alt.robloxUserId}" class="block bg-osint-900 border border-osint-800 rounded-lg p-3 hover:border-osint-primary hover:bg-osint-800/80 transition-all flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-osint-800 flex items-center justify-center text-gray-400 border border-osint-700">
-                                                <span class="material-symbols-outlined text-[18px]">person</span>
-                                            </div>
-                                            <div>
-                                                <div class="font-bold text-gray-200 text-sm group-hover:text-osint-primary">${App.Utils.sanitize(alt.robloxUsername)}</div>
-                                                <div class="text-[10px] text-gray-500 font-mono">ID: ${alt.robloxUserId}</div>
-                                            </div>
-                                        </a>
-                                    `).join('')}
+                        resDiv.innerHTML = `
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
+                                <div class="glass-card rounded-2xl p-6">
+                                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-osint-800 pb-2"><span class="material-symbols-outlined text-osint-primary">link</span> Roblox Connections</h3>
+                                    <div class="space-y-3">${connectionsHtml || '<p class="text-gray-500">No direct Roblox connections found.</p>'}</div>
+                                </div>
+                                <div class="glass-card rounded-2xl p-6">
+                                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-osint-800 pb-2"><span class="material-symbols-outlined text-osint-integration">dns</span> Server Memberships</h3>
+                                    <div class="bg-osint-900/50 rounded-xl px-4 py-1 border border-osint-800">${serversHtml || '<p class="text-gray-500 py-3">No tracked servers.</p>'}</div>
                                 </div>
                             </div>
                         `;
+                    } catch(err) {
+                        resDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Lookup Failed: ${err.message}</div>`;
                     }
-
-                    return `
-                        <div class="mt-8 border-t border-osint-800 pt-6 animate-fade-in">
-                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                <div class="w-5 h-5 text-[#5865F2]">${App.Config.svgs.discord}</div> Discord Connections
-                            </h3>
-                            ${accountsHtml}
-                            ${altsHtml}
-                        </div>
-                    `;
                 },
 
-                async executePlayerScan(query) {
-                    const resultsDiv = document.getElementById('target-results');
-                    resultsDiv.innerHTML = App.Utils.createSkeleton('dossier');
+                async executePlayerDossier(userId) {
+                    const resultsDiv = document.getElementById('app-content');
+                    resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto">${App.Utils.createSkeleton('dossier')}</div>`;
 
                     try {
-                        const userId = await App.API.resolveRobloxUser(query);
-                        
                         const [rbxProfile, rbxAvatar, rotRes, discRes] = await Promise.allSettled([
                             App.API.getRobloxProfile(userId),
                             App.API.getRobloxAvatar(userId),
@@ -994,7 +925,7 @@
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/discord`)
                         ]);
 
-                        if (rbxProfile.status === 'rejected') throw new Error("Player profile extraction failed. Ensure the username or ID is valid.");
+                        if (rbxProfile.status === 'rejected') throw new Error("Player profile extraction failed.");
                         
                         const profile = rbxProfile.value;
                         const avatar = rbxAvatar.status === 'fulfilled' ? rbxAvatar.value : '';
@@ -1004,72 +935,193 @@
                         App.DB.addRecord('players', { id: profile.id, name: profile.name, thumb: avatar, flagType: rotData.flagType });
 
                         resultsDiv.innerHTML = `
-                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
-                                <!-- ID Card -->
-                                <div class="lg:col-span-4 flex flex-col gap-6">
-                                    <div class="glass-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
-                                        <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent z-0"></div>
-                                        <div class="relative z-10 flex flex-col items-center text-center">
-                                            <div class="w-32 h-32 rounded-full p-1 bg-osint-800 border-2 border-osint-700 shadow-2xl mb-4 relative hover:scale-105 transition-transform duration-300">
-                                                <img src="${avatar}" class="w-full h-full rounded-full object-cover bg-osint-900" alt="Avatar">
-                                                <div class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-osint-900 border-2 border-osint-800 flex items-center justify-center ${App.Config.flags[rotData.flagType]?.color}">
-                                                    <span class="material-symbols-outlined text-[18px]">${App.Config.flags[rotData.flagType]?.icon}</span>
+                            <div class="max-w-6xl mx-auto">
+                                <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1 transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800 w-fit"><span class="material-symbols-outlined text-sm">arrow_back</span> Back to Results</button>
+                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
+                                    <!-- ID Card -->
+                                    <div class="lg:col-span-4 flex flex-col gap-6">
+                                        <div class="glass-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
+                                            <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent z-0"></div>
+                                            <div class="relative z-10 flex flex-col items-center text-center">
+                                                <div class="w-32 h-32 rounded-full p-1 bg-osint-800 border-2 border-osint-700 shadow-2xl mb-4 relative hover:scale-105 transition-transform duration-300">
+                                                    <img src="${avatar}" class="w-full h-full rounded-full object-cover bg-osint-900" alt="Avatar">
+                                                    <div class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-osint-900 border-2 border-osint-800 flex items-center justify-center ${App.Config.flags[rotData.flagType]?.color}">
+                                                        <span class="material-symbols-outlined text-[18px]">${App.Config.flags[rotData.flagType]?.icon}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <h2 class="text-2xl font-bold text-white mb-1 break-all">${App.Utils.sanitize(profile.displayName)}</h2>
-                                            <p class="text-gray-400 font-mono text-sm mb-4">@${App.Utils.sanitize(profile.name)}</p>
-                                            
-                                            <div class="w-full bg-osint-950 rounded-xl p-3 border border-osint-800 flex justify-between items-center mb-4 shadow-inner">
-                                                <span class="text-xs text-gray-500 uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">id_card</span> User ID</span>
-                                                <span class="font-mono text-osint-primary font-bold tracking-wider">${profile.id}</span>
-                                            </div>
-                                            
-                                            <div class="w-full text-left">
-                                                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">calendar_today</span> Creation Date</p>
-                                                <div class="bg-osint-900/50 rounded-lg p-2.5 text-xs text-gray-300 font-mono border border-osint-800/50 mb-3">
-                                                    ${App.Utils.formatDate(profile.created)}
+                                                <h2 class="text-2xl font-bold text-white mb-1 break-all">${App.Utils.sanitize(profile.displayName)}</h2>
+                                                <p class="text-gray-400 font-mono text-sm mb-4">@${App.Utils.sanitize(profile.name)}</p>
+                                                
+                                                <div class="w-full bg-osint-950 rounded-xl p-3 border border-osint-800 flex justify-between items-center mb-4 shadow-inner">
+                                                    <span class="text-xs text-gray-500 uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">id_card</span> User ID</span>
+                                                    <span class="font-mono text-osint-primary font-bold tracking-wider">${profile.id}</span>
                                                 </div>
                                                 
-                                                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">subject</span> Profile Bio</p>
-                                                <div class="bg-osint-900/50 rounded-lg p-3 text-xs text-gray-400 font-mono border border-osint-800/50 max-h-32 overflow-y-auto whitespace-pre-wrap scrollbar-styled">
-                                                    ${profile.description ? App.Utils.sanitize(profile.description) : '<span class="italic opacity-50">No description provided.</span>'}
+                                                <div class="w-full text-left">
+                                                    <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">calendar_today</span> Creation Date</p>
+                                                    <div class="bg-osint-900/50 rounded-lg p-2.5 text-xs text-gray-300 font-mono border border-osint-800/50 mb-3">
+                                                        ${App.Utils.formatDate(profile.created)}
+                                                    </div>
+                                                    
+                                                    <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">subject</span> Profile Bio</p>
+                                                    <div class="bg-osint-900/50 rounded-lg p-3 text-xs text-gray-400 font-mono border border-osint-800/50 max-h-32 overflow-y-auto whitespace-pre-wrap scrollbar-styled">
+                                                        ${profile.description ? App.Utils.sanitize(profile.description) : '<span class="italic opacity-50">No description provided.</span>'}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
+                                            Open Roblox Profile <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                                        </a>
                                     </div>
-                                    <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
-                                        Open Roblox Profile <span class="material-symbols-outlined text-[16px]">open_in_new</span>
-                                    </a>
-                                </div>
 
-                                <!-- Intel Panel -->
-                                <div class="lg:col-span-8 flex flex-col gap-6">
-                                    ${this.getFlagBannerHTML(rotData.flagType, rotData.confidence, rotData.reviewer)}
-                                    
-                                    <div class="glass-card rounded-3xl flex-1 flex flex-col overflow-hidden">
-                                        <div class="bg-osint-900/80 border-b border-osint-800 px-6 py-4 flex items-center gap-3">
-                                            <span class="material-symbols-outlined text-osint-primary">policy</span>
-                                            <h3 class="font-bold text-white tracking-wide">Safety Report</h3>
-                                        </div>
-                                        <div class="p-6 overflow-y-auto max-h-[600px] scrollbar-styled">
-                                            ${this.getEvidenceHTML(rotData.reasons)}
-                                            ${this.getDiscordHTML(discData)}
+                                    <!-- Intel Panel -->
+                                    <div class="lg:col-span-8 flex flex-col gap-6">
+                                        ${this.getFlagBannerHTML(rotData.flagType, rotData.confidence, rotData.reviewer)}
+                                        
+                                        <div class="glass-card rounded-3xl flex-1 flex flex-col overflow-hidden">
+                                            <div class="bg-osint-900/80 border-b border-osint-800 px-6 py-4 flex items-center gap-3">
+                                                <span class="material-symbols-outlined text-osint-primary">policy</span>
+                                                <h3 class="font-bold text-white tracking-wide">Safety Report</h3>
+                                            </div>
+                                            <div class="p-6 overflow-y-auto max-h-[600px] scrollbar-styled">
+                                                ${this.getEvidenceHTML(rotData.reasons)}
+                                                ${this.getDiscordHTML(discData)}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         `;
-                        App.Utils.toast('Player scanned successfully.', 'success');
 
                     } catch (err) {
                         resultsDiv.innerHTML = `
-                            <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto mt-10 animate-fade-in">
-                                <span class="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
-                                <h3 class="text-white text-2xl font-bold mb-2">Scan Failed</h3>
-                                <p class="text-gray-400 font-mono">${err.message}</p>
+                            <div class="max-w-6xl mx-auto">
+                                <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1"><span class="material-symbols-outlined text-sm">arrow_back</span> Back</button>
+                                <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto animate-fade-in">
+                                    <span class="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
+                                    <h3 class="text-white text-2xl font-bold mb-2">Data Extraction Failed</h3>
+                                    <p class="text-gray-400 font-mono">${err.message}</p>
+                                </div>
                             </div>
                         `;
-                        App.Utils.toast('Scan failed: ' + err.message, 'error');
+                    }
+                },
+
+                async executeGroupDossier(groupId) {
+                    const resultsDiv = document.getElementById('app-content');
+                    resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto">${App.Utils.createSkeleton('dossier')}</div>`;
+
+                    try {
+                        const [rbxGroup, rbxIcon, rotRes, trackedRes] = await Promise.allSettled([
+                            App.API.getRobloxGroupProfile(groupId),
+                            App.API.getRobloxGroupIcon(groupId),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group/${groupId}`),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group/${groupId}/tracked-users?limit=50`)
+                        ]);
+
+                        if (rbxGroup.status === 'rejected') throw new Error("Group profile extraction failed.");
+                        
+                        const group = rbxGroup.value;
+                        const icon = rbxIcon.status === 'fulfilled' ? rbxIcon.value : '';
+                        const rotData = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : { flagType: 0, confidence: 1 };
+                        const trackedData = trackedRes.status === 'fulfilled' && trackedRes.value.success ? trackedRes.value.data : { users: [], totalCount: 0, hasMore: false, nextCursor: null };
+                        
+                        App.State.groupPagination = {
+                            groupId: groupId,
+                            cursors: [null],
+                            currentPage: 0,
+                            hasMore: trackedData.hasMore,
+                            totalCount: trackedData.totalCount,
+                            allUsersCache: trackedData.users ? [...trackedData.users] : []
+                        };
+
+                        if(trackedData.nextCursor) {
+                            App.State.groupPagination.cursors.push(trackedData.nextCursor);
+                        }
+
+                        App.DB.addRecord('groups', { id: group.id, name: group.name, thumb: icon, flagType: rotData.flagType });
+
+                        resultsDiv.innerHTML = `
+                            <div class="max-w-6xl mx-auto">
+                                <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1 transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800 w-fit"><span class="material-symbols-outlined text-sm">arrow_back</span> Back to Results</button>
+                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
+                                    <!-- Org Card -->
+                                    <div class="lg:col-span-4 flex flex-col gap-6">
+                                        <div class="glass-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
+                                            <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent z-0"></div>
+                                            <div class="relative z-10 flex flex-col items-center text-center">
+                                                <div class="w-32 h-32 rounded-2xl p-1 bg-osint-800 border-2 border-osint-700 shadow-xl mb-4 hover:scale-105 transition-transform duration-300">
+                                                    <img src="${icon}" class="w-full h-full rounded-xl object-cover bg-osint-900" alt="Group Icon" onerror="this.style.display='none'">
+                                                </div>
+                                                <h2 class="text-2xl font-bold text-white mb-3 break-all">${App.Utils.sanitize(group.name)}</h2>
+                                                
+                                                <div class="w-full bg-osint-950 rounded-xl p-3 border border-osint-800 flex justify-between items-center mb-4 shadow-inner">
+                                                    <span class="text-xs text-gray-500 uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">tag</span> Group ID</span>
+                                                    <span class="font-mono text-osint-primary font-bold tracking-wider">${group.id}</span>
+                                                </div>
+
+                                                <div class="w-full flex gap-2 mb-4">
+                                                    <div class="flex-1 bg-osint-900/80 rounded-lg p-2 border border-osint-800">
+                                                        <div class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[12px]">group</span> Members</div>
+                                                        <div class="font-mono text-white font-medium mt-0.5">${group.memberCount?.toLocaleString() || 0}</div>
+                                                    </div>
+                                                    <div class="flex-1 bg-osint-900/80 rounded-lg p-2 border border-osint-800 overflow-hidden">
+                                                        <div class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[12px]">shield_person</span> Owner</div>
+                                                        <div class="font-mono text-gray-300 truncate mt-0.5 text-xs" title="${group.owner?.username || ''}">${group.owner?.username ? App.Utils.sanitize(group.owner.username) : 'None'}</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="w-full text-left">
+                                                    <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">notes</span> Description</p>
+                                                    <div class="bg-osint-900/50 rounded-lg p-3 text-xs text-gray-400 font-mono border border-osint-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap scrollbar-styled">
+                                                        ${group.description ? App.Utils.sanitize(group.description) : '<span class="italic opacity-50">No description provided.</span>'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a href="https://www.roblox.com/groups/${group.id}" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
+                                            Open Roblox Group <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                                        </a>
+                                    </div>
+
+                                    <!-- Intel Panel -->
+                                    <div class="lg:col-span-8 flex flex-col gap-6">
+                                        ${this.getFlagBannerHTML(rotData.flagType, rotData.confidence, null)}
+                                        
+                                        <div class="glass-card rounded-3xl flex-1 flex flex-col overflow-hidden">
+                                            <div class="bg-osint-900/80 border-b border-osint-800 px-6 py-4 flex justify-between items-center">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="material-symbols-outlined text-osint-primary">groups</span>
+                                                    <h3 class="font-bold text-white tracking-wide">Flagged Members</h3>
+                                                </div>
+                                                <span class="bg-osint-950 px-2 py-1 rounded-lg text-xs font-mono text-gray-300 border border-osint-800 shadow-inner flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[12px] text-osint-danger">warning</span>
+                                                    ${App.Utils.formatNumber(trackedData.totalCount)} Tracked
+                                                </span>
+                                            </div>
+                                            <div class="p-6 overflow-y-auto max-h-[600px] scrollbar-styled">
+                                                <p class="text-sm text-gray-400">Flagged individuals currently or previously detected within this group.</p>
+                                                <div id="tracked-users-wrapper"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        this.renderGroupTrackedUsers('tracked-users-wrapper', trackedData.users || [], App.State.groupPagination);
+                    } catch (err) {
+                        resultsDiv.innerHTML = `
+                            <div class="max-w-6xl mx-auto">
+                                <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1"><span class="material-symbols-outlined text-sm">arrow_back</span> Back</button>
+                                <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto animate-fade-in">
+                                    <span class="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
+                                    <h3 class="text-white text-2xl font-bold mb-2">Extraction Failed</h3>
+                                    <p class="text-gray-400 font-mono">${err.message}</p>
+                                </div>
+                            </div>
+                        `;
                     }
                 },
 
@@ -1081,13 +1133,13 @@
                     if (users.length > 0) {
                         html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">` + 
                         users.map(u => `
-                            <a href="#player-lookup-${u.id}" class="bg-osint-900 border border-osint-800 rounded-xl p-3 flex items-center gap-3 hover:border-osint-primary hover:bg-osint-800/80 transition-all group/item">
+                            <a href="#player-dossier?id=${u.id}" class="bg-osint-900 border border-osint-800 rounded-xl p-3 flex items-center gap-3 hover:border-osint-primary hover:bg-osint-800/80 transition-all group/item">
                                 <div class="w-10 h-10 rounded-full bg-osint-950 border border-osint-700 overflow-hidden flex-shrink-0 relative">
                                     <img src="${u.thumbnailUrl || ''}" class="w-full h-full object-cover" onerror="this.style.display='none'">
                                 </div>
                                 <div class="flex-1 overflow-hidden">
                                     <p class="text-sm font-bold text-gray-200 truncate group-hover/item:text-osint-primary transition-colors missing-display-${u.id}">
-                                        ${u.displayName ? App.Utils.sanitize(u.displayName) : '<span class="material-symbols-outlined animate-spin-slow text-[14px] align-middle mr-1 text-gray-500">progress_activity</span><span class="text-gray-500">Loading...</span>'}
+                                        ${u.displayName ? App.Utils.sanitize(u.displayName) : '<span class="material-symbols-outlined animate-spin-slow text-[14px] align-middle mr-1 text-osint-primary">progress_activity</span><span class="text-gray-500 font-normal">Loading Name...</span>'}
                                     </p>
                                     <p class="text-[10px] text-gray-500 font-mono truncate missing-name-${u.id} ${!u.name ? 'opacity-50 text-gray-500' : 'text-gray-400'}">
                                         ${u.name ? '@' + App.Utils.sanitize(u.name) : 'Fetching username...'} 
@@ -1098,19 +1150,18 @@
                             </a>
                         `).join('') + `</div>`;
                         
-                        // Pagination UI 
                         const totalPages = Math.ceil(pagination.totalCount / 50);
                         if (totalPages > 1) {
                             const hasPrev = pagination.currentPage > 0;
                             const hasNext = pagination.hasMore;
                             html += `
                                 <div class="flex items-center justify-between mt-5 bg-osint-950/50 px-4 py-2 rounded-xl border border-osint-800">
-                                    <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
+                                    <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
                                             ${!hasPrev ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(-1)">
                                         <span class="material-symbols-outlined text-sm">arrow_back</span> Prev
                                     </button>
-                                    <span class="text-xs text-gray-400 font-mono font-medium">Page ${pagination.currentPage + 1} of ${totalPages} <span class="opacity-50 ml-1">(Total: ${App.Utils.formatNumber(pagination.totalCount)})</span></span>
-                                    <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
+                                    <span class="text-xs text-gray-400 font-mono font-medium">Page ${pagination.currentPage + 1} of ${totalPages}</span>
+                                    <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
                                             ${!hasNext ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(1, '${pagination.nextCursor || ''}')">
                                         Next <span class="material-symbols-outlined text-sm">arrow_forward</span>
                                     </button>
@@ -1128,23 +1179,20 @@
                     }
                     container.innerHTML = html;
 
-                    // Trigger async fetch for missing names
                     App.API.fetchMissingNames(users);
                 },
 
-                async changeGroupPage(direction, nextCursor = null) {
+                async changeGroupPage(direction, robloxNextCursor = null) {
                     const state = App.State.groupPagination;
                     if (!state.groupId) return;
 
                     const targetPage = state.currentPage + direction;
-                    let cursorToUse = state.cursors[targetPage];
-
-                    if (direction === 1) {
-                        if(state.cursors.length <= targetPage) {
-                            state.cursors.push(nextCursor);
-                        }
-                        cursorToUse = state.cursors[targetPage];
+                    
+                    if (direction === 1 && state.cursors.length <= targetPage) {
+                        state.cursors.push(robloxNextCursor);
                     }
+
+                    let cursorToUse = state.cursors[targetPage];
 
                     document.getElementById('tracked-users-wrapper').innerHTML = `
                         <div class="flex justify-center p-10"><span class="material-symbols-outlined animate-spin-slow text-4xl text-osint-primary">progress_activity</span></div>
@@ -1159,24 +1207,20 @@
                         if (res.success) {
                             state.currentPage = targetPage;
                             state.hasMore = res.data.hasMore;
-                            
-                            // Cache these users globally so we don't have to refetch names if they go back
-                            const newUsers = res.data.users || [];
-                            newUsers.forEach(u => {
-                                if(!state.allUsersCache.find(x => x.id === u.id)) {
-                                    state.allUsersCache.push(u);
-                                }
-                            });
+                            state.nextCursor = res.data.nextCursor; // Update next cursor for the forward button
 
-                            // Inject cached names back if possible
+                            const newUsers = res.data.users || [];
                             newUsers.forEach(u => {
                                 const cached = state.allUsersCache.find(x => x.id === u.id);
                                 if(cached && cached.name) {
                                     u.name = cached.name;
                                     u.displayName = cached.displayName;
+                                } else if (!state.allUsersCache.find(x => x.id === u.id)) {
+                                    state.allUsersCache.push(u);
                                 }
                             });
 
+                            // Only pass pagination state that contains nextCursor to the render func
                             this.renderGroupTrackedUsers('tracked-users-wrapper', newUsers, state);
                         }
                     } catch(e) {
@@ -1184,128 +1228,6 @@
                     }
                 },
 
-                async executeGroupScan(query) {
-                    const resultsDiv = document.getElementById('target-results');
-                    resultsDiv.innerHTML = App.Utils.createSkeleton('dossier');
-
-                    try {
-                        const groupId = await App.API.resolveRobloxGroup(query);
-                        
-                        const [rbxGroup, rbxIcon, rotRes, trackedRes] = await Promise.allSettled([
-                            App.API.getRobloxGroupProfile(groupId),
-                            App.API.getRobloxGroupIcon(groupId),
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group/${groupId}`),
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group/${groupId}/tracked-users?limit=50`)
-                        ]);
-
-                        if (rbxGroup.status === 'rejected') throw new Error("Group profile extraction failed. Ensure the Group ID is valid.");
-                        
-                        const group = rbxGroup.value;
-                        const icon = rbxIcon.status === 'fulfilled' ? rbxIcon.value : '';
-                        const rotData = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : { flagType: 0, confidence: 1 };
-                        
-                        const trackedData = trackedRes.status === 'fulfilled' && trackedRes.value.success ? trackedRes.value.data : { users: [], totalCount: 0, hasMore: false };
-                        
-                        // Initialize pagination state
-                        App.State.groupPagination = {
-                            groupId: groupId,
-                            cursors: [null],
-                            currentPage: 0,
-                            hasMore: trackedData.hasMore,
-                            totalCount: trackedData.totalCount,
-                            allUsersCache: trackedData.users ? [...trackedData.users] : []
-                        };
-
-                        App.DB.addRecord('groups', {
-                            id: group.id,
-                            name: group.name,
-                            thumb: icon,
-                            flagType: rotData.flagType
-                        });
-
-                        resultsDiv.innerHTML = `
-                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
-                                <!-- Org Card -->
-                                <div class="lg:col-span-4 flex flex-col gap-6">
-                                    <div class="glass-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
-                                        <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent z-0"></div>
-                                        <div class="relative z-10 flex flex-col items-center text-center">
-                                            <div class="w-32 h-32 rounded-2xl p-1 bg-osint-800 border-2 border-osint-700 shadow-xl mb-4 hover:scale-105 transition-transform duration-300">
-                                                <img src="${icon}" class="w-full h-full rounded-xl object-cover bg-osint-900" alt="Group Icon">
-                                            </div>
-                                            <h2 class="text-2xl font-bold text-white mb-3 break-all">${App.Utils.sanitize(group.name)}</h2>
-                                            
-                                            <div class="w-full bg-osint-950 rounded-xl p-3 border border-osint-800 flex justify-between items-center mb-4 shadow-inner">
-                                                <span class="text-xs text-gray-500 uppercase font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">tag</span> Group ID</span>
-                                                <span class="font-mono text-osint-primary font-bold tracking-wider">${group.id}</span>
-                                            </div>
-
-                                            <div class="w-full flex gap-2 mb-4">
-                                                <div class="flex-1 bg-osint-900/80 rounded-lg p-2 border border-osint-800">
-                                                    <div class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[12px]">group</span> Members</div>
-                                                    <div class="font-mono text-white font-medium mt-0.5">${group.memberCount?.toLocaleString() || 0}</div>
-                                                </div>
-                                                <div class="flex-1 bg-osint-900/80 rounded-lg p-2 border border-osint-800 overflow-hidden">
-                                                    <div class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[12px]">shield_person</span> Owner</div>
-                                                    <div class="font-mono text-gray-300 truncate mt-0.5 text-xs" title="${group.owner?.username || ''}">${group.owner?.username ? App.Utils.sanitize(group.owner.username) : 'None'}</div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="w-full text-left">
-                                                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1 ml-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">notes</span> Description</p>
-                                                <div class="bg-osint-900/50 rounded-lg p-3 text-xs text-gray-400 font-mono border border-osint-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap scrollbar-styled">
-                                                    ${group.description ? App.Utils.sanitize(group.description) : '<span class="italic opacity-50">No description provided.</span>'}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <a href="https://www.roblox.com/groups/${group.id}" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
-                                        Open Roblox Group <span class="material-symbols-outlined text-[16px]">open_in_new</span>
-                                    </a>
-                                </div>
-
-                                <!-- Intel Panel -->
-                                <div class="lg:col-span-8 flex flex-col gap-6">
-                                    ${this.getFlagBannerHTML(rotData.flagType, rotData.confidence, null)}
-                                    
-                                    <div class="glass-card rounded-3xl flex-1 flex flex-col overflow-hidden">
-                                        <div class="bg-osint-900/80 border-b border-osint-800 px-6 py-4 flex justify-between items-center">
-                                            <div class="flex items-center gap-3">
-                                                <span class="material-symbols-outlined text-osint-primary">groups</span>
-                                                <h3 class="font-bold text-white tracking-wide">Flagged Members</h3>
-                                            </div>
-                                            <span class="bg-osint-950 px-2 py-1 rounded-lg text-xs font-mono text-gray-300 border border-osint-800 shadow-inner flex items-center gap-1">
-                                                <span class="material-symbols-outlined text-[12px] text-osint-danger">warning</span>
-                                                ${trackedData.totalCount} Tracked
-                                            </span>
-                                        </div>
-                                        <div class="p-6 overflow-y-auto max-h-[600px] scrollbar-styled">
-                                            <p class="text-sm text-gray-400">Flagged individuals currently or previously detected within this group.</p>
-                                            <div id="tracked-users-wrapper"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-
-                        // Render tracked users and start fetch for empty names
-                        this.renderGroupTrackedUsers('tracked-users-wrapper', trackedData.users || [], App.State.groupPagination);
-                        
-                        App.Utils.toast('Group scanned successfully.', 'success');
-
-                    } catch (err) {
-                        resultsDiv.innerHTML = `
-                            <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto mt-10 animate-fade-in">
-                                <span class="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
-                                <h3 class="text-white text-2xl font-bold mb-2">Scan Failed</h3>
-                                <p class="text-gray-400 font-mono">${err.message}</p>
-                            </div>
-                        `;
-                        App.Utils.toast('Scan failed: ' + err.message, 'error');
-                    }
-                },
-
-                // Toggle Fallback PiP lookup if native is not available
                 toggleFallbackPip() {
                     const pip = document.getElementById('pip-widget');
                     pip.classList.toggle('hidden');
@@ -1314,7 +1236,6 @@
                     }
                 },
 
-                // Native Document PIP
                 async openNativePip() {
                     if (!('documentPictureInPicture' in window)) {
                         App.Utils.toast('Your browser does not support Native Picture-in-Picture. Using fallback widget.', 'warning');
@@ -1335,69 +1256,45 @@
                         });
                         App.State.pipWindow = pip;
 
-                        // Inject necessary scripts and styles into PIP window
-                        const tailwindScript = document.createElement('script');
-                        tailwindScript.src = "https://cdn.tailwindcss.com";
-                        
-                        const configScript = document.createElement('script');
-                        configScript.textContent = `
-                            tailwind.config = {
-                                darkMode: 'class',
-                                theme: {
-                                    extend: {
-                                        colors: {
-                                            osint: {
-                                                950: '#0a0a0e', 900: '#12121a', 800: '#1c1c26',
-                                                700: '#2d2d3d', 600: '#3f3f5a', 500: '#58a6ff',
-                                                primary: '#2196f3', danger: '#ff4444',
-                                                warning: '#ff9800', success: '#4caf50',
-                                                pending: '#f97316', integration: '#14b8a6',
-                                                past: '#4a9eff', discord: '#5865F2'
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        `;
-
-                        const icons = document.createElement('link');
-                        icons.href = "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200";
-                        icons.rel = "stylesheet";
-
-                        pip.document.head.append(tailwindScript, configScript, icons);
-
+                        // Inject completely native styling without relying on Tailwind CDN
                         const style = pip.document.createElement('style');
                         style.textContent = `
-                            body { background: #0a0a0e; color: #fff; font-family: system-ui, sans-serif; margin: 0; }
-                            ::-webkit-scrollbar { width: 6px; }
-                            ::-webkit-scrollbar-track { background: transparent; }
-                            ::-webkit-scrollbar-thumb { background: #2d2d3d; border-radius: 3px; }
-                            .material-symbols-outlined { font-variation-settings: 'FILL' 1; vertical-align: middle; }
+                            body { margin: 0; background: #0a0a0e; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
+                            * { box-sizing: border-box; }
+                            .header { padding: 12px 16px; background: #12121a; border-bottom: 1px solid #1c1c26; font-weight: bold; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+                            .content { padding: 16px; display: flex; flex-direction: column; height: calc(100vh - 46px); }
+                            .input-group { display: flex; gap: 8px; margin-bottom: 16px; flex-shrink: 0; }
+                            input { flex: 1; padding: 10px; border-radius: 8px; background: #1c1c26; border: 1px solid #2d2d3d; color: #fff; font-size: 14px; outline: none; transition: border 0.2s; }
+                            input:focus { border-color: #2196f3; }
+                            button { padding: 10px 16px; border-radius: 8px; background: #2196f3; color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+                            button:hover { background: #1976d2; }
+                            .results { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 16px; border-radius: 12px; border: 1px dashed #2d2d3d; background: #12121a; transition: all 0.3s; }
+                            .badge { display: inline-block; padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: bold; margin-bottom: 12px; border: 1px solid currentColor; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .title { font-size: 20px; font-weight: bold; color: white; margin: 0; word-break: break-all; }
+                            .subtitle { font-size: 12px; color: #aaa; margin: 4px 0 0 0; font-family: monospace; }
+                            .link { display: inline-block; margin-top: 20px; padding: 8px 16px; background: #1c1c26; color: #fff; border: 1px solid #2d2d3d; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.2s; }
+                            .link:hover { background: #2d2d3d; }
                             @keyframes spin { to { transform: rotate(360deg); } }
-                            .animate-spin-slow { animation: spin 3s linear infinite; }
-                            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-                            .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
+                            .spinner { width: 30px; height: 30px; border: 3px solid #1c1c26; border-top-color: #2196f3; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px; }
                         `;
                         pip.document.head.appendChild(style);
 
                         pip.document.body.innerHTML = `
-                            <div class="flex flex-col h-full bg-osint-950 text-gray-300">
-                                <div class="bg-osint-900 px-4 py-3 flex justify-between items-center border-b border-osint-800">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-osint-primary text-lg">bolt</span>
-                                        <span class="font-bold text-sm text-white">Quick Scan</span>
-                                    </div>
+                            <div class="header">
+                                <div style="display:flex; align-items:center; gap:8px; color: #2196f3;">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    <span style="color:white; font-size: 14px;">Small Panel</span>
                                 </div>
-                                <div class="p-4 flex-1 flex flex-col">
-                                    <form id="pip-form" class="flex gap-2 mb-3">
-                                        <input type="text" id="pip-input" placeholder="Username or ID" class="flex-1 bg-osint-900 border border-osint-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-osint-primary transition-all" autocomplete="off">
-                                        <button type="submit" class="bg-osint-primary hover:bg-blue-500 text-white rounded-lg px-3 py-2 transition-colors flex items-center justify-center">
-                                            <span class="material-symbols-outlined text-sm">search</span>
-                                        </button>
-                                    </form>
-                                    <div id="pip-results" class="flex-1 text-center text-sm text-gray-400 flex flex-col items-center justify-center border border-osint-800 border-dashed rounded-lg bg-osint-900/30 p-4 transition-all">
-                                        <span class="material-symbols-outlined text-4xl mb-2 opacity-50">radar</span>
-                                        Ready to scan.
+                            </div>
+                            <div class="content">
+                                <form id="pip-form" class="input-group">
+                                    <input type="text" id="pip-input" placeholder="Player Username or ID" autocomplete="off">
+                                    <button type="submit">Scan</button>
+                                </form>
+                                <div id="pip-results" class="results">
+                                    <div style="opacity: 0.5;">
+                                        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 8px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        <br>Ready to scan.
                                     </div>
                                 </div>
                             </div>
@@ -1406,43 +1303,44 @@
                         pip.document.getElementById('pip-form').addEventListener('submit', async (e) => {
                             e.preventDefault();
                             const val = pip.document.getElementById('pip-input').value.trim();
-                            if(val) {
-                                const resDiv = pip.document.getElementById('pip-results');
-                                resDiv.innerHTML = `<span class="material-symbols-outlined animate-spin-slow text-3xl text-osint-primary">progress_activity</span><p class="mt-2 text-xs">Scanning...</p>`;
-                                
-                                try {
-                                    let userId = val;
-                                    if (!/^\\d+$/.test(val)) {
-                                        const url = App.API.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
-                                        const res = await fetch(url, {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                                            body: JSON.stringify({ usernames: [val], excludeBannedUsers: false })
-                                        });
-                                        const data = await res.json();
-                                        if (data.data && data.data.length > 0) userId = data.data[0].id;
-                                        else throw new Error('Player not found');
-                                    }
-
-                                    const data = await App.API.fetchSafe(`\${App.Config.rotectorAPI}/lookup/roblox/user/\${userId}/plaintext`);
-                                    const flagType = parseInt(data);
-                                    const flag = App.Config.flags[flagType] || App.Config.flags[0];
-
-                                    resDiv.innerHTML = `
-                                        <div class="flex flex-col items-center justify-center w-full h-full animate-fade-in">
-                                            <span class="material-symbols-outlined text-5xl \${flag.color} mb-2">\${flag.icon}</span>
-                                            <span class="font-bold text-white text-lg">\${flag.name}</span>
-                                            <button id="view-full-btn" class="mt-4 px-4 py-2 bg-osint-800 hover:bg-osint-700 rounded-lg text-xs font-medium text-white transition-colors border border-osint-700">Open in Dashboard</button>
-                                        </div>
-                                    `;
-                                    
-                                    pip.document.getElementById('view-full-btn').addEventListener('click', () => {
-                                        window.location.hash = `#player-lookup-\${userId}`;
-                                        window.focus();
+                            if(!val) return;
+                            
+                            const resDiv = pip.document.getElementById('pip-results');
+                            resDiv.innerHTML = `<div class="spinner"></div><div style="font-size: 13px; color: #aaa;">Analyzing Network...</div>`;
+                            
+                            try {
+                                let userId = val;
+                                // We are within the exact same javascript context, so App is available!
+                                if (!/^\d+$/.test(val)) {
+                                    const url = App.API.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
+                                    const res = await fetch(url, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                        body: JSON.stringify({ usernames: [val], excludeBannedUsers: false })
                                     });
-                                } catch (err) {
-                                    resDiv.innerHTML = `<span class="material-symbols-outlined text-3xl text-red-400 mb-2">error</span><span class="text-red-400 text-xs break-words px-2">\${err.message}</span>`;
+                                    const data = await res.json();
+                                    if (data.data && data.data.length > 0) userId = data.data[0].id;
+                                    else throw new Error('Player not found on Roblox.');
                                 }
+
+                                const data = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/plaintext`);
+                                const flagType = parseInt(data);
+                                const flag = App.Config.flags[flagType] || App.Config.flags[0];
+
+                                resDiv.innerHTML = `
+                                    <div class="badge" style="color: ${flag.hex}; background: ${flag.hex}15; border-color: ${flag.hex}50;">${flag.name}</div>
+                                    <p class="title">UID: ${userId}</p>
+                                    <p class="subtitle">Scan Complete</p>
+                                    <a href="#" id="view-full-btn" class="link">Open Full Report</a>
+                                `;
+                                
+                                pip.document.getElementById('view-full-btn').addEventListener('click', (ev) => {
+                                    ev.preventDefault();
+                                    window.location.hash = `#player-dossier?id=${userId}`;
+                                    window.focus();
+                                });
+                            } catch (err) {
+                                resDiv.innerHTML = `<div style="color: #ef4444; font-size: 13px; font-weight: 500;">${err.message}</div>`;
                             }
                         });
 
@@ -1451,11 +1349,11 @@
                         });
 
                     } catch (err) {
-                        App.Utils.toast('Failed to open native PIP. Your browser might restrict this feature.', 'error');
+                        App.Utils.toast('Failed to open native PIP. Using fallback.', 'warning');
+                        this.toggleFallbackPip();
                     }
                 },
 
-                // Handle Fallback PIP Search
                 async executePipSearch(query) {
                     const resDiv = document.getElementById('pip-results');
                     resDiv.innerHTML = `<span class="material-symbols-outlined animate-spin-slow text-2xl text-osint-primary">progress_activity</span>`;
@@ -1470,7 +1368,7 @@
                             <div class="flex flex-col items-center justify-center p-3 w-full h-full animate-fade-in">
                                 <span class="material-symbols-outlined text-3xl ${flag.color} mb-1">${flag.icon}</span>
                                 <span class="font-bold text-white">${flag.name}</span>
-                                <a href="#player-lookup-${userId}" onclick="App.Controllers.toggleFallbackPip()" class="text-xs text-osint-primary hover:underline mt-2">View Full Report</a>
+                                <a href="#player-dossier?id=${userId}" onclick="App.Controllers.toggleFallbackPip()" class="text-xs text-osint-primary hover:underline mt-2">View Full Report</a>
                             </div>
                         `;
                     } catch(err) {
@@ -1488,29 +1386,17 @@
                         e.preventDefault();
                         const val = document.getElementById('quick-search-input').value.trim();
                         if(val) {
-                            window.location.hash = `#player-lookup-${encodeURIComponent(val)}`;
+                            window.location.hash = `#player-search?q=${encodeURIComponent(val)}&limit=25`;
                             document.getElementById('quick-search-input').value = '';
                         }
                     });
 
-                    // Proxy Selector Setup
-                    const proxySelector = document.getElementById('proxy-selector');
-                    if (proxySelector) {
-                        proxySelector.value = localStorage.getItem('rc_proxy') || 'roproxy';
-                        proxySelector.addEventListener('change', (e) => {
-                            localStorage.setItem('rc_proxy', e.target.value);
-                            App.Utils.toast(`Network proxy updated to ${e.target.value}`, 'success');
-                        });
-                    }
-
-                    // Fallback PiP setup
                     document.getElementById('pip-form').addEventListener('submit', (e) => {
                         e.preventDefault();
                         const val = document.getElementById('pip-input').value.trim();
                         if(val) App.Controllers.executePipSearch(val);
                     });
 
-                    // Make Fallback PiP Draggable
                     const pipHeader = document.getElementById('pip-header');
                     const pipWidget = document.getElementById('pip-widget');
                     let isDragging = false;
@@ -1526,7 +1412,7 @@
                         if (!isDragging) return;
                         pipWidget.style.left = `${e.clientX - offsetX}px`;
                         pipWidget.style.top = `${e.clientY - offsetY}px`;
-                        pipWidget.style.bottom = 'auto'; // release bottom anchoring
+                        pipWidget.style.bottom = 'auto'; 
                     });
                     
                     document.addEventListener('mouseup', () => isDragging = false);
@@ -1535,35 +1421,41 @@
                 },
 
                 handle() {
-                    const hash = window.location.hash || '#overview';
+                    const fullHash = window.location.hash || '#overview';
+                    const [path, queryString] = fullHash.split('?');
+                    const params = new URLSearchParams(queryString || '');
                     
                     document.querySelectorAll('.nav-link').forEach(el => {
                         el.classList.remove('text-white', 'bg-osint-800', 'border-r-2', 'border-osint-primary');
-                        if (hash.startsWith(el.getAttribute('href').split('-lookup')[0])) {
+                        if (path.startsWith(el.getAttribute('href').split('?')[0])) {
                             el.classList.add('text-white', 'bg-osint-800', 'border-r-2', 'border-osint-primary');
                         }
                     });
 
-                    const routeMap = {
-                        '#overview': () => App.Views.renderOverview(),
-                        '#statistics': () => App.Views.renderStatistics(),
-                        '#recent-players': () => App.Views.renderHistory('players'),
-                        '#recent-groups': () => App.Views.renderHistory('groups')
-                    };
-
                     App.Views.contentDiv.innerHTML = '';
                     App.Views.contentDiv.scrollTop = 0;
 
-                    if (routeMap[hash]) {
-                        routeMap[hash]();
-                    } else if (hash.startsWith('#player-lookup')) {
-                        const param = hash.replace('#player-lookup', '').replace(/^-/, '');
-                        App.Views.renderPlayerLookup(param ? decodeURIComponent(param) : null);
-                    } else if (hash.startsWith('#group-lookup')) {
-                        const param = hash.replace('#group-lookup', '').replace(/^-/, '');
-                        App.Views.renderGroupLookup(param ? decodeURIComponent(param) : null);
-                    } else {
-                        routeMap['#overview']();
+                    switch(path) {
+                        case '#overview': App.Views.renderOverview(); break;
+                        case '#statistics': App.Views.renderStatistics(); break;
+                        case '#recent-players': App.Views.renderHistory('players'); break;
+                        case '#recent-groups': App.Views.renderHistory('groups'); break;
+                        case '#player-search': App.Views.renderPlayerSearch(params.get('q'), params.get('limit'), params.get('cursor')); break;
+                        case '#group-search': App.Views.renderGroupSearch(params.get('q'), params.get('limit'), params.get('cursor')); break;
+                        case '#discord-lookup': App.Views.executeDiscordLookup(params.get('id')); break;
+                        case '#player-dossier': App.Views.executePlayerDossier(params.get('id')); break;
+                        case '#group-dossier': App.Views.executeGroupDossier(params.get('id')); break;
+                        default:
+                            // Legacy backward compatibility
+                            if (path.startsWith('#player-lookup-')) {
+                                const id = path.replace('#player-lookup-', '');
+                                App.Views.executePlayerDossier(id);
+                            } else if (path.startsWith('#group-lookup-')) {
+                                const id = path.replace('#group-lookup-', '');
+                                App.Views.executeGroupDossier(id);
+                            } else {
+                                App.Views.renderOverview();
+                            }
                     }
                 }
             }
