@@ -134,9 +134,9 @@
         }
 
         /* Staggered Animations */
-        .stagger-1 { animation-delay: 0.05s; opacity: 0; animation-fill-mode: forwards; }
-        .stagger-2 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
-        .stagger-3 { animation-delay: 0.15s; opacity: 0; animation-fill-mode: forwards; }
+        .stagger-1 { animation: slideUp 0.4s ease-out 0.05s forwards; opacity: 0; }
+        .stagger-2 { animation: slideUp 0.4s ease-out 0.1s forwards; opacity: 0; }
+        .stagger-3 { animation: slideUp 0.4s ease-out 0.15s forwards; opacity: 0; }
     </style>
 </head>
 <body class="bg-osint-950 text-gray-300 font-sans h-screen overflow-hidden flex selection:bg-osint-500/30">
@@ -457,6 +457,8 @@
                         return `https://${domain.replace('roblox.com', 'roproxy.com')}${endpoint}`;
                     } else if (proxyType === 'corsproxy') {
                         return `https://corsproxy.io/?${fullUrl}`;
+                    } else if (proxyType === 'direct') {
+                        return fullUrl;
                     } else {
                         // Default to Catch Them proxy
                         return `https://catchthem.mk-7.org/proxy/${fullUrl}`;
@@ -622,6 +624,14 @@
                                         <div>
                                             <h4 class="font-bold text-white text-md">CorsProxy.io</h4>
                                             <p class="text-xs text-gray-500 font-mono mt-1">corsproxy.io/?https://...</p>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-start gap-4 p-4 rounded-xl border ${currentProxy === 'direct' ? 'border-osint-primary bg-osint-primary/10' : 'border-osint-800 bg-osint-900/50 hover:bg-osint-800/50'} cursor-pointer transition-colors" onclick="App.Controllers.setProxy('direct')">
+                                        <div class="pt-1"><input type="radio" name="proxy" value="direct" ${currentProxy === 'direct' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
+                                        <div>
+                                            <h4 class="font-bold text-white text-md">Direct Connection</h4>
+                                            <p class="text-xs text-gray-500 font-mono mt-1">Connect directly to roblox.com (No Proxy)</p>
                                         </div>
                                     </label>
                                 </div>
@@ -1941,22 +1951,44 @@
                     const pipHeader = document.getElementById('pip-header');
                     const pipWidget = document.getElementById('pip-widget');
                     let isDragging = false;
-                    let offsetX, offsetY;
+                    let dragStartX, dragStartY;
+                    let initialLeft, initialTop;
                     
                     pipHeader.addEventListener('mousedown', (e) => {
                         isDragging = true;
-                        offsetX = e.clientX - pipWidget.getBoundingClientRect().left;
-                        offsetY = e.clientY - pipWidget.getBoundingClientRect().top;
+                        const rect = pipWidget.getBoundingClientRect();
+                        initialLeft = rect.left;
+                        initialTop = rect.top;
+                        dragStartX = e.clientX;
+                        dragStartY = e.clientY;
+                        
+                        pipWidget.style.bottom = 'auto';
+                        pipWidget.style.right = 'auto';
+                        pipWidget.style.left = initialLeft + 'px';
+                        pipWidget.style.top = initialTop + 'px';
+                        pipWidget.style.transition = 'none'; // Disable transition while dragging
                     });
                     
                     document.addEventListener('mousemove', (e) => {
                         if (!isDragging) return;
-                        pipWidget.style.left = `${e.clientX - offsetX}px`;
-                        pipWidget.style.top = `${e.clientY - offsetY}px`;
-                        pipWidget.style.bottom = 'auto'; 
+                        // Use requestAnimationFrame & transform to prevent CPU reflow lag in games
+                        requestAnimationFrame(() => {
+                            pipWidget.style.transform = `translate3d(${e.clientX - dragStartX}px, ${e.clientY - dragStartY}px, 0)`;
+                        });
                     });
                     
-                    document.addEventListener('mouseup', () => isDragging = false);
+                    document.addEventListener('mouseup', () => {
+                        if (isDragging) {
+                            isDragging = false;
+                            const currentRect = pipWidget.getBoundingClientRect();
+                            pipWidget.style.left = currentRect.left + 'px';
+                            pipWidget.style.top = currentRect.top + 'px';
+                            pipWidget.style.transform = 'none';
+                            requestAnimationFrame(() => {
+                                pipWidget.style.transition = 'all 0.3s';
+                            });
+                        }
+                    });
 
                     this.handle();
                 },
