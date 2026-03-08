@@ -509,8 +509,8 @@
                 async getXTrackerData(id) {
                     if (localStorage.getItem('rc_xtracker_enabled') === 'false') return null;
                     try {
-                        const res = await fetch(`https://api.xtracker.xyz/api/registry/user?id=${id}`, {
-                            headers: { 'Authorization': 'uSWxNE0X1AeD5WYImi9ZjA' }
+                        const res = await fetch(`https://catchthem.mk-7.org/proxy/https://api.xtracker.xyz/api/registry/user?id=${id}`, {
+                            headers: { 'Authorization': 'uSWxNE0X1AeD5WYImi9ZjA',  }
                         });
                         if (res.status === 404) return null; // Normal if not in DB
                         if (!res.ok) throw new Error(`HTTP ${res.status}`);
