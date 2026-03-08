@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Roblox Catcher | Safety Dashboard</title>
     
+    <!-- Discord Embeds & SEO -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="The Roblox Catcher">
+    <meta property="og:title" content="The Roblox Catcher | Safety Dashboard" id="meta-og-title">
+    <meta property="og:description" content="Protect your community by checking players and groups against our comprehensive safety database." id="meta-og-desc">
+    <meta property="og:image" content="" id="meta-og-img">
+    <meta name="theme-color" content="#2196f3" id="meta-theme-color">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -283,7 +291,7 @@
             State: {
                 groupPagination: {
                     groupId: null,
-                    cursors: [null], // index maps to page: [null, 'cursorForPage2', 'cursorForPage3']
+                    cursors: [null],
                     currentPage: 0,
                     hasMore: false,
                     totalCount: 0,
@@ -295,21 +303,57 @@
             // --- Database (Local Storage Wrapper) ---
             DB: {
                 getKey: (type) => `rc_history_${type}`,
-                getHistory: (type) => JSON.parse(localStorage.getItem(App.DB.getKey(type)) || '[]'),
-                saveHistory: (type, data) => localStorage.setItem(App.DB.getKey(type), JSON.stringify(data)),
+                getHistory: (type) => {
+                    try {
+                        return JSON.parse(localStorage.getItem(App.DB.getKey(type)) || '[]');
+                    } catch (e) {
+                        console.warn('History read error:', e);
+                        return [];
+                    }
+                },
+                saveHistory: (type, data) => {
+                    try {
+                        localStorage.setItem(App.DB.getKey(type), JSON.stringify(data));
+                    } catch (e) {
+                        console.warn('History write error:', e);
+                    }
+                },
                 
                 addRecord: (type, record) => {
-                    let history = App.DB.getHistory(type);
-                    history = history.filter(item => String(item.id) !== String(record.id));
-                    history.unshift({ ...record, timestamp: Date.now() });
-                    if (history.length > 100) history.pop();
-                    App.DB.saveHistory(type, history);
+                    try {
+                        let history = App.DB.getHistory(type);
+                        history = history.filter(item => String(item.id) !== String(record.id));
+                        history.unshift({ ...record, timestamp: Date.now() });
+                        if (history.length > 50) history = history.slice(0, 50); // Keep max 50 recent items safely
+                        App.DB.saveHistory(type, history);
+                    } catch (e) {
+                        console.error('Failed to add record to history:', e);
+                    }
                 }
             },
 
             // --- Utilities ---
             Utils: {
                 sanitize: (str) => DOMPurify.sanitize(str),
+                
+                // Note: Discord's native crawler does NOT execute JavaScript.
+                // For Discord embeds to work flawlessly, you will need to serve this HTML 
+                // via a backend that injects these meta tags server-side based on the URL.
+                // However, this JS implementation dynamically sets proper OG tags for web environments and other bots.
+                updateMetaTags: (title, desc, img, color) => {
+                    document.title = title;
+                    const setMeta = (id, content) => {
+                        const el = document.getElementById(id);
+                        if(el) {
+                            if (content) el.setAttribute('content', content);
+                            else el.setAttribute('content', '');
+                        }
+                    };
+                    setMeta('meta-og-title', title);
+                    setMeta('meta-og-desc', desc);
+                    setMeta('meta-og-img', img);
+                    setMeta('meta-theme-color', color);
+                },
                 
                 formatDate: (ts) => {
                     if (!ts) return 'Unknown Date';
@@ -335,7 +379,6 @@
                 },
                 
                 toast: (message, type = 'info') => {
-                    // Only show toasts for errors or specific events to avoid spam
                     if(type === 'success' && message.includes('successfully')) return;
 
                     const container = document.getElementById('toast-container');
@@ -386,7 +429,6 @@
 
             // --- API Client ---
             API: {
-                // Always uses corsproxy.io to fix CORS + Preflight (OPTIONS) issues completely
                 buildRobloxUrl(domain, endpoint) {
                     const fullUrl = `https://${domain}${endpoint}`;
                     return `https://corsproxy.io/?${encodeURIComponent(fullUrl)}`;
@@ -441,7 +483,6 @@
                     return this.fetchSafe(`${App.Config.rotectorAPI}/stats`);
                 },
 
-                // Batch fetch missing usernames from Roblox API securely
                 async fetchMissingNames(users) {
                     const missingIds = users.filter(u => !u.name || !u.displayName).map(u => u.id);
                     if (missingIds.length === 0) return;
@@ -457,7 +498,6 @@
                         const data = await res.json();
                         if(data && data.data) {
                             data.data.forEach(user => {
-                                // Update DOM elements gracefully
                                 const nameEls = document.querySelectorAll(`.missing-name-${user.id}`);
                                 const displayEls = document.querySelectorAll(`.missing-display-${user.id}`);
                                 
@@ -470,7 +510,6 @@
                                     el.innerHTML = App.Utils.sanitize(user.displayName);
                                 });
 
-                                // Update local cache
                                 const cachedUser = App.State.groupPagination.allUsersCache.find(u => u.id === user.id);
                                 if (cachedUser) {
                                     cachedUser.name = user.name;
@@ -1173,10 +1212,13 @@
                         if (rbxProfile.status === 'rejected') throw new Error("Player profile extraction failed.");
                         
                         const profile = rbxProfile.value;
-                        const avatar = rbxAvatar.status === 'fulfilled' ? rbxAvatar.value : '';
-                        const rotData = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : { flagType: 0, confidence: 1, reasons: {} };
-                        const discData = discRes.status === 'fulfilled' && discRes.value.success ? discRes.value.data : null;
+                        const avatar = rbxAvatar.status === 'fulfilled' ? rbxAvatar.value : 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
+                        
+                        // Fix for empty data breaking JSON mapping
+                        const rotData = (rotRes.status === 'fulfilled' && rotRes.value?.success && rotRes.value?.data) ? rotRes.value.data : { flagType: 0, confidence: 1, reasons: {} };
+                        const discData = (discRes.status === 'fulfilled' && discRes.value?.success && discRes.value?.data) ? discRes.value.data : null;
 
+                        // Save lookup to history
                         App.DB.addRecord('players', { 
                             id: profile.id, 
                             name: profile.name, 
@@ -1184,6 +1226,19 @@
                             thumb: avatar, 
                             flagType: rotData.flagType 
                         });
+
+                        // Set Embed Meta Tags Dynamically
+                        const flag = App.Config.flags[rotData.flagType] || App.Config.flags[0];
+                        let embedDesc = `Roblox ID: ${profile.id}\nSafety Status: ${flag.name}`;
+                        if (rotData.reasons && Object.keys(rotData.reasons).length > 0) {
+                            embedDesc += `\n\nFlags Detected:\n` + Object.keys(rotData.reasons).map(r => `• ${r}`).join('\n');
+                        }
+                        App.Utils.updateMetaTags(
+                            `[${flag.name}] ${profile.displayName} (@${profile.name}) - Dossier`,
+                            embedDesc,
+                            avatar,
+                            flag.hex
+                        );
 
                         resultsDiv.innerHTML = `
                             <div class="max-w-6xl mx-auto">
@@ -1275,8 +1330,10 @@
                         
                         const group = rbxGroup.value;
                         const icon = rbxIcon.status === 'fulfilled' ? rbxIcon.value : '';
-                        const rotData = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : { flagType: 0, confidence: 1 };
-                        const trackedData = trackedRes.status === 'fulfilled' && trackedRes.value.success ? trackedRes.value.data : { users: [], totalCount: 0, hasMore: false, nextCursor: null };
+                        
+                        // Fix for empty data breaking JSON mapping
+                        const rotData = (rotRes.status === 'fulfilled' && rotRes.value?.success && rotRes.value?.data) ? rotRes.value.data : { flagType: 0, confidence: 1 };
+                        const trackedData = (trackedRes.status === 'fulfilled' && trackedRes.value?.success && trackedRes.value?.data) ? trackedRes.value.data : { users: [], totalCount: 0, hasMore: false, nextCursor: null };
                         
                         App.State.groupPagination = {
                             groupId: groupId,
@@ -1291,7 +1348,18 @@
                             App.State.groupPagination.cursors.push(trackedData.nextCursor);
                         }
 
+                        // Save lookup to history safely
                         App.DB.addRecord('groups', { id: group.id, name: group.name, thumb: icon, flagType: rotData.flagType });
+
+                        // Set Embed Meta Tags Dynamically
+                        const flag = App.Config.flags[rotData.flagType] || App.Config.flags[0];
+                        let embedDesc = `Group ID: ${group.id}\nMembers: ${group.memberCount?.toLocaleString() || 0}\nSafety Status: ${flag.name}`;
+                        App.Utils.updateMetaTags(
+                            `[${flag.name}] Group: ${group.name} - Dossier`,
+                            embedDesc,
+                            icon,
+                            flag.hex
+                        );
 
                         resultsDiv.innerHTML = `
                             <div class="max-w-6xl mx-auto">
@@ -1725,9 +1793,19 @@
                     App.Views.contentDiv.innerHTML = '';
                     App.Views.contentDiv.scrollTop = 0;
 
+                    // Reset Default SEO meta tags if not looking at a dossier
+                    if (!path.includes('dossier')) {
+                        App.Utils.updateMetaTags(
+                            'The Roblox Catcher | Safety Dashboard',
+                            'Protect your community by checking players and groups against our comprehensive safety database.',
+                            '',
+                            '#2196f3'
+                        );
+                    }
+
                     switch(path) {
                         case '#overview': App.Views.renderOverview(); break;
-                        case '#statistics': App.Controllers.renderStatistics(); break;
+                        case '#statistics': App.Views.renderStatistics(); break;
                         case '#recent-players': App.Views.renderHistory('players'); break;
                         case '#recent-groups': App.Views.renderHistory('groups'); break;
                         case '#player-search': App.Controllers.executePlayerSearch(params.get('q'), params.get('limit'), params.get('cursor')); break;
@@ -1738,7 +1816,6 @@
                         case '#player-lookup': App.Views.renderPlayerLookup(); break;
                         case '#group-lookup': App.Views.renderGroupLookup(); break;
                         default:
-                            // Legacy backward compatibility
                             if (path.startsWith('#player-lookup-')) {
                                 const id = path.replace('#player-lookup-', '');
                                 App.Controllers.executePlayerDossier(id);
