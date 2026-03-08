@@ -8,7 +8,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Material Icons -->
+    <!-- Google Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     
     <!-- Google Fonts -->
@@ -49,7 +49,7 @@
                         'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'fade-in': 'fadeIn 0.4s ease-out forwards',
                         'slide-up': 'slideUp 0.4s ease-out forwards',
-                        'stagger-fade': 'fadeIn 0.4s ease-out backwards'
+                        'scale-in': 'scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
                     },
                     keyframes: {
                         pulseGlow: {
@@ -63,6 +63,10 @@
                         slideUp: {
                             '0%': { opacity: 0, transform: 'translateY(20px)' },
                             '100%': { opacity: 1, transform: 'translateY(0)' }
+                        },
+                        scaleIn: {
+                            '0%': { opacity: 0, transform: 'scale(0.95)' },
+                            '100%': { opacity: 1, transform: 'scale(1)' }
                         }
                     }
                 }
@@ -110,7 +114,7 @@
         }
 
         .toast-enter { animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .toast-exit { animation: toastSlideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .toast-exit { animation: toastSlideOut 0.3s ease-in forwards; }
 
         @keyframes toastSlideIn {
             from { transform: translateX(100%); opacity: 0; }
@@ -118,8 +122,13 @@
         }
         @keyframes toastSlideOut {
             from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(120%); opacity: 0; }
         }
+
+        /* Staggered Animations */
+        .stagger-1 { animation-delay: 0.05s; opacity: 0; animation-fill-mode: forwards; }
+        .stagger-2 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+        .stagger-3 { animation-delay: 0.15s; opacity: 0; animation-fill-mode: forwards; }
     </style>
 </head>
 <body class="bg-osint-950 text-gray-300 font-sans h-screen overflow-hidden flex selection:bg-osint-500/30">
@@ -132,46 +141,54 @@
     <aside class="w-64 glass-card border-r border-osint-800 flex flex-col z-20 h-full relative">
         <div class="p-6 flex items-center gap-3 border-b border-osint-800">
             <div class="w-10 h-10 rounded-xl bg-osint-primary flex items-center justify-center text-white shadow-[0_0_15px_rgba(33,150,243,0.4)]">
-                <span class="material-symbols-outlined text-2xl">radar</span>
+                <span class="material-symbols-outlined text-2xl">policy</span>
             </div>
             <div>
                 <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
-                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.0</p>
+                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.1</p>
             </div>
         </div>
 
         <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="nav-menu">
-            <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all mb-4">
+            <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all mb-2">
                 <span class="material-symbols-outlined w-5 text-center text-lg">dashboard</span>
                 <span class="font-medium text-sm">Dashboard</span>
             </a>
+            
+            <a href="#statistics" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all mb-4">
+                <span class="material-symbols-outlined w-5 text-center text-lg">query_stats</span>
+                <span class="font-medium text-sm">Global Stats</span>
+            </a>
 
-            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-4">Scanners</div>
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-4">Lookups</div>
             <a href="#player-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
                 <span class="material-symbols-outlined w-5 text-center text-lg">person_search</span>
                 <span class="font-medium text-sm">Player Scan</span>
             </a>
-            <a href="#recent-players" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
-                <span class="material-symbols-outlined w-5 text-center text-lg">history</span>
-                <span class="font-medium text-sm">Recent Players</span>
-            </a>
-
-            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6">Communities</div>
             <a href="#group-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
                 <span class="material-symbols-outlined w-5 text-center text-lg">manage_search</span>
                 <span class="font-medium text-sm">Group Scan</span>
             </a>
-            <a href="#recent-groups" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6">History</div>
+            <a href="#recent-players" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
                 <span class="material-symbols-outlined w-5 text-center text-lg">history</span>
+                <span class="font-medium text-sm">Recent Players</span>
+            </a>
+            <a href="#recent-groups" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+                <span class="material-symbols-outlined w-5 text-center text-lg">history_toggle_off</span>
                 <span class="font-medium text-sm">Recent Groups</span>
             </a>
         </nav>
 
-        <div class="p-4 border-t border-osint-800 bg-osint-900/50">
+        <div class="p-4 border-t border-osint-800 bg-osint-900/50 flex flex-col gap-3">
+            <button onclick="App.Controllers.togglePipWidget()" class="w-full bg-osint-800 hover:bg-osint-700 text-white rounded-lg py-2 flex items-center justify-center gap-2 transition-colors border border-osint-700 hover:border-osint-primary/50 text-sm font-medium">
+                <span class="material-symbols-outlined text-lg">picture_in_picture_alt</span> Quick PIP
+            </button>
             <div class="flex items-center gap-3 px-3 py-2 bg-osint-950 rounded-lg border border-osint-800 shadow-inner">
                 <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse-glow shadow-[0_0_5px_#4caf50]"></div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Rotector Network</span>
+                    <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Rotector API</span>
                     <span class="text-[10px] font-mono text-green-400">Connected & Secure</span>
                 </div>
             </div>
@@ -202,28 +219,52 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 w-80 pointer-events-none"></div>
 
+    <!-- Quick PiP Widget (Hidden by default) -->
+    <div id="pip-widget" class="hidden fixed bottom-6 left-72 w-80 glass-card rounded-2xl shadow-2xl z-50 flex-col overflow-hidden transition-all duration-300 border border-osint-primary/30 animate-scale-in">
+        <div class="bg-osint-900/80 px-4 py-3 flex justify-between items-center border-b border-osint-800 cursor-move" id="pip-header">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-osint-primary text-lg">bolt</span>
+                <span class="font-bold text-sm text-white">Quick Scan</span>
+            </div>
+            <button onclick="App.Controllers.togglePipWidget()" class="text-gray-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+        </div>
+        <div class="p-4 bg-osint-950/90">
+            <form id="pip-form" class="flex gap-2 mb-3">
+                <input type="text" id="pip-input" placeholder="Username or ID" class="flex-1 bg-osint-900 border border-osint-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-osint-primary" autocomplete="off">
+                <button type="submit" class="bg-osint-primary hover:bg-blue-500 text-white rounded-lg px-3 py-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-sm">search</span>
+                </button>
+            </form>
+            <div id="pip-results" class="text-center text-sm text-gray-400 min-h-[60px] flex items-center justify-center border border-osint-800 border-dashed rounded-lg bg-osint-900/30">
+                Ready to scan.
+            </div>
+        </div>
+    </div>
+
     <!-- Application Logic -->
     <script>
         /**
          * The Roblox Catcher
-         * Advanced Safety OSINT Dashboard
+         * Advanced Safety Dashboard built for production
          */
         const App = {
             // --- Configuration & Constants ---
             Config: {
-                robloxUsersAPI: 'https://users.roproxy.com/v1',
-                robloxThumbnailsAPI: 'https://thumbnails.roproxy.com/v1',
-                robloxGroupsAPI: 'https://groups.roproxy.com/v1',
-                rotectorAPI: 'https://roscoe.rotector.com/v1/lookup',
+                robloxUsersAPI: 'https://users.roblox.com/v1',
+                robloxThumbnailsAPI: 'https://thumbnails.roblox.com/v1',
+                robloxGroupsAPI: 'https://groups.roblox.com/v1',
+                rotectorAPI: 'https://roscoe.rotector.com/v1',
                 
                 // Flag mappings aligned with Rotector system
                 flags: {
-                    0: { name: 'Safe / Unflagged', color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/30', icon: 'check_circle' },
-                    1: { name: 'Pending / Queued', color: 'text-osint-pending', bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: 'schedule' },
-                    2: { name: 'Flagged / Unsafe', color: 'text-osint-danger', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: 'warning' },
+                    0: { name: 'Not Flagged', color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/30', icon: 'check_circle' },
+                    1: { name: 'Under Review', color: 'text-osint-pending', bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: 'schedule' },
+                    2: { name: 'Unsafe', color: 'text-osint-danger', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: 'warning' },
                     3: { name: 'Queued', color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', icon: 'hourglass_empty' },
                     4: { name: 'Integration', color: 'text-osint-integration', bg: 'bg-teal-500/10', border: 'border-teal-500/30', icon: 'hub' },
-                    5: { name: 'Mixed Evidence', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', icon: 'balance' },
+                    5: { name: 'Mixed', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', icon: 'balance' },
                     6: { name: 'Past Offender', color: 'text-osint-past', bg: 'bg-blue-500/10', border: 'border-blue-500/30', icon: 'history' }
                 },
 
@@ -243,10 +284,11 @@
             State: {
                 groupPagination: {
                     groupId: null,
-                    cursors: [null], // index matches page: 0 is page 1
+                    cursors: [null], // Index maps to page (0 = page 1 cursor is null)
                     currentPage: 0,
                     hasMore: false,
-                    totalCount: 0
+                    totalCount: 0,
+                    allUsersCache: [] // Cache to hold users to avoid refetching missing names repeatedly
                 }
             },
 
@@ -268,11 +310,34 @@
             // --- Utilities ---
             Utils: {
                 sanitize: (str) => DOMPurify.sanitize(str),
+                
                 formatDate: (ts) => {
                     if (!ts) return 'Unknown Date';
-                    const date = new Date(ts > 1e11 ? ts : ts * 1000);
-                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    let date;
+                    // Handle ISO Strings directly (e.g. "2019-05-28T01:18:33.9Z")
+                    if (typeof ts === 'string') {
+                        date = new Date(ts);
+                    } else {
+                        // Handle Unix timestamps
+                        date = new Date(ts > 1e11 ? ts : ts * 1000);
+                    }
+                    
+                    if (isNaN(date.getTime())) return 'Invalid Date';
+                    
+                    return date.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    });
                 },
+                
+                formatNumber: (num) => {
+                    if (num === null || num === undefined) return '0';
+                    return new Intl.NumberFormat().format(num);
+                },
+
                 delay: (ms) => new Promise(res => setTimeout(res, ms)),
                 
                 toast: (message, type = 'info') => {
@@ -288,19 +353,19 @@
                     
                     const t = types[type] || types.info;
                     
-                    toast.className = `glass-card p-4 rounded-xl flex items-start gap-3 pointer-events-auto toast-enter ${t.border} ${t.bg}`;
+                    toast.className = `glass-card p-4 rounded-xl flex items-start gap-3 pointer-events-auto toast-enter ${t.border} ${t.bg} shadow-lg`;
                     toast.innerHTML = `
                         <span class="material-symbols-outlined ${t.color} mt-0.5 text-[22px]">${t.icon}</span>
-                        <div class="flex-1 text-sm font-medium text-gray-200">${App.Utils.sanitize(message)}</div>
-                        <button class="text-gray-500 hover:text-white transition-colors" onclick="this.parentElement.remove()"><span class="material-symbols-outlined text-[20px]">close</span></button>
+                        <div class="flex-1 text-sm font-medium text-gray-200 mt-1">${App.Utils.sanitize(message)}</div>
+                        <button class="text-gray-500 hover:text-white transition-colors mt-0.5" onclick="this.parentElement.remove()"><span class="material-symbols-outlined text-[18px]">close</span></button>
                     `;
                     
                     container.appendChild(toast);
                     
                     setTimeout(() => {
                         toast.classList.replace('toast-enter', 'toast-exit');
-                        setTimeout(() => toast.remove(), 300);
-                    }, 5000);
+                        setTimeout(() => toast.remove(), 400);
+                    }, 4000);
                 },
 
                 createSkeleton: (type) => {
@@ -345,7 +410,7 @@
                     if (/^\d+$/.test(query)) return parseInt(query, 10);
                     const data = await this.fetchSafe(`${App.Config.robloxUsersAPI}/usernames/users`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
                         body: JSON.stringify({ usernames: [query], excludeBannedUsers: false })
                     });
                     if (data.data && data.data.length > 0) return data.data[0].id;
@@ -385,32 +450,48 @@
                     }
                 },
 
-                // Resolves missing display names via Roblox API
+                async getStatistics() {
+                    return this.fetchSafe(`${App.Config.rotectorAPI}/stats`);
+                },
+
+                // Batch fetch missing usernames from Roblox API
                 async fetchMissingNames(users) {
                     const missingIds = users.filter(u => !u.name || !u.displayName).map(u => u.id);
-                    if(missingIds.length === 0) return;
+                    if (missingIds.length === 0) return;
 
                     try {
                         const res = await fetch(`${App.Config.robloxUsersAPI}/users`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'accept': 'application/json' 
+                            },
                             body: JSON.stringify({ userIds: missingIds, excludeBannedUsers: false })
                         });
+                        
                         const data = await res.json();
                         
                         if(data && data.data) {
                             data.data.forEach(user => {
-                                // Find placeholders in DOM and update them gracefully
+                                // Update DOM elements gracefully
                                 const nameEls = document.querySelectorAll(`.missing-name-${user.id}`);
                                 const displayEls = document.querySelectorAll(`.missing-display-${user.id}`);
                                 
                                 nameEls.forEach(el => {
                                     el.innerHTML = `@${App.Utils.sanitize(user.name)}`;
-                                    el.classList.remove('opacity-50');
+                                    el.classList.remove('opacity-50', 'text-gray-500');
+                                    el.classList.add('text-gray-400');
                                 });
                                 displayEls.forEach(el => {
                                     el.innerHTML = App.Utils.sanitize(user.displayName);
                                 });
+
+                                // Update local cache so pagination doesn't lose it
+                                const cachedUser = App.State.groupPagination.allUsersCache.find(u => u.id === user.id);
+                                if (cachedUser) {
+                                    cachedUser.name = user.name;
+                                    cachedUser.displayName = user.displayName;
+                                }
                             });
                         }
                     } catch(e) {
@@ -418,7 +499,7 @@
                         missingIds.forEach(id => {
                             const nameEls = document.querySelectorAll(`.missing-name-${id}`);
                             const displayEls = document.querySelectorAll(`.missing-display-${id}`);
-                            nameEls.forEach(el => el.innerHTML = `<span class="text-red-400">Data Unavailable</span>`);
+                            nameEls.forEach(el => el.innerHTML = `<span class="text-red-400">Unavailable</span>`);
                             displayEls.forEach(el => el.innerHTML = `<span class="text-red-400">Unknown Player</span>`);
                         });
                     }
@@ -445,26 +526,29 @@
                                         <div class="w-2 h-2 rounded-full bg-osint-primary animate-pulse"></div>
                                         Network Connected
                                     </div>
-                                    <h2 class="text-4xl font-bold text-white mb-4 tracking-tight">Find Flagged Players & Groups</h2>
+                                    <h2 class="text-4xl font-bold text-white mb-4 tracking-tight">Find flagged players in Roblox.</h2>
                                     <p class="text-gray-400 text-lg leading-relaxed mb-8">
-                                        Protect your community by instantly checking players and groups against the Rotector database. Detect flagged behavior, linked Discord accounts, and hidden alt accounts to keep your environment safe.
+                                        Protect your community by checking players and groups against our comprehensive safety database. Instantly view flagged histories, linked Discord profiles, and known alt accounts.
                                     </p>
                                     <div class="flex gap-4">
                                         <a href="#player-lookup" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(33,150,243,0.3)] hover:shadow-[0_0_25px_rgba(33,150,243,0.5)] flex items-center gap-2">
                                             <span class="material-symbols-outlined text-lg">search</span> Start Scan
                                         </a>
+                                        <a href="#statistics" class="bg-osint-800 hover:bg-osint-700 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-all border border-osint-700 hover:border-osint-primary/50 flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-lg">bar_chart</span> View Global Stats
+                                        </a>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Metrics -->
+                            <!-- Quick Metrics -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div class="glass-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors hover:-translate-y-1 duration-300">
                                     <div class="w-14 h-14 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
                                         <span class="material-symbols-outlined text-3xl">inventory_2</span>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Local History</p>
+                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Your Scans</p>
                                         <h3 class="text-3xl font-bold text-white font-mono">${playersCount + groupsCount}</h3>
                                     </div>
                                 </div>
@@ -491,6 +575,64 @@
                     `;
                 },
 
+                async renderStatistics() {
+                    App.Views.titleDiv.innerText = 'Global Statistics';
+                    App.Views.contentDiv.innerHTML = App.Utils.createSkeleton('dossier');
+
+                    try {
+                        const stats = await App.API.getStatistics();
+                        
+                        // Parse stats
+                        const totalFlagged = stats.data?.totalFlaggedUsers || 0;
+                        const totalConfirmed = stats.data?.totalConfirmedUsers || 0;
+                        const totalBanned = stats.data?.totalBannedUsers || 0;
+                        const groupsFlagged = stats.data?.totalFlaggedGroups || 0;
+
+                        App.Views.contentDiv.innerHTML = `
+                            <div class="max-w-6xl mx-auto space-y-6 animate-slide-up">
+                                <div class="bg-osint-900 border border-osint-800 rounded-3xl p-8 text-center relative overflow-hidden">
+                                    <div class="absolute inset-0 cyber-grid opacity-50"></div>
+                                    <div class="relative z-10">
+                                        <h2 class="text-3xl font-bold text-white mb-2">Network Impact</h2>
+                                        <p class="text-gray-400 mb-8">Data currently tracked and verified by the Rotector safety system.</p>
+                                        
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div class="bg-osint-950 p-6 rounded-2xl border border-osint-800 hover:border-osint-danger/50 transition-colors duration-300">
+                                                <span class="material-symbols-outlined text-osint-danger text-4xl mb-3">flag</span>
+                                                <h3 class="text-3xl font-mono font-bold text-white mb-1">${App.Utils.formatNumber(totalFlagged)}</h3>
+                                                <p class="text-xs text-gray-500 uppercase tracking-wider font-bold">Flagged Players</p>
+                                            </div>
+                                            <div class="bg-osint-950 p-6 rounded-2xl border border-osint-800 hover:border-orange-500/50 transition-colors duration-300">
+                                                <span class="material-symbols-outlined text-orange-500 text-4xl mb-3">verified_user</span>
+                                                <h3 class="text-3xl font-mono font-bold text-white mb-1">${App.Utils.formatNumber(totalConfirmed)}</h3>
+                                                <p class="text-xs text-gray-500 uppercase tracking-wider font-bold">Confirmed Unsafe</p>
+                                            </div>
+                                            <div class="bg-osint-950 p-6 rounded-2xl border border-osint-800 hover:border-red-600/50 transition-colors duration-300">
+                                                <span class="material-symbols-outlined text-red-600 text-4xl mb-3">gavel</span>
+                                                <h3 class="text-3xl font-mono font-bold text-white mb-1">${App.Utils.formatNumber(totalBanned)}</h3>
+                                                <p class="text-xs text-gray-500 uppercase tracking-wider font-bold">Banned by Roblox</p>
+                                            </div>
+                                            <div class="bg-osint-950 p-6 rounded-2xl border border-osint-800 hover:border-osint-primary/50 transition-colors duration-300">
+                                                <span class="material-symbols-outlined text-osint-primary text-4xl mb-3">account_tree</span>
+                                                <h3 class="text-3xl font-mono font-bold text-white mb-1">${App.Utils.formatNumber(groupsFlagged)}</h3>
+                                                <p class="text-xs text-gray-500 uppercase tracking-wider font-bold">Flagged Groups</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } catch (err) {
+                        App.Views.contentDiv.innerHTML = `
+                            <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto mt-10 animate-fade-in">
+                                <span class="material-symbols-outlined text-5xl text-red-500 mb-4">cloud_off</span>
+                                <h3 class="text-white text-2xl font-bold mb-2">Stats Unavailable</h3>
+                                <p class="text-gray-400 font-mono">Could not connect to the statistics server.</p>
+                            </div>
+                        `;
+                    }
+                },
+
                 async renderPlayerLookup(query = null) {
                     App.Views.titleDiv.innerText = 'Player Safety Scan';
                     
@@ -499,7 +641,7 @@
                             <!-- Search Bar -->
                             <form id="target-search-form" class="relative mb-8 shadow-2xl">
                                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                    <span class="material-symbols-outlined text-gray-500">fingerprint</span>
+                                    <span class="material-symbols-outlined text-gray-500">person_search</span>
                                 </div>
                                 <input type="text" id="target-query" value="${query || ''}" required placeholder="Enter Roblox Username or ID to scan..." 
                                     class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-36 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
@@ -511,7 +653,7 @@
                             <div id="target-results">
                                 ${query ? App.Utils.createSkeleton('dossier') : `
                                     <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
-                                        <span class="material-symbols-outlined text-7xl mb-4">person_search</span>
+                                        <span class="material-symbols-outlined text-[80px] mb-4">badge</span>
                                         <p class="text-xl font-mono tracking-widest uppercase">Awaiting Player Input</p>
                                     </div>
                                 `}
@@ -524,7 +666,6 @@
                         e.preventDefault();
                         const inputQuery = document.getElementById('target-query').value.trim();
                         if (!inputQuery) return;
-                        
                         window.location.hash = `#player-lookup-${encodeURIComponent(inputQuery)}`;
                     });
 
@@ -540,7 +681,7 @@
                         <div class="max-w-6xl mx-auto">
                             <form id="group-search-form" class="relative mb-8 shadow-2xl">
                                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                    <span class="material-symbols-outlined text-gray-500">groups</span>
+                                    <span class="material-symbols-outlined text-gray-500">manage_search</span>
                                 </div>
                                 <input type="text" id="group-query" value="${query || ''}" required placeholder="Enter Group Name or ID to scan..." 
                                     class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-36 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
@@ -552,7 +693,7 @@
                             <div id="target-results">
                                 ${query ? App.Utils.createSkeleton('dossier') : `
                                     <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
-                                        <span class="material-symbols-outlined text-7xl mb-4">account_tree</span>
+                                        <span class="material-symbols-outlined text-[80px] mb-4">groups</span>
                                         <p class="text-xl font-mono tracking-widest uppercase">Awaiting Group Input</p>
                                     </div>
                                 `}
@@ -583,7 +724,7 @@
                     if (records.length === 0) {
                         html += `
                             <div class="glass-card rounded-2xl p-16 flex flex-col items-center justify-center text-gray-500 border border-osint-800 border-dashed">
-                                <span class="material-symbols-outlined text-6xl mb-4 opacity-50">inventory_2</span>
+                                <span class="material-symbols-outlined text-[60px] mb-4 opacity-50">history</span>
                                 <p class="text-lg">No recent scans found.</p>
                             </div>
                         `;
@@ -605,7 +746,7 @@
                                             ${records.map((r, i) => {
                                                 const flag = App.Config.flags[r.flagType] || App.Config.flags[0];
                                                 return `
-                                                <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer animate-stagger-fade" style="animation-delay: ${i * 0.05}s" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-lookup-${r.id}'">
+                                                <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer stagger-${(i%3)+1}" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-lookup-${r.id}'">
                                                     <td class="p-4 flex items-center gap-4">
                                                         <div class="w-10 h-10 rounded-full bg-osint-900 border border-osint-700 overflow-hidden flex-shrink-0">
                                                             <img src="${r.thumb}" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'></svg>'">
@@ -663,7 +804,7 @@
                                     <span class="material-symbols-outlined text-[28px]">${flag.icon}</span>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Rotector Status</p>
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Safety Status</p>
                                     <h3 class="text-2xl font-bold text-white leading-none">${flag.name}</h3>
                                 </div>
                             </div>
@@ -822,8 +963,8 @@
                         const [rbxProfile, rbxAvatar, rotRes, discRes] = await Promise.allSettled([
                             App.API.getRobloxProfile(userId),
                             App.API.getRobloxAvatar(userId),
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/roblox/user/${userId}`),
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/roblox/user/${userId}/discord`)
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}`),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/discord`)
                         ]);
 
                         if (rbxProfile.status === 'rejected') throw new Error("Player profile extraction failed. Ensure the username or ID is valid.");
@@ -869,7 +1010,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <a href="https://www.roproxy.com/users/${profile.id}/profile" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
+                                    <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
                                         Open Roblox Profile <span class="material-symbols-outlined text-[16px]">open_in_new</span>
                                     </a>
                                 </div>
@@ -905,7 +1046,6 @@
                     }
                 },
 
-                // Renders the group tracked users section, replacing previous content
                 renderGroupTrackedUsers(containerId, users, pagination) {
                     const container = document.getElementById(containerId);
                     if (!container) return;
@@ -922,8 +1062,8 @@
                                     <p class="text-sm font-bold text-gray-200 truncate group-hover/item:text-osint-primary transition-colors missing-display-${u.id}">
                                         ${u.displayName ? App.Utils.sanitize(u.displayName) : '<span class="material-symbols-outlined animate-spin-slow text-[14px] align-middle mr-1 text-gray-500">progress_activity</span><span class="text-gray-500">Loading...</span>'}
                                     </p>
-                                    <p class="text-[10px] text-gray-500 font-mono truncate missing-name-${u.id} ${!u.name ? 'opacity-50' : ''}">
-                                        ${u.name ? '@' + App.Utils.sanitize(u.name) : 'Fetching name...'} 
+                                    <p class="text-[10px] text-gray-500 font-mono truncate missing-name-${u.id} ${!u.name ? 'opacity-50 text-gray-500' : 'text-gray-400'}">
+                                        ${u.name ? '@' + App.Utils.sanitize(u.name) : 'Fetching username...'} 
                                         ${u.isActive ? '' : '<span class="text-red-400 ml-1 font-sans font-bold">[Left Group]</span>'}
                                     </p>
                                 </div>
@@ -931,8 +1071,9 @@
                             </a>
                         `).join('') + `</div>`;
                         
-                        // Pagination UI
-                        if (pagination && pagination.totalCount > 50) {
+                        // Pagination UI (50 per page limit assumed)
+                        const totalPages = Math.ceil(pagination.totalCount / 50);
+                        if (totalPages > 1) {
                             const hasPrev = pagination.currentPage > 0;
                             const hasNext = pagination.hasMore;
                             html += `
@@ -943,7 +1084,7 @@
                                     </button>
                                     <span class="text-xs text-gray-400 font-mono font-medium">Page ${pagination.currentPage + 1} <span class="opacity-50 ml-1">(Total: ${pagination.totalCount})</span></span>
                                     <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
-                                            ${!hasNext ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(1, '${pagination.nextCursor}')">
+                                            ${!hasNext ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(1, '${pagination.nextCursor || ''}')">
                                         Next <span class="material-symbols-outlined text-sm">arrow_forward</span>
                                     </button>
                                 </div>
@@ -964,37 +1105,52 @@
                     App.API.fetchMissingNames(users);
                 },
 
-                // Pagination logic wrapper
                 async changeGroupPage(direction, nextCursor = null) {
                     const state = App.State.groupPagination;
                     if (!state.groupId) return;
 
                     const targetPage = state.currentPage + direction;
-                    let cursorToUse = state.cursors[targetPage]; // Could be null if page 0
+                    let cursorToUse = state.cursors[targetPage];
 
                     if (direction === 1) {
-                        // Moving forward, save the cursor for the next page if we don't have it
                         if(state.cursors.length <= targetPage) {
                             state.cursors.push(nextCursor);
                         }
                         cursorToUse = state.cursors[targetPage];
                     }
 
-                    // Show loading state inline
                     document.getElementById('tracked-users-wrapper').innerHTML = `
                         <div class="flex justify-center p-10"><span class="material-symbols-outlined animate-spin-slow text-4xl text-osint-primary">progress_activity</span></div>
                     `;
 
                     try {
-                        let url = `${App.Config.rotectorAPI}/roblox/group/${state.groupId}/tracked-users?limit=50`;
-                        if (cursorToUse) url += `&cursor=${cursorToUse}`;
+                        let url = `${App.Config.rotectorAPI}/lookup/roblox/group/${state.groupId}/tracked-users?limit=50`;
+                        if (cursorToUse) url += `&cursor=${encodeURIComponent(cursorToUse)}`;
                         
                         const res = await App.API.fetchSafe(url);
                         
                         if (res.success) {
                             state.currentPage = targetPage;
                             state.hasMore = res.data.hasMore;
-                            this.renderGroupTrackedUsers('tracked-users-wrapper', res.data.users, state);
+                            
+                            // Cache these users globally so we don't have to refetch names if they go back
+                            const newUsers = res.data.users || [];
+                            newUsers.forEach(u => {
+                                if(!state.allUsersCache.find(x => x.id === u.id)) {
+                                    state.allUsersCache.push(u);
+                                }
+                            });
+
+                            // Inject cached names back if possible
+                            newUsers.forEach(u => {
+                                const cached = state.allUsersCache.find(x => x.id === u.id);
+                                if(cached && cached.name) {
+                                    u.name = cached.name;
+                                    u.displayName = cached.displayName;
+                                }
+                            });
+
+                            this.renderGroupTrackedUsers('tracked-users-wrapper', newUsers, state);
                         }
                     } catch(e) {
                         App.Utils.toast('Failed to load page: ' + e.message, 'error');
@@ -1011,11 +1167,11 @@
                         const [rbxGroup, rbxIcon, rotRes, trackedRes] = await Promise.allSettled([
                             App.API.getRobloxGroupProfile(groupId),
                             App.API.getRobloxGroupIcon(groupId),
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/roblox/group/${groupId}`),
-                            App.API.fetchSafe(`${App.Config.rotectorAPI}/roblox/group/${groupId}/tracked-users?limit=50`)
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group/${groupId}`),
+                            App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group/${groupId}/tracked-users?limit=50`)
                         ]);
 
-                        if (rbxGroup.status === 'rejected') throw new Error("Group profile extraction failed.");
+                        if (rbxGroup.status === 'rejected') throw new Error("Group profile extraction failed. Ensure the Group ID is valid.");
                         
                         const group = rbxGroup.value;
                         const icon = rbxIcon.status === 'fulfilled' ? rbxIcon.value : '';
@@ -1029,7 +1185,8 @@
                             cursors: [null],
                             currentPage: 0,
                             hasMore: trackedData.hasMore,
-                            totalCount: trackedData.totalCount
+                            totalCount: trackedData.totalCount,
+                            allUsersCache: trackedData.users ? [...trackedData.users] : []
                         };
 
                         App.DB.addRecord('groups', {
@@ -1075,7 +1232,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <a href="https://www.roproxy.com/groups/${group.id}" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
+                                    <a href="https://www.roblox.com/groups/${group.id}" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
                                         Open Roblox Group <span class="material-symbols-outlined text-[16px]">open_in_new</span>
                                     </a>
                                 </div>
@@ -1096,7 +1253,7 @@
                                             </span>
                                         </div>
                                         <div class="p-6 overflow-y-auto max-h-[600px] scrollbar-styled">
-                                            <p class="text-sm text-gray-400">Known flagged individuals detected currently or previously within this group.</p>
+                                            <p class="text-sm text-gray-400">Flagged individuals currently or previously detected within this group.</p>
                                             <div id="tracked-users-wrapper"></div>
                                         </div>
                                     </div>
@@ -1105,7 +1262,7 @@
                         `;
 
                         // Render tracked users and start fetch for empty names
-                        this.renderGroupTrackedUsers('tracked-users-wrapper', trackedData.users, App.State.groupPagination);
+                        this.renderGroupTrackedUsers('tracked-users-wrapper', trackedData.users || [], App.State.groupPagination);
                         
                         App.Utils.toast('Group scanned successfully.', 'success');
 
@@ -1118,6 +1275,39 @@
                             </div>
                         `;
                         App.Utils.toast('Scan failed: ' + err.message, 'error');
+                    }
+                },
+
+                // Toggle Quick PiP lookup
+                togglePipWidget() {
+                    const pip = document.getElementById('pip-widget');
+                    pip.classList.toggle('hidden');
+                    if (!pip.classList.contains('hidden')) {
+                        document.getElementById('pip-input').focus();
+                    }
+                },
+
+                // Handle PIP Search
+                async executePipSearch(query) {
+                    const resDiv = document.getElementById('pip-results');
+                    resDiv.innerHTML = `<span class="material-symbols-outlined animate-spin-slow text-2xl text-osint-primary">progress_activity</span>`;
+                    try {
+                        const userId = await App.API.resolveRobloxUser(query);
+                        const data = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/plaintext`);
+                        
+                        // the /plaintext endpoint returns the flagType directly (e.g. "0")
+                        const flagType = parseInt(data);
+                        const flag = App.Config.flags[flagType] || App.Config.flags[0];
+                        
+                        resDiv.innerHTML = `
+                            <div class="flex flex-col items-center justify-center p-3 w-full h-full">
+                                <span class="material-symbols-outlined text-3xl ${flag.color} mb-1">${flag.icon}</span>
+                                <span class="font-bold text-white">${flag.name}</span>
+                                <a href="#player-lookup-${userId}" onclick="App.Controllers.togglePipWidget()" class="text-xs text-osint-primary hover:underline mt-2">View Full Report</a>
+                            </div>
+                        `;
+                    } catch(err) {
+                        resDiv.innerHTML = `<span class="text-red-400 p-2 text-center text-xs break-words">${err.message}</span>`;
                     }
                 }
             },
@@ -1136,6 +1326,34 @@
                         }
                     });
 
+                    // PiP setup
+                    document.getElementById('pip-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const val = document.getElementById('pip-input').value.trim();
+                        if(val) App.Controllers.executePipSearch(val);
+                    });
+
+                    // Make PiP Draggable
+                    const pipHeader = document.getElementById('pip-header');
+                    const pipWidget = document.getElementById('pip-widget');
+                    let isDragging = false;
+                    let offsetX, offsetY;
+                    
+                    pipHeader.addEventListener('mousedown', (e) => {
+                        isDragging = true;
+                        offsetX = e.clientX - pipWidget.getBoundingClientRect().left;
+                        offsetY = e.clientY - pipWidget.getBoundingClientRect().top;
+                    });
+                    
+                    document.addEventListener('mousemove', (e) => {
+                        if (!isDragging) return;
+                        pipWidget.style.left = `${e.clientX - offsetX}px`;
+                        pipWidget.style.top = `${e.clientY - offsetY}px`;
+                        pipWidget.style.bottom = 'auto'; // release bottom anchoring
+                    });
+                    
+                    document.addEventListener('mouseup', () => isDragging = false);
+
                     this.handle();
                 },
 
@@ -1151,6 +1369,7 @@
 
                     const routeMap = {
                         '#overview': () => App.Views.renderOverview(),
+                        '#statistics': () => App.Views.renderStatistics(),
                         '#recent-players': () => App.Views.renderHistory('players'),
                         '#recent-groups': () => App.Views.renderHistory('groups')
                     };
