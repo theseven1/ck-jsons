@@ -94,13 +94,12 @@
             vertical-align: middle;
         }
 
-        /* Glass & Visual Utilities */
-        .glass-card {
-            background: rgba(28, 28, 38, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        /* Hardware Accelerated & Optimized UI Cards */
+        .ui-card {
+            background: rgba(28, 28, 38, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateZ(0); 
         }
         
         .cyber-grid {
@@ -108,6 +107,7 @@
                 linear-gradient(to right, rgba(88,166,255,0.03) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(88,166,255,0.03) 1px, transparent 1px);
             background-size: 30px 30px;
+            transform: translateZ(0);
         }
 
         .skeleton {
@@ -133,6 +133,17 @@
             to { transform: translateX(120%); opacity: 0; }
         }
 
+        /* Sidebar Collapse Transitions */
+        #sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        #sidebar.collapsed { width: 5.5rem; }
+        #sidebar.collapsed .sidebar-text { display: none; }
+        #sidebar.collapsed .sidebar-header { justify-content: center; padding-left: 0; padding-right: 0; }
+        #sidebar.collapsed .nav-link { justify-content: center; padding-left: 0; padding-right: 0; }
+        #sidebar.collapsed .nav-link span.material-symbols-outlined { margin: 0; }
+        #sidebar.collapsed .sidebar-bottom-panel { padding: 1rem 0; align-items: center; }
+        #sidebar.collapsed .sidebar-bottom-panel button { padding: 0.5rem 0; justify-content: center; }
+        #sidebar.collapsed .api-status { padding: 0.5rem 0; justify-content: center; background: transparent; border: none; box-shadow: none; }
+
         /* Staggered Animations */
         .stagger-1 { animation: slideUp 0.4s ease-out 0.05s forwards; opacity: 0; }
         .stagger-2 { animation: slideUp 0.4s ease-out 0.1s forwards; opacity: 0; }
@@ -143,71 +154,71 @@
 
     <!-- Global Background -->
     <div class="fixed inset-0 cyber-grid z-0 pointer-events-none"></div>
-    <div class="fixed top-[-200px] right-[-200px] w-[600px] h-[600px] bg-osint-500/10 rounded-full blur-[120px] z-0 pointer-events-none"></div>
+    <div class="fixed top-[-200px] right-[-200px] w-[600px] h-[600px] z-0 pointer-events-none rounded-full" style="background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, rgba(88,166,255,0) 70%); transform: translateZ(0);"></div>
 
     <!-- Sidebar Navigation -->
-    <aside class="w-64 glass-card border-r border-osint-800 flex flex-col z-20 h-full relative">
-        <div class="p-6 flex items-center gap-3 border-b border-osint-800">
-            <div class="w-10 h-10 rounded-xl bg-osint-primary flex items-center justify-center text-white shadow-[0_0_15px_rgba(33,150,243,0.4)]">
+    <aside id="sidebar" class="w-64 ui-card border-r border-osint-800 flex flex-col z-20 h-full relative overflow-hidden transition-all duration-300">
+        <div class="p-6 flex items-center gap-3 border-b border-osint-800 sidebar-header transition-all">
+            <div class="w-10 h-10 rounded-xl bg-osint-primary flex items-center justify-center text-white shadow-[0_0_15px_rgba(33,150,243,0.4)] flex-shrink-0">
                 <span class="material-symbols-outlined text-2xl">policy</span>
             </div>
-            <div>
+            <div class="sidebar-text flex-shrink-0">
                 <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
                 <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.5</p>
             </div>
         </div>
 
         <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="nav-menu">
-            <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all mb-2">
-                <span class="material-symbols-outlined w-5 text-center text-lg">dashboard</span>
-                <span class="font-medium text-sm">Dashboard</span>
+            <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-colors mb-2" title="Dashboard">
+                <span class="material-symbols-outlined w-5 text-center text-lg flex-shrink-0">dashboard</span>
+                <span class="font-medium text-sm sidebar-text flex-shrink-0">Dashboard</span>
             </a>
             
-            <a href="#statistics" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all mb-4">
-                <span class="material-symbols-outlined w-5 text-center text-lg">query_stats</span>
-                <span class="font-medium text-sm">Global Stats</span>
+            <a href="#statistics" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-colors mb-4" title="Global Stats">
+                <span class="material-symbols-outlined w-5 text-center text-lg flex-shrink-0">query_stats</span>
+                <span class="font-medium text-sm sidebar-text flex-shrink-0">Global Stats</span>
             </a>
 
-            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-4">Scanners</div>
-            <a href="#player-search" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
-                <span class="material-symbols-outlined w-5 text-center text-lg">person_search</span>
-                <span class="font-medium text-sm">Player Search</span>
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-4 sidebar-text flex-shrink-0 truncate">Scanners</div>
+            <a href="#player-search" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-colors" title="Player Search">
+                <span class="material-symbols-outlined w-5 text-center text-lg flex-shrink-0">person_search</span>
+                <span class="font-medium text-sm sidebar-text flex-shrink-0">Player Search</span>
             </a>
-            <a href="#group-search" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
-                <span class="material-symbols-outlined w-5 text-center text-lg">manage_search</span>
-                <span class="font-medium text-sm">Group Search</span>
+            <a href="#group-search" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-colors" title="Group Search">
+                <span class="material-symbols-outlined w-5 text-center text-lg flex-shrink-0">manage_search</span>
+                <span class="font-medium text-sm sidebar-text flex-shrink-0">Group Search</span>
             </a>
-            <a href="#discord-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
-                <span class="material-symbols-outlined w-5 text-center text-lg">hub</span>
-                <span class="font-medium text-sm">Discord Lookup</span>
-            </a>
-
-            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6">History</div>
-            <a href="#recent-players" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
-                <span class="material-symbols-outlined w-5 text-center text-lg">history</span>
-                <span class="font-medium text-sm">Recent Players</span>
-            </a>
-            <a href="#recent-groups" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
-                <span class="material-symbols-outlined w-5 text-center text-lg">history_toggle_off</span>
-                <span class="font-medium text-sm">Recent Groups</span>
+            <a href="#discord-lookup" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-colors" title="Discord Lookup">
+                <span class="material-symbols-outlined w-5 text-center text-lg flex-shrink-0">hub</span>
+                <span class="font-medium text-sm sidebar-text flex-shrink-0">Discord Lookup</span>
             </a>
 
-            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6">System</div>
-            <a href="#settings" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
-                <span class="material-symbols-outlined w-5 text-center text-lg">settings</span>
-                <span class="font-medium text-sm">Settings</span>
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6 sidebar-text flex-shrink-0 truncate">History</div>
+            <a href="#recent-players" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-colors" title="Recent Players">
+                <span class="material-symbols-outlined w-5 text-center text-lg flex-shrink-0">history</span>
+                <span class="font-medium text-sm sidebar-text flex-shrink-0">Recent Players</span>
+            </a>
+            <a href="#recent-groups" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-colors" title="Recent Groups">
+                <span class="material-symbols-outlined w-5 text-center text-lg flex-shrink-0">history_toggle_off</span>
+                <span class="font-medium text-sm sidebar-text flex-shrink-0">Recent Groups</span>
+            </a>
+
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6 sidebar-text flex-shrink-0 truncate">System</div>
+            <a href="#settings" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-colors" title="Settings">
+                <span class="material-symbols-outlined w-5 text-center text-lg flex-shrink-0">settings</span>
+                <span class="font-medium text-sm sidebar-text flex-shrink-0">Settings</span>
             </a>
         </nav>
 
-        <div class="p-4 border-t border-osint-800 bg-osint-900/50 flex flex-col gap-3">
-            <button onclick="App.Controllers.openNativePip()" class="w-full bg-osint-800 hover:bg-osint-700 text-white rounded-lg py-2 flex items-center justify-center gap-2 transition-colors border border-osint-700 hover:border-osint-primary/50 text-sm font-medium shadow-sm">
-                <span class="material-symbols-outlined text-lg">picture_in_picture_alt</span> Small Panel
+        <div class="p-4 border-t border-osint-800 bg-osint-900/50 flex flex-col gap-3 sidebar-bottom-panel transition-all">
+            <button onclick="App.Controllers.openNativePip()" class="w-full bg-osint-800 hover:bg-osint-700 text-white rounded-lg py-2 flex items-center justify-center gap-2 transition-colors border border-osint-700 hover:border-osint-primary/50 text-sm font-medium shadow-sm" title="Small Panel">
+                <span class="material-symbols-outlined text-lg flex-shrink-0">picture_in_picture_alt</span> <span class="sidebar-text flex-shrink-0">Small Panel</span>
             </button>
-            <div class="flex items-center gap-3 px-3 py-2 bg-osint-950 rounded-lg border border-osint-800 shadow-inner mt-1">
-                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse-glow shadow-[0_0_5px_#4caf50]"></div>
-                <div class="flex flex-col">
+            <div class="flex items-center gap-3 px-3 py-2 bg-osint-950 rounded-lg border border-osint-800 shadow-inner mt-1 api-status transition-all" title="API Connected">
+                <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_#4caf50] flex-shrink-0"></div>
+                <div class="flex flex-col sidebar-text flex-shrink-0">
                     <span class="text-[10px] font-bold text-gray-300 uppercase tracking-wider">API</span>
-                    <span class="text-[10px] font-mono text-green-400">Stable</span>
+                    <span class="text-[10px] font-mono text-green-400">Connected</span>
                 </div>
             </div>
         </div>
@@ -216,11 +227,16 @@
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col relative z-10">
         <!-- Topbar -->
-        <header class="h-16 glass-card border-b border-osint-800 flex items-center justify-between px-8 z-10 sticky top-0">
-            <h2 id="page-title" class="text-lg font-bold text-white tracking-wide">Safety Dashboard</h2>
+        <header class="h-16 ui-card border-b border-osint-800 flex items-center justify-between px-8 z-10 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button onclick="App.Controllers.toggleSidebar()" class="text-gray-400 hover:text-white transition-colors focus:outline-none flex items-center justify-center" title="Toggle Sidebar">
+                    <span id="sidebar-toggle-icon" class="material-symbols-outlined text-2xl">menu_open</span>
+                </button>
+                <h2 id="page-title" class="text-lg font-bold text-white tracking-wide">Safety Dashboard</h2>
+            </div>
             <div class="flex items-center gap-4">
                 <form id="quick-search-form" class="relative">
-                    <input type="text" placeholder="Quick search ID or name..." class="bg-osint-950 border border-osint-700 text-sm rounded-lg px-4 py-1.5 focus:outline-none focus:border-osint-primary focus:ring-1 focus:ring-osint-primary w-64 transition-all font-mono text-gray-300" id="quick-search-input" autocomplete="off">
+                    <input type="text" placeholder="Quick Search User ID..." class="bg-osint-950 border border-osint-700 text-sm rounded-lg px-4 py-1.5 focus:outline-none focus:border-osint-primary focus:ring-1 focus:ring-osint-primary w-64 transition-colors font-mono text-gray-300" id="quick-search-input" autocomplete="off">
                     <button type="submit" class="absolute right-2 top-1 text-gray-500 hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-lg mt-0.5">search</span>
                     </button>
@@ -237,8 +253,8 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 w-80 pointer-events-none"></div>
 
-    <!-- Fallback Small Panel Widget (If Native PIP fails) -->
-    <div id="pip-widget" class="hidden fixed bottom-6 left-72 w-[340px] glass-card rounded-2xl shadow-2xl z-50 flex-col overflow-hidden transition-all duration-300 border border-osint-primary/30 animate-scale-in">
+    <!-- Fallback Small Panel Widget -->
+    <div id="pip-widget" class="hidden fixed bottom-6 left-72 w-[340px] ui-card rounded-2xl shadow-2xl z-50 flex-col overflow-hidden border border-osint-primary/30 animate-scale-in">
         <div class="bg-osint-900/80 px-4 py-3 flex justify-between items-center border-b border-osint-800 cursor-move" id="pip-header">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-osint-primary text-lg">bolt</span>
@@ -412,7 +428,7 @@
                     };
                     const t = types[type] || types.info;
                     
-                    toast.className = `glass-card p-4 rounded-xl flex items-start gap-3 pointer-events-auto toast-enter ${t.border} ${t.bg} shadow-lg`;
+                    toast.className = `ui-card p-4 rounded-xl flex items-start gap-3 pointer-events-auto toast-enter ${t.border} ${t.bg} shadow-lg`;
                     toast.innerHTML = `
                         <span class="material-symbols-outlined ${t.color} mt-0.5 text-[22px]">${t.icon}</span>
                         <div class="flex-1 text-sm font-medium text-gray-200 mt-1">${App.Utils.sanitize(message)}</div>
@@ -430,15 +446,15 @@
                     if (type === 'dossier') {
                         return `
                             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
-                                <div class="lg:col-span-4 glass-card rounded-2xl p-6 flex flex-col items-center">
+                                <div class="lg:col-span-4 ui-card rounded-2xl p-6 flex flex-col items-center">
                                     <div class="w-32 h-32 rounded-2xl skeleton mb-4"></div>
                                     <div class="w-3/4 h-6 skeleton rounded mb-2"></div>
                                     <div class="w-1/2 h-4 skeleton rounded mb-6"></div>
                                     <div class="w-full h-24 skeleton rounded"></div>
                                 </div>
                                 <div class="lg:col-span-8 flex flex-col gap-6">
-                                    <div class="glass-card h-32 rounded-2xl skeleton"></div>
-                                    <div class="glass-card flex-1 min-h-[300px] rounded-2xl skeleton"></div>
+                                    <div class="ui-card h-32 rounded-2xl skeleton"></div>
+                                    <div class="ui-card flex-1 min-h-[300px] rounded-2xl skeleton"></div>
                                 </div>
                             </div>
                         `;
@@ -472,10 +488,8 @@
                             let errorMsg = `HTTP ${res.status}`;
                             try { 
                                 const errData = await res.json(); 
-                                // Gracefully parse roblox error array 
                                 if (errData.errors && errData.errors.length > 0) {
                                     errorMsg = errData.errors[0].message;
-                                    // Make certain messages more friendly
                                     if (errorMsg === "The keyword is too short.") {
                                         errorMsg = "The search is too short.";
                                     }
@@ -596,7 +610,7 @@
                     
                     App.Views.contentDiv.innerHTML = `
                         <div class="max-w-4xl mx-auto animate-slide-up space-y-6">
-                            <div class="glass-card rounded-3xl p-8 border border-osint-800">
+                            <div class="ui-card rounded-3xl p-8 border border-osint-800">
                                 <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
                                     <span class="material-symbols-outlined text-osint-primary">dns</span> Proxy Configuration
                                 </h3>
@@ -626,7 +640,7 @@
                                             <p class="text-xs text-gray-500 font-mono mt-1">corsproxy.io/?https://...</p>
                                         </div>
                                     </label>
-                                    
+
                                     <label class="flex items-start gap-4 p-4 rounded-xl border ${currentProxy === 'direct' ? 'border-osint-primary bg-osint-primary/10' : 'border-osint-800 bg-osint-900/50 hover:bg-osint-800/50'} cursor-pointer transition-colors" onclick="App.Controllers.setProxy('direct')">
                                         <div class="pt-1"><input type="radio" name="proxy" value="direct" ${currentProxy === 'direct' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
                                         <div>
@@ -637,7 +651,7 @@
                                 </div>
                             </div>
 
-                            <div class="glass-card rounded-3xl p-8 border border-osint-800">
+                            <div class="ui-card rounded-3xl p-8 border border-osint-800">
                                 <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
                                     <span class="material-symbols-outlined text-osint-danger">delete_forever</span> Data Management
                                 </h3>
@@ -664,7 +678,7 @@
 
                     App.Views.contentDiv.innerHTML = `
                         <div class="max-w-6xl mx-auto space-y-8 animate-fade-in">
-                            <div class="relative glass-card rounded-3xl p-10 overflow-hidden border border-osint-primary/30 group">
+                            <div class="relative ui-card rounded-3xl p-10 overflow-hidden border border-osint-primary/30 group">
                                 <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-osint-primary/10 rounded-full blur-[80px] group-hover:bg-osint-primary/20 transition-all duration-700 pointer-events-none"></div>
                                 <div class="relative z-10 max-w-3xl">
                                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-osint-primary/10 border border-osint-primary/20 text-osint-primary text-xs font-mono font-bold mb-6">
@@ -676,10 +690,10 @@
                                         Protect your community by checking players and groups against our comprehensive safety database. Detect flagged behavior, linked Discord accounts, and hidden alt accounts to keep your environment safe.
                                     </p>
                                     <div class="flex gap-4">
-                                        <a href="#player-search" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(33,150,243,0.3)] hover:shadow-[0_0_25px_rgba(33,150,243,0.5)] flex items-center gap-2">
+                                        <a href="#player-search" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-colors shadow-[0_0_15px_rgba(33,150,243,0.3)] hover:shadow-[0_0_25px_rgba(33,150,243,0.5)] flex items-center gap-2">
                                             <span class="material-symbols-outlined text-lg">search</span> Start Scan
                                         </a>
-                                        <a href="#statistics" class="bg-osint-800 hover:bg-osint-700 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-all border border-osint-700 hover:border-osint-primary/50 flex items-center gap-2">
+                                        <a href="#statistics" class="bg-osint-800 hover:bg-osint-700 active:scale-95 text-white px-6 py-3 rounded-lg font-bold transition-colors border border-osint-700 hover:border-osint-primary/50 flex items-center gap-2">
                                             <span class="material-symbols-outlined text-lg">bar_chart</span> View Global Stats
                                         </a>
                                     </div>
@@ -687,7 +701,7 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div class="glass-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors hover:-translate-y-1 duration-300">
+                                <div class="ui-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors">
                                     <div class="w-14 h-14 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
                                         <span class="material-symbols-outlined text-3xl">inventory_2</span>
                                     </div>
@@ -696,7 +710,7 @@
                                         <h3 class="text-3xl font-bold text-white font-mono">${playersCount + groupsCount}</h3>
                                     </div>
                                 </div>
-                                <div class="glass-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors hover:-translate-y-1 duration-300">
+                                <div class="ui-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors">
                                     <div class="w-14 h-14 rounded-xl bg-osint-integration/10 text-osint-integration flex items-center justify-center border border-osint-integration/20">
                                         <span class="material-symbols-outlined text-3xl">dns</span>
                                     </div>
@@ -705,7 +719,7 @@
                                         <h3 class="text-2xl font-bold text-white uppercase mt-1">Operational</h3>
                                     </div>
                                 </div>
-                                <div class="glass-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors hover:-translate-y-1 duration-300">
+                                <div class="ui-card p-6 rounded-2xl flex items-center gap-5 hover:border-gray-600 transition-colors">
                                     <div class="w-14 h-14 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center border border-green-500/20">
                                         <span class="material-symbols-outlined text-3xl">security</span>
                                     </div>
@@ -766,7 +780,7 @@
                         `;
                     } catch (err) {
                         App.Views.contentDiv.innerHTML = `
-                            <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto mt-10 animate-fade-in">
+                            <div class="ui-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto mt-10 animate-fade-in">
                                 <span class="material-symbols-outlined text-5xl text-red-500 mb-4">cloud_off</span>
                                 <h3 class="text-white text-2xl font-bold mb-2">Stats Unavailable</h3>
                                 <p class="text-gray-400 font-mono">Could not connect to the statistics server.</p>
@@ -783,16 +797,16 @@
                                     <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                         <span class="material-symbols-outlined text-gray-500">${type === 'player' ? 'person_search' : 'manage_search'}</span>
                                     </div>
-                                    <input type="text" id="target-query" value="${query || ''}" required placeholder="Search for a ${type === 'player' ? 'Player Username' : 'Group Name'}..." 
-                                        class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
+                                    <input type="text" id="target-query" value="${query || ''}" required placeholder="Search for a ${type === 'player' ? 'Player Username or ID' : 'Group Name or ID'}..." 
+                                        class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-colors font-mono text-lg shadow-inner">
                                 </div>
-                                <select id="target-limit" class="bg-osint-900 border-2 border-osint-800 text-white rounded-2xl px-4 py-4 focus:outline-none focus:border-osint-primary transition-all text-lg font-bold cursor-pointer">
+                                <select id="target-limit" class="bg-osint-900 border-2 border-osint-800 text-white rounded-2xl px-4 py-4 focus:outline-none focus:border-osint-primary transition-colors text-lg font-bold cursor-pointer">
                                     <option value="10" ${limit=='10'?'selected':''}>10 per page</option>
                                     <option value="25" ${limit=='25'?'selected':''}>25 per page</option>
                                     <option value="50" ${limit=='50'?'selected':''}>50 per page</option>
                                     <option value="100" ${limit=='100'?'selected':''}>100 per page</option>
                                 </select>
-                                <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)]">
+                                <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-colors shadow-[0_0_10px_rgba(33,150,243,0.3)]">
                                     Search
                                 </button>
                             </form>
@@ -806,7 +820,7 @@
                                 ` : `
                                     <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
                                         <span class="material-symbols-outlined text-[80px] mb-4">${type === 'player' ? 'badge' : 'groups'}</span>
-                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Search Input</p>
+                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Search or ID Input</p>
                                     </div>
                                 `}
                             </div>
@@ -820,18 +834,18 @@
                     let records = App.DB.getHistory(type);
                     if (!Array.isArray(records)) records = [];
 
-                    let html = `<div class="max-w-6xl mx-auto animate-slide-up">`;
+                    let html = `<div class="max-w-6xl mx-auto animate-fade-in">`;
                     
                     if (records.length === 0) {
                         html += `
-                            <div class="glass-card rounded-2xl p-16 flex flex-col items-center justify-center text-gray-500 border border-osint-800 border-dashed">
+                            <div class="ui-card rounded-2xl p-16 flex flex-col items-center justify-center text-gray-500 border border-osint-800 border-dashed">
                                 <span class="material-symbols-outlined text-[60px] mb-4 opacity-50">history</span>
                                 <p class="text-lg">No recent scans found.</p>
                             </div>
                         `;
                     } else {
                         html += `
-                            <div class="glass-card rounded-2xl border border-osint-800 overflow-hidden">
+                            <div class="ui-card rounded-2xl border border-osint-800 overflow-hidden">
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left border-collapse">
                                         <thead>
@@ -856,7 +870,7 @@
                                                     <tr class="hover:bg-osint-800/40 transition-colors group cursor-pointer stagger-${(i%3)+1}" onclick="window.location.hash='#${isPlayer ? 'player' : 'group'}-dossier?id=${id}'">
                                                         <td class="p-4 flex items-center gap-4">
                                                             <div class="w-10 h-10 rounded-full bg-osint-900 border border-osint-700 overflow-hidden flex-shrink-0">
-                                                                <img src="${thumb}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                                                <img src="${thumb}" loading="lazy" class="w-full h-full object-cover" onerror="this.style.display='none'">
                                                             </div>
                                                             <span class="font-bold text-white group-hover:text-osint-primary transition-colors">${displayName}</span>
                                                         </td>
@@ -868,7 +882,7 @@
                                                         </td>
                                                         <td class="p-4 text-sm text-gray-500 font-mono">${App.Utils.formatDate(r.timestamp)}</td>
                                                         <td class="p-4 text-right">
-                                                            <button class="w-8 h-8 rounded-lg bg-osint-900 border border-osint-700 text-gray-400 hover:text-white hover:border-osint-primary hover:bg-osint-primary/20 transition-all flex items-center justify-center ml-auto">
+                                                            <button class="w-8 h-8 rounded-lg bg-osint-900 border border-osint-700 text-gray-400 hover:text-white hover:border-osint-primary hover:bg-osint-primary/20 transition-colors flex items-center justify-center ml-auto">
                                                                 <span class="material-symbols-outlined text-[18px]">chevron_right</span>
                                                             </button>
                                                         </td>
@@ -893,6 +907,18 @@
             // --- Business Logic / Controllers ---
             Controllers: {
                 
+                toggleSidebar() {
+                    const sidebar = document.getElementById('sidebar');
+                    const btnIcon = document.getElementById('sidebar-toggle-icon');
+                    sidebar.classList.toggle('collapsed');
+                    
+                    if (sidebar.classList.contains('collapsed')) {
+                        btnIcon.innerText = 'menu';
+                    } else {
+                        btnIcon.innerText = 'menu_open';
+                    }
+                },
+
                 setProxy(proxyName) {
                     localStorage.setItem('rc_proxy_preference', proxyName);
                     App.Utils.toast(`Proxy configuration updated to ${proxyName}.`, 'success');
@@ -909,14 +935,14 @@
                         const col = pct > 80 ? 'text-red-500' : pct > 50 ? 'text-yellow-500' : 'text-green-500';
                         return `
                             <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
-                                <svg class="transform -rotate-90 w-12 h-12"><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" class="text-osint-800"/><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" class="transition-all duration-1000 ${col}"/></svg>
+                                <svg class="transform -rotate-90 w-12 h-12"><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" class="text-osint-800"/><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" class="transition-colors duration-1000 ${col}"/></svg>
                                 <span class="absolute text-[10px] font-bold font-mono text-white">${pct}%</span>
                             </div>
                         `;
                     };
 
                     return `
-                        <div class="glass-card rounded-2xl p-5 border ${flag.border} ${flag.bg} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-lg transition-shadow">
+                        <div class="ui-card rounded-2xl p-5 border ${flag.border} ${flag.bg} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-lg transition-shadow">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full flex items-center justify-center ${flag.color} bg-black/20 border ${flag.border}">
                                     <span class="material-symbols-outlined text-[28px]">${flag.icon}</span>
@@ -963,7 +989,7 @@
                     }
 
                     return Object.entries(reasonsObj).map(([type, data]) => `
-                        <div class="bg-osint-900 border border-osint-800 rounded-xl p-4 mb-4 shadow-sm relative overflow-hidden hover:-translate-y-0.5 transition-transform">
+                        <div class="bg-osint-900 border border-osint-800 rounded-xl p-4 mb-4 shadow-sm relative overflow-hidden">
                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-osint-danger"></div>
                             <div class="flex justify-between items-start mb-3 pl-2">
                                 <h4 class="font-bold text-white text-md flex items-center gap-2">
@@ -1058,7 +1084,7 @@
                                 </h4>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     ${discordData.altAccounts.map(alt => `
-                                        <a href="#player-dossier?id=${alt.robloxUserId}" class="block bg-osint-900 border border-osint-800 rounded-lg p-3 hover:border-osint-primary hover:bg-osint-800/80 transition-all flex items-center gap-3">
+                                        <a href="#player-dossier?id=${alt.robloxUserId}" class="block bg-osint-900 border border-osint-800 rounded-lg p-3 hover:border-osint-primary hover:bg-osint-800/80 transition-colors flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-osint-800 flex items-center justify-center text-gray-400 border border-osint-700">
                                                 <span class="material-symbols-outlined text-[18px]">person</span>
                                             </div>
@@ -1085,14 +1111,26 @@
                 },
 
                 async executePlayerSearch(query, limit = 25, cursor = '') {
-                    App.Views.titleDiv.innerText = 'Player Search';
+                    // ID Bypass routing for direct navigation via URL
+                    if (query && /^\d+$/.test(query)) {
+                        window.location.hash = `#player-dossier?id=${query}`;
+                        return;
+                    }
+
+                    App.Views.titleDiv.innerText = 'Player Search / Lookup';
                     App.Views.contentDiv.innerHTML = App.Views.renderSearchTemplate('player', query, limit);
 
                     document.getElementById('target-search-form').addEventListener('submit', (e) => {
                         e.preventDefault();
                         const q = document.getElementById('target-query').value.trim();
                         const l = document.getElementById('target-limit').value;
-                        if (q) window.location.hash = `#player-search?q=${encodeURIComponent(q)}&limit=${l}`;
+                        if (q) {
+                            if (/^\d+$/.test(q)) {
+                                window.location.hash = `#player-dossier?id=${q}`;
+                            } else {
+                                window.location.hash = `#player-search?q=${encodeURIComponent(q)}&limit=${l}`;
+                            }
+                        }
                     });
 
                     if (!query) return;
@@ -1125,7 +1163,7 @@
                             thumbRes.value.data.forEach(t => thumbMap[t.targetId] = t.imageUrl);
                         }
 
-                        let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">`;
+                        let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">`;
                         
                         searchData.data.forEach(u => {
                             const flagType = rotMap[u.id]?.flagType || 0;
@@ -1133,9 +1171,9 @@
                             const avatar = thumbMap[u.id] || 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular';
                             
                             html += `
-                                <div class="glass-card rounded-xl p-4 flex flex-col gap-3 border-t-2 ${flag.border.replace('/30','')} hover:bg-osint-800/50 transition-colors">
+                                <div class="bg-osint-900 border border-osint-800 rounded-xl p-4 flex flex-col gap-3 border-t-2 ${flag.border.replace('/30','')} hover:bg-osint-800/50 transition-colors">
                                     <div class="flex items-center gap-3">
-                                        <img src="${avatar}" class="w-12 h-12 rounded-full border border-osint-700 bg-osint-900 object-cover shrink-0">
+                                        <img src="${avatar}" loading="lazy" class="w-12 h-12 rounded-full border border-osint-700 bg-osint-950 object-cover shrink-0">
                                         <div class="flex-1 min-w-0">
                                             <h4 class="font-bold text-white text-sm truncate">${App.Utils.sanitize(u.displayName)}</h4>
                                             <p class="text-xs text-gray-400 font-mono truncate">@${App.Utils.sanitize(u.name)}</p>
@@ -1145,7 +1183,7 @@
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${flag.bg} ${flag.color}">
                                             <span class="material-symbols-outlined text-[12px]">${flag.icon}</span> ${flag.name}
                                         </span>
-                                        <a href="#player-dossier?id=${u.id}" class="text-xs font-bold text-osint-primary hover:text-white transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800">
+                                        <a href="#player-dossier?id=${u.id}" class="text-xs font-bold text-osint-primary hover:text-white transition-colors bg-osint-950 px-3 py-1.5 rounded-lg border border-osint-800">
                                             View Dossier
                                         </a>
                                     </div>
@@ -1177,14 +1215,26 @@
                 },
 
                 async executeGroupSearch(query, limit = 25, cursor = '') {
-                    App.Views.titleDiv.innerText = 'Group Search';
+                    // ID Bypass routing for direct navigation via URL
+                    if (query && /^\d+$/.test(query)) {
+                        window.location.hash = `#group-dossier?id=${query}`;
+                        return;
+                    }
+
+                    App.Views.titleDiv.innerText = 'Group Search / Lookup';
                     App.Views.contentDiv.innerHTML = App.Views.renderSearchTemplate('group', query, limit);
 
                     document.getElementById('target-search-form').addEventListener('submit', (e) => {
                         e.preventDefault();
                         const q = document.getElementById('target-query').value.trim();
                         const l = document.getElementById('target-limit').value;
-                        if (q) window.location.hash = `#group-search?q=${encodeURIComponent(q)}&limit=${l}`;
+                        if (q) {
+                            if (/^\d+$/.test(q)) {
+                                window.location.hash = `#group-dossier?id=${q}`;
+                            } else {
+                                window.location.hash = `#group-search?q=${encodeURIComponent(q)}&limit=${l}`;
+                            }
+                        }
                     });
 
                     if (!query) return;
@@ -1216,7 +1266,7 @@
                             thumbRes.value.data.forEach(t => thumbMap[t.targetId] = t.imageUrl);
                         }
 
-                        let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">`;
+                        let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">`;
                         
                         searchData.data.forEach(g => {
                             const flagType = rotMap[g.id]?.flagType || 0;
@@ -1224,9 +1274,9 @@
                             const icon = thumbMap[g.id] || '';
                             
                             html += `
-                                <div class="glass-card rounded-xl p-4 flex flex-col gap-3 border-t-2 ${flag.border.replace('/30','')} hover:bg-osint-800/50 transition-colors">
+                                <div class="bg-osint-900 border border-osint-800 rounded-xl p-4 flex flex-col gap-3 border-t-2 ${flag.border.replace('/30','')} hover:bg-osint-800/50 transition-colors">
                                     <div class="flex items-center gap-3">
-                                        <img src="${icon}" class="w-12 h-12 rounded-lg border border-osint-700 bg-osint-900 object-cover shrink-0" onerror="this.style.display='none'">
+                                        <img src="${icon}" loading="lazy" class="w-12 h-12 rounded-lg border border-osint-700 bg-osint-950 object-cover shrink-0" onerror="this.style.display='none'">
                                         <div class="flex-1 min-w-0">
                                             <h4 class="font-bold text-white text-sm truncate">${App.Utils.sanitize(g.name)}</h4>
                                             <p class="text-xs text-gray-500 font-mono truncate">ID: ${g.id} • Mem: ${App.Utils.formatNumber(g.memberCount)}</p>
@@ -1236,7 +1286,7 @@
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${flag.bg} ${flag.color}">
                                             <span class="material-symbols-outlined text-[12px]">${flag.icon}</span> ${flag.name}
                                         </span>
-                                        <a href="#group-dossier?id=${g.id}" class="text-xs font-bold text-osint-primary hover:text-white transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800">
+                                        <a href="#group-dossier?id=${g.id}" class="text-xs font-bold text-osint-primary hover:text-white transition-colors bg-osint-950 px-3 py-1.5 rounded-lg border border-osint-800">
                                             View Dossier
                                         </a>
                                     </div>
@@ -1276,9 +1326,9 @@
                                         <span class="material-symbols-outlined text-gray-500">hub</span>
                                     </div>
                                     <input type="text" id="discord-query" value="${query || ''}" required placeholder="Enter Exact Discord ID (e.g. 1332382707707023441)" 
-                                        class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-all font-mono text-lg shadow-inner">
+                                        class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-colors font-mono text-lg shadow-inner">
                                 </div>
-                                <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-all shadow-[0_0_10px_rgba(33,150,243,0.3)] flex items-center gap-2">
+                                <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-colors shadow-[0_0_10px_rgba(33,150,243,0.3)] flex items-center gap-2">
                                     Analyze
                                 </button>
                             </form>
@@ -1335,11 +1385,11 @@
 
                         resDiv.innerHTML = `
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
-                                <div class="glass-card rounded-2xl p-6">
+                                <div class="ui-card rounded-2xl p-6">
                                     <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-osint-800 pb-2"><span class="material-symbols-outlined text-osint-primary">link</span> Roblox Connections</h3>
                                     <div class="space-y-3">${connectionsHtml || '<p class="text-gray-500">No direct Roblox connections found.</p>'}</div>
                                 </div>
-                                <div class="glass-card rounded-2xl p-6">
+                                <div class="ui-card rounded-2xl p-6">
                                     <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-osint-800 pb-2"><span class="material-symbols-outlined text-osint-integration">dns</span> Server Memberships</h3>
                                     <div class="bg-osint-900/50 rounded-xl px-4 py-1 border border-osint-800">${serversHtml || '<p class="text-gray-500 py-3">No tracked servers.</p>'}</div>
                                 </div>
@@ -1372,7 +1422,7 @@
                             hasRotData = true;
                         }
 
-                        // Fully failed extraction case
+                        // Fully failed extraction case (Banned/Deleted user and no history)
                         if (isInvisible && !hasRotData) {
                             throw new Error("User not found on Roblox and no historical data exists in Rotector.");
                         }
@@ -1417,7 +1467,7 @@
                                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
                                     <!-- ID Card -->
                                     <div class="lg:col-span-4 flex flex-col gap-6">
-                                        <div class="glass-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
+                                        <div class="ui-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
                                             <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent z-0"></div>
                                             <div class="relative z-10 flex flex-col items-center text-center">
                                                 <div class="w-32 h-32 rounded-full p-1 bg-osint-800 border-2 border-osint-700 shadow-2xl mb-4 relative hover:scale-105 transition-transform duration-300">
@@ -1449,7 +1499,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
+                                        <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-colors active:scale-[0.98]">
                                             Open Roblox Profile <span class="material-symbols-outlined text-[16px]">open_in_new</span>
                                         </a>
                                     </div>
@@ -1458,7 +1508,7 @@
                                     <div class="lg:col-span-8 flex flex-col gap-6">
                                         ${this.getFlagBannerHTML(rotData.flagType, rotData.confidence, rotData.reviewer)}
                                         
-                                        <div class="glass-card rounded-3xl flex-1 flex flex-col overflow-hidden">
+                                        <div class="ui-card rounded-3xl flex-1 flex flex-col overflow-hidden">
                                             <div class="bg-osint-900/80 border-b border-osint-800 px-6 py-4 flex items-center gap-3">
                                                 <span class="material-symbols-outlined text-osint-primary">policy</span>
                                                 <h3 class="font-bold text-white tracking-wide">Safety Report</h3>
@@ -1477,7 +1527,7 @@
                         resultsDiv.innerHTML = `
                             <div class="max-w-6xl mx-auto">
                                 <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1"><span class="material-symbols-outlined text-sm">arrow_back</span> Back</button>
-                                <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto animate-fade-in">
+                                <div class="ui-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto animate-fade-in">
                                     <span class="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
                                     <h3 class="text-white text-2xl font-bold mb-2">Data Extraction Failed</h3>
                                     <p class="text-gray-400 font-mono">${err.message}</p>
@@ -1509,7 +1559,7 @@
                             hasRotData = true;
                         }
 
-                        // Fully failed extraction case
+                        // Fully failed extraction case (Banned/Deleted group and no history)
                         if (isInvisible && !hasRotData) {
                             throw new Error("Group not found on Roblox and no historical data exists in Rotector.");
                         }
@@ -1559,7 +1609,7 @@
                                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
                                     <!-- Org Card -->
                                     <div class="lg:col-span-4 flex flex-col gap-6">
-                                        <div class="glass-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
+                                        <div class="ui-card rounded-3xl p-6 border-t-4 ${App.Config.flags[rotData.flagType]?.border.replace('/30','')} relative overflow-hidden">
                                             <div class="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent z-0"></div>
                                             <div class="relative z-10 flex flex-col items-center text-center">
                                                 <div class="w-32 h-32 rounded-2xl p-1 bg-osint-800 border-2 border-osint-700 shadow-xl mb-4 hover:scale-105 transition-transform duration-300">
@@ -1593,7 +1643,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <a href="https://www.roblox.com/groups/${group.id}" target="_blank" class="glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-all active:scale-[0.98]">
+                                        <a href="https://www.roblox.com/groups/${group.id}" target="_blank" class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-osint-primary transition-colors active:scale-[0.98]">
                                             Open Roblox Group <span class="material-symbols-outlined text-[16px]">open_in_new</span>
                                         </a>
                                     </div>
@@ -1602,7 +1652,7 @@
                                     <div class="lg:col-span-8 flex flex-col gap-6">
                                         ${this.getFlagBannerHTML(rotData.flagType, rotData.confidence, null)}
                                         
-                                        <div class="glass-card rounded-3xl flex-1 flex flex-col overflow-hidden">
+                                        <div class="ui-card rounded-3xl flex-1 flex flex-col overflow-hidden">
                                             <div class="bg-osint-900/80 border-b border-osint-800 px-6 py-4 flex justify-between items-center">
                                                 <div class="flex items-center gap-3">
                                                     <span class="material-symbols-outlined text-osint-primary">groups</span>
@@ -1628,7 +1678,7 @@
                         resultsDiv.innerHTML = `
                             <div class="max-w-6xl mx-auto">
                                 <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1"><span class="material-symbols-outlined text-sm">arrow_back</span> Back</button>
-                                <div class="glass-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto animate-fade-in">
+                                <div class="ui-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto animate-fade-in">
                                     <span class="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
                                     <h3 class="text-white text-2xl font-bold mb-2">Extraction Failed</h3>
                                     <p class="text-gray-400 font-mono">${err.message}</p>
@@ -1646,9 +1696,9 @@
                     if (users.length > 0) {
                         html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">` + 
                         users.map(u => `
-                            <a href="#player-dossier?id=${u.id}" class="bg-osint-900 border border-osint-800 rounded-xl p-3 flex items-center gap-3 hover:border-osint-primary hover:bg-osint-800/80 transition-all group/item">
+                            <a href="#player-dossier?id=${u.id}" class="bg-osint-900 border border-osint-800 rounded-xl p-3 flex items-center gap-3 hover:border-osint-primary hover:bg-osint-800/80 transition-colors group/item">
                                 <div class="w-10 h-10 rounded-full bg-osint-950 border border-osint-700 overflow-hidden flex-shrink-0 relative">
-                                    <img src="${u.thumbnailUrl || ''}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                    <img src="${u.thumbnailUrl || ''}" loading="lazy" class="w-full h-full object-cover" onerror="this.style.display='none'">
                                 </div>
                                 <div class="flex-1 overflow-hidden">
                                     <p class="text-sm font-bold text-gray-200 truncate group-hover/item:text-osint-primary transition-colors missing-display-${u.id}">
@@ -1797,7 +1847,7 @@
                             <div class="header">
                                 <div style="display:flex; align-items:center; gap:8px; color: #2196f3;">
                                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                    <span style="color:white; font-size: 14px;">Lookup Panel</span>
+                                    <span style="color:white; font-size: 14px;">Small Panel</span>
                                 </div>
                             </div>
                             <div class="content">
@@ -1937,7 +1987,11 @@
                         e.preventDefault();
                         const val = document.getElementById('quick-search-input').value.trim();
                         if(val) {
-                            window.location.hash = `#player-search?q=${encodeURIComponent(val)}&limit=25`;
+                            if (/^\d+$/.test(val)) {
+                                window.location.hash = `#player-dossier?id=${val}`;
+                            } else {
+                                window.location.hash = `#player-search?q=${encodeURIComponent(val)}&limit=25`;
+                            }
                             document.getElementById('quick-search-input').value = '';
                         }
                     });
@@ -1966,12 +2020,11 @@
                         pipWidget.style.right = 'auto';
                         pipWidget.style.left = initialLeft + 'px';
                         pipWidget.style.top = initialTop + 'px';
-                        pipWidget.style.transition = 'none'; // Disable transition while dragging
+                        pipWidget.style.transition = 'none';
                     });
                     
                     document.addEventListener('mousemove', (e) => {
                         if (!isDragging) return;
-                        // Use requestAnimationFrame & transform to prevent CPU reflow lag in games
                         requestAnimationFrame(() => {
                             pipWidget.style.transform = `translate3d(${e.clientX - dragStartX}px, ${e.clientY - dragStartY}px, 0)`;
                         });
@@ -2008,7 +2061,7 @@
                     App.Views.contentDiv.innerHTML = '';
                     App.Views.contentDiv.scrollTop = 0;
 
-                    // Reset Default SEO meta tags if not looking at a dossier
+                    // Reset Default SEO meta tags
                     if (!path.includes('dossier')) {
                         App.Utils.updateMetaTags(
                             'Catch Them | Safety Dashboard',
@@ -2029,8 +2082,6 @@
                         case '#player-dossier': App.Controllers.executePlayerDossier(params.get('id')); break;
                         case '#group-dossier': App.Controllers.executeGroupDossier(params.get('id')); break;
                         case '#settings': App.Views.renderSettings(); break;
-                        case '#player-lookup': App.Views.renderPlayerLookup(); break;
-                        case '#group-lookup': App.Views.renderGroupLookup(); break;
                         default:
                             if (path.startsWith('#player-lookup-')) {
                                 const id = path.replace('#player-lookup-', '');
