@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -192,6 +191,12 @@
                 <span class="material-symbols-outlined w-5 text-center text-lg">history_toggle_off</span>
                 <span class="font-medium text-sm">Recent Groups</span>
             </a>
+
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2 mt-6">System</div>
+            <a href="#settings" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-osint-800 transition-all">
+                <span class="material-symbols-outlined w-5 text-center text-lg">settings</span>
+                <span class="font-medium text-sm">Settings</span>
+            </a>
         </nav>
 
         <div class="p-4 border-t border-osint-800 bg-osint-900/50 flex flex-col gap-3">
@@ -303,10 +308,12 @@
 
             // --- Database (Local Storage Wrapper) ---
             DB: {
-                getKey: (type) => `rc_history_${type}`,
+                getKey: (type) => `rc_v4_history_${type}`,
                 getHistory: (type) => {
                     try {
-                        const data = JSON.parse(localStorage.getItem(App.DB.getKey(type)) || '[]');
+                        const raw = localStorage.getItem(App.DB.getKey(type));
+                        if (!raw) return [];
+                        const data = JSON.parse(raw);
                         return Array.isArray(data) ? data : [];
                     } catch (e) {
                         console.warn('History read error:', e);
@@ -322,14 +329,29 @@
                 },
                 
                 addRecord: (type, record) => {
+                    if (!record || !record.id) return;
                     try {
                         let history = App.DB.getHistory(type);
                         history = history.filter(item => String(item.id) !== String(record.id));
-                        history.unshift({ ...record, timestamp: Date.now() });
+                        history.unshift({ 
+                            ...record, 
+                            timestamp: Date.now(),
+                            thumb: record.thumb || 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular'
+                        });
                         if (history.length > 50) history = history.slice(0, 50); // Keep max 50 recent items safely
                         App.DB.saveHistory(type, history);
                     } catch (e) {
                         console.error('Failed to add record to history:', e);
+                    }
+                },
+
+                clearHistory: (type) => {
+                    try {
+                        localStorage.removeItem(App.DB.getKey(type));
+                        App.Utils.toast(`Cleared ${type} history.`, 'success');
+                        App.Views.renderSettings();
+                    } catch (e) {
+                        console.error('Failed to clear history:', e);
                     }
                 }
             },
@@ -338,10 +360,6 @@
             Utils: {
                 sanitize: (str) => DOMPurify.sanitize(str),
                 
-                // Note: Discord's native crawler does NOT execute JavaScript.
-                // For Discord embeds to work flawlessly, you will need to serve this HTML 
-                // via a backend that injects these meta tags server-side based on the URL.
-                // However, this JS implementation dynamically sets proper OG tags for web environments and other bots.
                 updateMetaTags: (title, desc, img, color) => {
                     document.title = title;
                     const setMeta = (id, content) => {
@@ -433,7 +451,16 @@
             API: {
                 buildRobloxUrl(domain, endpoint) {
                     const fullUrl = `https://${domain}${endpoint}`;
-                    return `https://catchthem.mk-7.org/proxy/${encodeURIComponent(fullUrl)}`;
+                    const proxyType = localStorage.getItem('rc_proxy_preference') || 'catchthem';
+                    
+                    if (proxyType === 'roproxy') {
+                        return `https://${domain.replace('roblox.com', 'roproxy.com')}${endpoint}`;
+                    } else if (proxyType === 'corsproxy') {
+                        return `https://corsproxy.io/?${fullUrl}`;
+                    } else {
+                        // Default to Catch Them proxy
+                        return `https://catchthem.mk-7.org/proxy/${fullUrl}`;
+                    }
                 },
 
                 async fetchSafe(url, options = {}) {
@@ -441,7 +468,19 @@
                         const res = await fetch(url, options);
                         if (!res.ok) {
                             let errorMsg = `HTTP ${res.status}`;
-                            try { const errData = await res.json(); if(errData.error) errorMsg = errData.error; } catch(e){}
+                            try { 
+                                const errData = await res.json(); 
+                                // Gracefully parse roblox error array 
+                                if (errData.errors && errData.errors.length > 0) {
+                                    errorMsg = errData.errors[0].message;
+                                    // Make certain messages more friendly
+                                    if (errorMsg === "The keyword is too short.") {
+                                        errorMsg = "The search is too short.";
+                                    }
+                                } else if (errData.error) {
+                                    errorMsg = errData.error;
+                                } 
+                            } catch(e){}
                             throw new Error(errorMsg);
                         }
                         return await res.json();
@@ -546,6 +585,65 @@
             Views: {
                 contentDiv: document.getElementById('app-content'),
                 titleDiv: document.getElementById('page-title'),
+
+                renderSettings() {
+                    App.Views.titleDiv.innerText = 'Application Settings';
+                    const currentProxy = localStorage.getItem('rc_proxy_preference') || 'catchthem';
+                    const pCount = App.DB.getHistory('players').length;
+                    const gCount = App.DB.getHistory('groups').length;
+                    
+                    App.Views.contentDiv.innerHTML = `
+                        <div class="max-w-4xl mx-auto animate-slide-up space-y-6">
+                            <div class="glass-card rounded-3xl p-8 border border-osint-800">
+                                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-osint-primary">dns</span> Proxy Configuration
+                                </h3>
+                                <p class="text-gray-400 text-sm mb-6">If you are experiencing HTTP 429 (Too Many Requests) errors when scanning players, you can change the proxy server used to communicate with the Roblox API.</p>
+                                
+                                <div class="space-y-4">
+                                    <label class="flex items-start gap-4 p-4 rounded-xl border ${currentProxy === 'catchthem' ? 'border-osint-primary bg-osint-primary/10' : 'border-osint-800 bg-osint-900/50 hover:bg-osint-800/50'} cursor-pointer transition-colors" onclick="App.Controllers.setProxy('catchthem')">
+                                        <div class="pt-1"><input type="radio" name="proxy" value="catchthem" ${currentProxy === 'catchthem' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
+                                        <div>
+                                            <h4 class="font-bold text-white text-md">Catch Them Proxy (Recommended)</h4>
+                                            <p class="text-xs text-gray-500 font-mono mt-1">catchthem.mk-7.org/proxy/...</p>
+                                        </div>
+                                    </label>
+
+                                    <label class="flex items-start gap-4 p-4 rounded-xl border ${currentProxy === 'roproxy' ? 'border-osint-primary bg-osint-primary/10' : 'border-osint-800 bg-osint-900/50 hover:bg-osint-800/50'} cursor-pointer transition-colors" onclick="App.Controllers.setProxy('roproxy')">
+                                        <div class="pt-1"><input type="radio" name="proxy" value="roproxy" ${currentProxy === 'roproxy' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
+                                        <div>
+                                            <h4 class="font-bold text-white text-md">RoProxy</h4>
+                                            <p class="text-xs text-gray-500 font-mono mt-1">Replaces roblox.com with roproxy.com directly</p>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-start gap-4 p-4 rounded-xl border ${currentProxy === 'corsproxy' ? 'border-osint-primary bg-osint-primary/10' : 'border-osint-800 bg-osint-900/50 hover:bg-osint-800/50'} cursor-pointer transition-colors" onclick="App.Controllers.setProxy('corsproxy')">
+                                        <div class="pt-1"><input type="radio" name="proxy" value="corsproxy" ${currentProxy === 'corsproxy' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
+                                        <div>
+                                            <h4 class="font-bold text-white text-md">CorsProxy.io</h4>
+                                            <p class="text-xs text-gray-500 font-mono mt-1">corsproxy.io/?https://...</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="glass-card rounded-3xl p-8 border border-osint-800">
+                                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-osint-danger">delete_forever</span> Data Management
+                                </h3>
+                                <p class="text-gray-400 text-sm mb-6">Manage your local storage cache and history files.</p>
+                                <div class="flex gap-4 flex-wrap">
+                                    <button onclick="App.DB.clearHistory('players')" class="bg-osint-900 hover:bg-red-500/10 text-gray-300 hover:text-red-400 border border-osint-700 hover:border-red-500/30 px-5 py-2.5 rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-lg">person_remove</span> Clear Players (${pCount})
+                                    </button>
+                                    <button onclick="App.DB.clearHistory('groups')" class="bg-osint-900 hover:bg-red-500/10 text-gray-300 hover:text-red-400 border border-osint-700 hover:border-red-500/30 px-5 py-2.5 rounded-xl font-bold transition-all text-sm flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-lg">group_remove</span> Clear Groups (${gCount})
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                },
 
                 renderOverview() {
                     App.Views.titleDiv.innerText = 'Safety Dashboard';
@@ -785,6 +883,12 @@
             // --- Business Logic / Controllers ---
             Controllers: {
                 
+                setProxy(proxyName) {
+                    localStorage.setItem('rc_proxy_preference', proxyName);
+                    App.Utils.toast(`Proxy configuration updated to ${proxyName}.`, 'success');
+                    App.Views.renderSettings();
+                },
+
                 getFlagBannerHTML(flagType, confidence, reviewer) {
                     const flag = App.Config.flags[flagType] || App.Config.flags[0];
                     const confPercent = confidence ? Math.round(confidence * 100) : null;
@@ -1655,7 +1759,8 @@
                         });
                         App.State.pipWindow = pip;
 
-                        // Inject completely native styling without relying on Tailwind CDN
+                        // To prevent FPS lag in games while the PiP runs, we completely strip 
+                        // heavy CSS paints like box-shadows, animations (no spinning loaders), and transitions.
                         const style = pip.document.createElement('style');
                         style.textContent = `
                             body { margin: 0; background: #0a0a0e; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
@@ -1663,20 +1768,18 @@
                             .header { padding: 12px 16px; background: #12121a; border-bottom: 1px solid #1c1c26; font-weight: bold; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
                             .content { padding: 16px; display: flex; flex-direction: column; height: calc(100vh - 46px); }
                             .input-group { display: flex; gap: 8px; margin-bottom: 16px; flex-shrink: 0; }
-                            input { flex: 1; padding: 10px; border-radius: 8px; background: #1c1c26; border: 1px solid #2d2d3d; color: #fff; font-size: 14px; outline: none; transition: border 0.2s; }
+                            input { flex: 1; padding: 10px; border-radius: 8px; background: #1c1c26; border: 1px solid #2d2d3d; color: #fff; font-size: 14px; outline: none; }
                             input:focus { border-color: #2196f3; }
-                            button { padding: 10px 16px; border-radius: 8px; background: #2196f3; color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+                            button { padding: 10px 16px; border-radius: 8px; background: #2196f3; color: white; border: none; font-weight: bold; cursor: pointer; }
                             button:hover { background: #1976d2; }
-                            .results { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 16px; border-radius: 12px; border: 1px dashed #2d2d3d; background: #12121a; transition: all 0.3s; }
+                            .results { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 16px; border-radius: 12px; border: 1px dashed #2d2d3d; background: #12121a; }
                             .badge { display: inline-block; padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: bold; margin-bottom: 12px; border: 1px solid currentColor; text-transform: uppercase; letter-spacing: 0.5px; }
                             .title { font-size: 20px; font-weight: bold; color: white; margin: 0; word-break: break-all; }
                             .subtitle { font-size: 12px; color: #aaa; margin: 4px 0 0 0; font-family: monospace; }
-                            .link { display: inline-block; margin-top: 20px; padding: 8px 16px; background: #1c1c26; color: #fff; border: 1px solid #2d2d3d; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.2s; width: 100%; }
+                            .link { display: inline-block; margin-top: 20px; padding: 8px 16px; background: #1c1c26; color: #fff; border: 1px solid #2d2d3d; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; width: 100%; text-align: center;}
                             .link:hover { background: #2d2d3d; }
                             .avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #1c1c26; margin-right: 16px; }
                             .profile-row { display: flex; align-items: center; width: 100%; text-align: left; background: #1c1c26; padding: 12px; border-radius: 12px; border: 1px solid #2d2d3d; margin-bottom: 16px; }
-                            @keyframes spin { to { transform: rotate(360deg); } }
-                            .spinner { width: 30px; height: 30px; border: 3px solid #1c1c26; border-top-color: #2196f3; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px; }
                         `;
                         pip.document.head.appendChild(style);
 
@@ -1707,7 +1810,7 @@
                             if(!val) return;
                             
                             const resDiv = pip.document.getElementById('pip-results');
-                            resDiv.innerHTML = `<div class="spinner"></div><div style="font-size: 13px; color: #aaa;">Analyzing Network...</div>`;
+                            resDiv.innerHTML = `<div style="font-size: 14px; font-weight: bold; color: #aaa;">Analyzing Network...</div>`;
                             
                             try {
                                 let userId = val;
@@ -1742,7 +1845,7 @@
 
                                 resDiv.innerHTML = `
                                     <div class="profile-row" style="border-color: ${flag.hex}40;">
-                                        <img src="${avatar}" class="avatar" style="border: 2px solid ${flag.hex}; box-shadow: 0 0 10px ${flag.hex}30;">
+                                        <img src="${avatar}" class="avatar" style="border: 2px solid ${flag.hex};">
                                         <div style="min-width: 0; flex: 1;">
                                             <div class="title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${username}</div>
                                             <div class="subtitle">UID: ${userId}</div>
@@ -1893,6 +1996,7 @@
                         case '#discord-lookup': App.Controllers.executeDiscordLookup(params.get('id')); break;
                         case '#player-dossier': App.Controllers.executePlayerDossier(params.get('id')); break;
                         case '#group-dossier': App.Controllers.executeGroupDossier(params.get('id')); break;
+                        case '#settings': App.Views.renderSettings(); break;
                         case '#player-lookup': App.Views.renderPlayerLookup(); break;
                         case '#group-lookup': App.Views.renderGroupLookup(); break;
                         default:
