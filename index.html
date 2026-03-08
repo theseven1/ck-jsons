@@ -146,11 +146,11 @@
         #sidebar.collapsed .api-status { padding: 0.5rem 0; justify-content: center; background: transparent; border: none; box-shadow: none; }
 
         /* Mind Map Hierarchical D3 Classes */
-        .node circle { stroke: #2d2d3d; stroke-width: 3px; cursor: pointer; transition: stroke 0.3s; }
+        .node circle { stroke: #2d2d3d; stroke-width: 3px; cursor: pointer; transition: stroke 0.3s, filter 0.3s; }
         .node image { cursor: pointer; clip-path: circle(18px at 20px 20px); transition: filter 0.3s; }
-        .node:hover circle { stroke: #58a6ff; }
+        .node:hover circle { filter: brightness(1.5); }
         .node:hover image { filter: brightness(1.2); }
-        .node text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #e0e0e0; pointer-events: none; text-shadow: 0px 2px 5px rgba(0,0,0,0.9); font-weight: 500; }
+        .node text { font-family: 'Inter', sans-serif; font-size: 11px; fill: #e0e0e0; pointer-events: none; text-shadow: 0px 2px 5px rgba(0,0,0,0.9); font-weight: 600; }
         .link { fill: none; stroke: #3f3f5a; stroke-width: 2px; stroke-opacity: 0.5; transition: stroke-opacity 0.3s; }
 
         /* Staggered Animations */
@@ -159,7 +159,7 @@
         .stagger-3 { animation: slideUp 0.4s ease-out 0.15s forwards; opacity: 0; }
     </style>
 </head>
-<body class="bg-osint-950 text-gray-300 font-sans h-screen overflow-hidden flex selection:bg-osint-500/30">
+<body class="bg-osint-950 text-gray-300 font-sans h-screen overflow-hidden flex selection:bg-osint-500/30 relative">
 
     <!-- Global Background -->
     <div class="fixed inset-0 cyber-grid z-0 pointer-events-none"></div>
@@ -179,7 +179,7 @@
     </div>
 
     <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="w-64 ui-card border-r border-osint-800 flex flex-col z-20 h-full relative overflow-hidden transition-all duration-300">
+    <aside id="sidebar" class="w-64 ui-card border-r border-osint-800 flex flex-col z-20 h-full relative overflow-hidden transition-all duration-300 shrink-0">
         <div class="p-6 flex items-center gap-3 border-b border-osint-800 sidebar-header transition-all">
             <div class="w-10 h-10 rounded-xl bg-osint-primary flex items-center justify-center text-white shadow-[0_0_15px_rgba(33,150,243,0.4)] flex-shrink-0">
                 <span class="material-symbols-outlined text-2xl">policy</span>
@@ -247,9 +247,9 @@
     </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col relative z-10">
+    <main class="flex-1 flex flex-col relative z-10 min-w-0">
         <!-- Topbar -->
-        <header class="h-16 ui-card border-b border-osint-800 flex items-center justify-between px-8 z-10 sticky top-0">
+        <header class="h-16 ui-card border-b border-osint-800 flex items-center justify-between px-8 z-10 sticky top-0 shrink-0">
             <div class="flex items-center gap-4">
                 <button onclick="App.Controllers.toggleSidebar()" class="text-gray-400 hover:text-white transition-colors focus:outline-none flex items-center justify-center" title="Toggle Sidebar">
                     <span id="sidebar-toggle-icon" class="material-symbols-outlined text-2xl">menu_open</span>
@@ -379,7 +379,7 @@
                             timestamp: Date.now(),
                             thumb: record.thumb || 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular'
                         });
-                        if (history.length > 50) history = history.slice(0, 50);
+                        if (history.length > 50) history = history.slice(0, 50); // Keep max 50 recent items safely
                         App.DB.saveHistory(type, history);
                     } catch (e) {
                         console.error('Failed to add record to history:', e);
@@ -422,6 +422,7 @@
                     if (typeof ts === 'string') {
                         date = new Date(ts);
                     } else {
+                        // Handle Unix timestamps (seconds vs ms)
                         date = new Date(ts > 1e11 ? ts : ts * 1000);
                     }
                     
@@ -500,6 +501,7 @@
                     } else if (proxyType === 'direct') {
                         return fullUrl;
                     } else {
+                        // Default to Catch Them proxy
                         return `https://catchthem.mk-7.org/proxy/${fullUrl}`;
                     }
                 },
@@ -535,12 +537,12 @@
                         const res = await fetch(`https://catchthem.mk-7.org/proxy/https://api.xtracker.xyz/api/registry/user?id=${id}`, {
                             headers: { 'Authorization': 'uSWxNE0X1AeD5WYImi9ZjA' }
                         });
-                        if (res.status === 404) return null;
+                        if (res.status === 404) return null; // Normal if not in DB
                         if (!res.ok) throw new Error(`HTTP ${res.status}`);
                         return await res.json();
                     } catch (e) {
                         console.warn('XTracker API Error:', e);
-                        return null; 
+                        return null; // Gracefully fail
                     }
                 },
 
@@ -1390,6 +1392,7 @@
                         });
                         html += `</div>`;
 
+                        // Pagination controls
                         if (searchData.previousPageCursor || searchData.nextPageCursor) {
                             html += `
                                 <div class="flex items-center justify-between mt-6 bg-osint-950/50 px-4 py-3 rounded-xl border border-osint-800">
@@ -1959,24 +1962,20 @@
 
                         // Create hierarchical D3 tree (left to right list layout)
                         const root = d3.hierarchy(treeData);
-                        const treeLayout = d3.tree().nodeSize([45, 300]); // y-spacing, x-spacing
+                        const treeLayout = d3.tree().nodeSize([50, 250]); // y-spacing, x-spacing
                         treeLayout(root);
-
-                        // Center the root vertically
-                        let y0 = Infinity;
-                        let y1 = -Infinity;
-                        root.each(d => {
-                            if (d.x > y1) y1 = d.x;
-                            if (d.x < y0) y0 = d.x;
-                        });
 
                         // Draw Links
                         const link = g.selectAll(".link").data(root.links(), d => d.target.data.id);
-                        link.enter().append("path")
+                        
+                        const linkEnter = link.enter().append("path")
                             .attr("class", "link")
-                            .attr("d", d3.linkHorizontal().x(d => d.source.y).y(d => d.source.x)) // spawn from parent
-                            .merge(link)
-                            .transition().duration(400)
+                            .attr("d", d => {
+                                const o = {x: d.source.x, y: d.source.y};
+                                return d3.linkHorizontal().x(d => d.y).y(d => d.x)({source: o, target: o});
+                            });
+                            
+                        link.merge(linkEnter).transition().duration(400)
                             .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x));
                             
                         link.exit().transition().duration(300).attr("opacity", 0).remove();
@@ -2004,10 +2003,9 @@
                             .attr("stroke", d => {
                                 if (d.data.type === 'target') return '#2196f3'; // blue
                                 if (d.data.type === 'group') return '#14b8a6'; // teal
-                                return '#ef4444'; // red (flagged)
+                                return d.data.flag ? '#ef4444' : '#9ca3af'; // red (flagged) or gray (clear)
                             });
 
-                        // Node Avatar inside circle
                         nodeEnter.append("image")
                             .attr("href", d => d.data.avatar || 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39df885e827/150/150/AvatarHeadshot/Webp/isCircular')
                             .attr("x", -20)
@@ -2021,7 +2019,6 @@
                             .attr("text-anchor", d => d.children ? "end" : "start")
                             .text(d => d.data.label);
 
-                        // Subtext (Username / ID)
                         nodeEnter.append("text")
                             .attr("dy", "1.6em")
                             .attr("x", d => d.children ? -30 : 30)
@@ -2056,24 +2053,22 @@
                             bannerColors = 'from-blue-600/30 to-blue-900/40 border-blue-500/30';
                             document.getElementById('tt-avatar').classList.replace('border-osint-950', 'border-osint-primary');
                         } else if (data.type === 'group') {
-                            badgeText = 'FLAGGED GROUP';
-                            bannerColors = 'from-teal-600/30 to-teal-900/40 border-teal-500/30';
-                            document.getElementById('tt-avatar').classList.replace('border-osint-primary', 'border-osint-integration');
+                            badgeText = data.flag ? 'FLAGGED GROUP' : 'GROUP';
+                            bannerColors = data.flag ? 'from-red-600/30 to-red-900/40 border-red-500/30' : 'from-teal-600/30 to-teal-900/40 border-teal-500/30';
+                            document.getElementById('tt-avatar').className = `absolute -bottom-6 left-4 w-14 h-14 rounded-full border-4 ${data.flag ? 'border-osint-danger' : 'border-osint-integration'} bg-osint-800 object-cover shadow-lg`;
                         } else {
-                            badgeText = 'FLAGGED CONN';
-                            bannerColors = 'from-red-600/30 to-red-900/40 border-red-500/30';
-                            document.getElementById('tt-avatar').classList.replace('border-osint-primary', 'border-osint-danger');
-                            document.getElementById('tt-avatar').classList.replace('border-osint-integration', 'border-osint-danger');
+                            badgeText = data.flag ? 'FLAGGED CONNECTION' : 'CLEARED CONNECTION';
+                            bannerColors = data.flag ? 'from-red-600/30 to-red-900/40 border-red-500/30' : 'from-gray-600/30 to-gray-800/40 border-gray-500/30';
+                            document.getElementById('tt-avatar').className = `absolute -bottom-6 left-4 w-14 h-14 rounded-full border-4 ${data.flag ? 'border-osint-danger' : 'border-gray-500'} bg-osint-800 object-cover shadow-lg`;
                         }
 
                         badge.innerText = badgeText;
-                        banner.className = `h-14 bg-gradient-to-r ${bannerColors} border-b w-full relative`;
+                        banner.className = `h-14 bg-gradient-to-r ${bannerColors} border-b border-osint-700 w-full relative`;
 
-                        // Populate internal flags list
                         let flagsHtml = '';
                         if (data.flagData) {
                             const f = App.Config.flags[data.flagData.flagType] || App.Config.flags[0];
-                            flagsHtml += `<div class="flex justify-between items-center bg-black/20 p-2 rounded border border-white/5"><span class="flex items-center gap-1.5 ${f.color} font-bold"><span class="material-symbols-outlined text-[14px]">${f.icon}</span> ${f.name}</span></div>`;
+                            flagsHtml += `<div class="flex justify-between items-center bg-black/20 p-2 rounded border border-white/5 mb-1"><span class="flex items-center gap-1.5 ${f.color} font-bold"><span class="material-symbols-outlined text-[14px]">${f.icon}</span> ${f.name}</span></div>`;
                             
                             if (data.flagData.reasons) {
                                 Object.keys(data.flagData.reasons).forEach(r => {
@@ -2081,7 +2076,7 @@
                                 });
                             }
                         } else {
-                             flagsHtml += `<div class="text-xs text-gray-500 italic">No flag data attached.</div>`;
+                             flagsHtml += `<div class="text-xs text-gray-500 italic">No specific flag data attached.</div>`;
                         }
 
                         flagsContainer.innerHTML = flagsHtml;
@@ -2092,7 +2087,6 @@
                         let x = event.clientX + 20;
                         let y = event.clientY - 20;
                         
-                        // Prevent overflow
                         if (x + 260 > window.innerWidth) x = event.clientX - 280;
                         if (y + 150 > window.innerHeight) y = event.clientY - 160;
 
@@ -2107,8 +2101,8 @@
                         }, 200);
                     };
 
-                    // Initial zoom to center
-                    g.attr("transform", `translate(${width/6}, ${height/2}) scale(0.8)`);
+                    // Initial zoom centering
+                    g.attr("transform", `translate(100, ${height/2}) scale(0.8)`);
 
                     // WebSocket Connection
                     try {
@@ -2141,11 +2135,10 @@
                                     const newNode = { ...msg.node, children: [] };
                                     nodeMap[newNode.id] = newNode;
                                     
-                                    // Auto-link to source
                                     if (msg.source && nodeMap[msg.source]) {
                                         nodeMap[msg.source].children.push(newNode);
+                                        updateGraph();
                                     }
-                                    updateGraph();
                                 }
                             }
                             else if (msg.type === 'done') {
@@ -2162,9 +2155,7 @@
                         };
 
                         ws.onclose = () => {
-                            if (stopBtn && !stopBtn.classList.contains('hidden')) {
-                                stopBtn.classList.add('hidden');
-                            }
+                            if (stopBtn && !stopBtn.classList.contains('hidden')) stopBtn.classList.add('hidden');
                         };
 
                     } catch (err) {
