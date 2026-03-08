@@ -1163,30 +1163,59 @@
 
                 getXTrackerHTML(xtData) {
                     // Only render if data exists and has meaningful content
-                    if (!xtData || (!xtData.alts?.length && !xtData.evidence?.length)) return '';
+                    if (!xtData) return '';
                     
-                    const altsHtml = (xtData.alts && xtData.alts.length > 0) ? `
+                    const hasAlts = Array.isArray(xtData.alts) && xtData.alts.length > 0;
+                    const hasEvidence = Array.isArray(xtData.evidence) && xtData.evidence.length > 0;
+                    
+                    if (!hasAlts && !hasEvidence) return '';
+                    
+                    const altsHtml = hasAlts ? `
                         <div class="mb-4">
                             <h5 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Known Alts</h5>
                             <div class="flex flex-wrap gap-2">
-                                ${xtData.alts.map(alt => `<span class="px-2 py-1 bg-osint-950 rounded-md text-xs font-mono text-gray-300 border border-osint-800">${App.Utils.sanitize(alt)}</span>`).join('')}
+                                ${xtData.alts.map(alt => `<span class="px-2 py-1 bg-osint-950 rounded-md text-xs font-mono text-gray-300 border border-osint-800">${App.Utils.sanitize(String(alt))}</span>`).join('')}
                             </div>
                         </div>
                     ` : '';
 
-                    const evidenceHtml = (xtData.evidence && xtData.evidence.length > 0) ? `
+                    const evidenceHtml = hasEvidence ? `
                         <div>
                             <h5 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Exploit Evidence</h5>
                             <div class="space-y-3">
-                                ${xtData.evidence.map(ev => `
+                                ${xtData.evidence.map(ev => {
+                                    let urlHtml = '';
+                                    if (ev.url) {
+                                        let rawUrl = ev.url;
+                                        // Auto-convert XTracker vault links to raw streams and embed video player
+                                        if (rawUrl.includes('vault.xtracker.xyz/vault/') && rawUrl.endsWith('.mp4')) {
+                                            if (!rawUrl.includes('/vault/raw/')) {
+                                                rawUrl = rawUrl.replace('/vault/', '/vault/raw/');
+                                            }
+                                            urlHtml = `
+                                                <div class="mt-2 rounded-lg overflow-hidden border border-osint-800 bg-black shadow-inner">
+                                                    <video controls class="w-full max-h-[400px] outline-none" preload="metadata">
+                                                        <source src="${App.Utils.sanitize(rawUrl)}" type="video/mp4">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                </div>
+                                            `;
+                                        } else {
+                                            // Fallback for youtube or other external URLs
+                                            urlHtml = `<a href="${App.Utils.sanitize(ev.url)}" target="_blank" class="text-xs text-osint-primary hover:underline hover:text-blue-400 flex items-center gap-1.5 break-all font-mono mt-2 inline-block"><span class="material-symbols-outlined text-[14px] align-text-bottom">link</span> ${App.Utils.sanitize(ev.url)}</a>`;
+                                        }
+                                    }
+                                    
+                                    return `
                                     <div class="bg-osint-950 border border-osint-800 rounded-lg p-3 hover:border-red-500/50 transition-colors">
                                         <div class="flex justify-between items-start mb-1.5">
-                                            <span class="font-bold text-red-400 text-sm flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">pest_control</span> ${App.Utils.sanitize(ev.reason)}</span>
+                                            <span class="font-bold text-red-400 text-sm flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">pest_control</span> ${App.Utils.sanitize(ev.reason || 'Unknown')}</span>
                                             <span class="text-xs font-mono text-gray-500 bg-osint-900 px-2 py-0.5 rounded border border-osint-800">${ev.date ? App.Utils.sanitize(ev.date.split(' ')[0]) : 'Unknown Date'}</span>
                                         </div>
-                                        ${ev.url ? `<a href="${App.Utils.sanitize(ev.url)}" target="_blank" class="text-xs text-osint-primary hover:underline hover:text-blue-400 flex items-center gap-1.5 break-all font-mono"><span class="material-symbols-outlined text-[14px]">link</span> ${App.Utils.sanitize(ev.url)}</a>` : ''}
+                                        ${urlHtml}
                                     </div>
-                                `).join('')}
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
                     ` : '';
