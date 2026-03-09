@@ -186,7 +186,7 @@
             </div>
             <div class="sidebar-text flex-shrink-0">
                 <h1 class="text-white font-bold text-md leading-tight tracking-wide">The Roblox<br>Catcher</h1>
-                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v3.7</p>
+                <p class="text-[10px] text-osint-500 font-mono mt-0.5">Safety Network v4.0</p>
             </div>
         </div>
 
@@ -311,6 +311,7 @@
                 rotectorAPI: 'https://roscoe.rotector.com/v1',
                 // WebSocket server connecting to our Deep Analyzer Node.js Backend
                 wsURL: 'wss://catchthem.mk-7.org/ws', 
+                apiValidateURL: 'https://catchthem.mk-7.org/api/validate', // Endpoint to validate API Keys
                 
                 flags: {
                     0: { name: 'Not Flagged', color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/30', icon: 'check_circle', hex: '#9ca3af' },
@@ -345,6 +346,41 @@
                 },
                 pipWindow: null,
                 analysisWS: null
+            },
+
+            // --- Security & Rate Limiting ---
+            Security: {
+                checkLimit: () => {
+                    const apiKey = localStorage.getItem('rc_api_key');
+                    if (apiKey) return true; // API Key users bypass rate limits
+
+                    const limitKey = 'rc_search_limit';
+                    let limitData = JSON.parse(localStorage.getItem(limitKey) || '{"count": 0, "resetAt": 0}');
+                    const now = Date.now();
+
+                    // Reset if past 24 hours
+                    if (now > limitData.resetAt) {
+                        limitData = { count: 0, resetAt: now + (24 * 60 * 60 * 1000) };
+                    }
+
+                    if (limitData.count >= 50) {
+                        return false;
+                    }
+
+                    limitData.count++;
+                    localStorage.setItem(limitKey, JSON.stringify(limitData));
+                    return true;
+                },
+                getLimitStats: () => {
+                    const limitKey = 'rc_search_limit';
+                    let limitData = JSON.parse(localStorage.getItem(limitKey) || '{"count": 0, "resetAt": 0}');
+                    const now = Date.now();
+                    if (now > limitData.resetAt) {
+                        limitData = { count: 0, resetAt: now + (24 * 60 * 60 * 1000) };
+                        localStorage.setItem(limitKey, JSON.stringify(limitData));
+                    }
+                    return limitData;
+                }
             },
 
             // --- Database (Local Storage Wrapper) ---
@@ -530,6 +566,7 @@
                 },
 
                 async getXTrackerData(id) {
+                    if (!localStorage.getItem('rc_api_key')) return null; // Premium API Key check
                     if (localStorage.getItem('rc_xtracker_enabled') === 'false') return null;
                     try {
                         const res = await fetch(`https://catchthem.mk-7.org/proxy/https://api.xtracker.xyz/api/registry/user?id=${id}`, {
@@ -542,17 +579,6 @@
                         console.warn('XTracker API Error:', e);
                         return null; 
                     }
-                },
-
-                async resolveRobloxUser(username) {
-                    const url = this.buildRobloxUrl('users.roblox.com', '/v1/usernames/users');
-                    const res = await this.fetchSafe(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify({ usernames: [username], excludeBannedUsers: false })
-                    });
-                    if (res.data && res.data.length > 0) return res.data[0].id;
-                    throw new Error('User not found on Roblox.');
                 },
 
                 async getRobloxProfile(id) {
@@ -642,14 +668,47 @@
 
                 renderSettings() {
                     App.Views.titleDiv.innerText = 'Application Settings';
-                    const currentProxy = localStorage.getItem('rc_proxy_preference') || 'catchthem';
+                    const currentProxy = localStorage.getItem('rc_proxy_preference') || 'roproxy';
                     const xtEnabled = localStorage.getItem('rc_xtracker_enabled') !== 'false';
                     const pCount = App.DB.getHistory('players').length;
                     const gCount = App.DB.getHistory('groups').length;
+                    const limitStats = App.Security.getLimitStats();
+                    const hasApiKey = !!localStorage.getItem('rc_api_key');
                     
                     App.Views.contentDiv.innerHTML = `
                         <div class="max-w-4xl mx-auto animate-slide-up space-y-6 w-full">
                             
+                            <!-- API Key Settings -->
+                            <div class="ui-card rounded-3xl p-8 border border-osint-800">
+                                <div class="flex justify-between items-start mb-6">
+                                    <div>
+                                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-osint-primary">key</span> API Access
+                                        </h3>
+                                        <p class="text-gray-400 text-sm mt-1">Enter your API key to unlock Deep Network Inspection and bypass the 50 daily lookup limit.</p>
+                                    </div>
+                                    <div class="bg-osint-950 px-3 py-1.5 rounded-lg border border-osint-800 flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[16px] text-gray-500">search</span>
+                                        <span class="text-xs font-mono font-bold text-gray-300">Lookups: ${limitStats.count}/50</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <span class="material-symbols-outlined text-gray-500 text-lg">password</span>
+                                        </div>
+                                        <input type="password" id="api-key-input" placeholder="Enter API Key..." value="${localStorage.getItem('rc_api_key') || ''}" class="w-full bg-osint-900 border border-osint-700 text-white rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:border-osint-primary transition-colors font-mono">
+                                    </div>
+                                    <button onclick="App.Controllers.saveApiKey()" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-[0_0_10px_rgba(33,150,243,0.2)]">
+                                        Save & Validate
+                                    </button>
+                                </div>
+                                <div id="api-key-status" class="mt-3 text-sm flex items-center gap-1 min-h-[20px]">
+                                    ${localStorage.getItem('rc_api_key') ? `<span class="text-green-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Key saved.</span>` : ''}
+                                </div>
+                            </div>
+
                             <!-- Integrations -->
                             <div class="ui-card rounded-3xl p-8 border border-osint-800">
                                 <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -658,6 +717,7 @@
                                 <p class="text-gray-400 text-sm mb-6">Manage external intelligence sources and cheater databases linked to the dashboard.</p>
                                 
                                 <div class="space-y-4">
+                                    ${hasApiKey ? `
                                     <label class="flex justify-between items-center p-4 rounded-xl border ${xtEnabled ? 'border-osint-primary bg-osint-primary/10' : 'border-osint-800 bg-osint-900/50 hover:bg-osint-800/50'} cursor-pointer transition-colors">
                                         <div class="flex items-start gap-4">
                                             <div class="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20 shrink-0">
@@ -673,6 +733,19 @@
                                             <div class="w-11 h-6 bg-osint-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-300 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-osint-primary"></div>
                                         </div>
                                     </label>
+                                    ` : `
+                                    <div class="flex justify-between items-center p-4 rounded-xl border border-osint-800 bg-osint-900/30 opacity-60 cursor-not-allowed">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-10 h-10 rounded-lg bg-gray-500/10 text-gray-500 flex items-center justify-center border border-gray-500/20 shrink-0">
+                                                <span class="material-symbols-outlined text-[20px]">lock</span>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-gray-400 text-md flex items-center gap-2">XTracker Intelligence <span class="bg-gray-800 text-[10px] px-2 py-0.5 rounded text-gray-400 uppercase tracking-widest font-bold border border-gray-700">API KEY</span></h4>
+                                                <p class="text-xs text-gray-500 mt-1">Requires active API Key to cross-reference cheater databases.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    `}
                                 </div>
                             </div>
 
@@ -817,7 +890,7 @@
                                 <div class="bg-osint-900 border border-osint-800 rounded-3xl p-8 text-center relative overflow-hidden">
                                     <div class="absolute inset-0 cyber-grid opacity-50"></div>
                                     <div class="relative z-10">
-                                        <h2 class="text-3xl font-bold text-white mb-2">Network Impact</h2>
+                                        <h2 class="text-3xl font-bold text-white mb-2">Roblox Impact</h2>
                                         <p class="text-gray-400 mb-8">Data currently tracked and verified by the outsourced safety system.</p>
                                         
                                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -902,9 +975,19 @@
                     let records = App.DB.getHistory(type);
                     if (!Array.isArray(records)) records = [];
 
+                    const hasApiKey = !!localStorage.getItem('rc_api_key');
+                    let displayRecords = records;
+                    let hiddenCount = 0;
+
+                    // Apply history limit rule for non-premium users
+                    if (!hasApiKey && records.length > 3) {
+                        displayRecords = records.slice(0, 3);
+                        hiddenCount = records.length - 3;
+                    }
+
                     let html = `<div class="max-w-6xl mx-auto animate-fade-in w-full">`;
                     
-                    if (records.length === 0) {
+                    if (displayRecords.length === 0) {
                         html += `
                             <div class="ui-card rounded-2xl p-16 flex flex-col items-center justify-center text-gray-500 border border-osint-800 border-dashed">
                                 <span class="material-symbols-outlined text-[60px] mb-4 opacity-50">history</span>
@@ -926,7 +1009,7 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-osint-800/50">
-                                            ${records.map((r) => {
+                                            ${displayRecords.map((r) => {
                                                 try {
                                                     if (!r || typeof r !== 'object') return '';
                                                     const flag = App.Config.flags[r.flagType] || App.Config.flags[0];
@@ -964,8 +1047,20 @@
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
                         `;
+
+                        if (hiddenCount > 0) {
+                            html += `
+                                <div class="bg-osint-900/50 p-4 border-t border-osint-800 text-center">
+                                    <p class="text-sm text-gray-400 mb-3"><span class="material-symbols-outlined text-[16px] align-text-bottom mr-1">lock</span> ${hiddenCount} scans hidden.</p>
+                                    <a href="#settings" class="bg-osint-800 hover:bg-osint-700 text-white font-bold py-2 px-6 rounded-lg transition-colors inline-flex items-center gap-2 text-xs border border-osint-700">
+                                        Enter API Key
+                                    </a>
+                                </div>
+                            `;
+                        }
+
+                        html += `</div>`;
                     }
                     html += `</div>`;
                     App.Views.contentDiv.innerHTML = html;
@@ -997,6 +1092,57 @@
                     localStorage.setItem('rc_xtracker_enabled', enabled ? 'true' : 'false');
                     App.Utils.toast(`XTracker Intelligence ${enabled ? 'enabled' : 'disabled'}.`, 'success');
                     App.Views.renderSettings();
+                },
+
+                async saveApiKey() {
+                    const key = document.getElementById('api-key-input').value.trim();
+                    const statusEl = document.getElementById('api-key-status');
+                    
+                    if (!key) {
+                        localStorage.removeItem('rc_api_key');
+                        App.Utils.toast('API Key removed.', 'info');
+                        statusEl.innerHTML = '';
+                        return;
+                    }
+                    
+                    statusEl.innerHTML = `<span class="text-osint-primary animate-pulse flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">sync</span> Validating against secure vault...</span>`;
+                    
+                    try {
+                        const res = await fetch(App.Config.apiValidateURL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ apiKey: key })
+                        });
+                        const data = await res.json();
+                        
+                        if (data.valid) {
+                            localStorage.setItem('rc_api_key', key);
+                            App.Utils.toast('API Key verified & activated!', 'success');
+                            statusEl.innerHTML = `<span class="text-green-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Key active. Deep Inspection unlocked.</span>`;
+                        } else {
+                            App.Utils.toast('Invalid API Key.', 'error');
+                            statusEl.innerHTML = `<span class="text-red-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">error</span> Invalid API Key.</span>`;
+                        }
+                    } catch(e) {
+                        App.Utils.toast('Validation service offline. Saved locally for later validation.', 'warning');
+                        localStorage.setItem('rc_api_key', key);
+                        statusEl.innerHTML = `<span class="text-yellow-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">warning</span> Key saved.</span>`;
+                    }
+                },
+
+                showRateLimitError(type) {
+                    App.Views.contentDiv.innerHTML = `
+                        <div class="max-w-2xl mx-auto w-full mt-10">
+                            <div class="ui-card border-red-500/30 p-10 text-center rounded-3xl animate-fade-in shadow-lg">
+                                <span class="material-symbols-outlined text-6xl text-red-500 mb-4">block</span>
+                                <h3 class="text-white text-2xl font-bold mb-2">Daily Limit Reached</h3>
+                                <p class="text-gray-400 mb-6">You have exhausted your 50 free searches for the next 24 hours.</p>
+                                <a href="#settings" class="bg-osint-primary hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-colors inline-flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">key</span> Enter API Key
+                                </a>
+                            </div>
+                        </div>
+                    `;
                 },
 
                 getFlagBannerHTML(flagType, confidence, reviewer) {
@@ -1090,6 +1236,22 @@
                 },
 
                 getDiscordHTML(discordData) {
+                    const hasApiKey = !!localStorage.getItem('rc_api_key');
+                    if (!hasApiKey) {
+                        return `
+                            <div class="mt-8 border-t border-osint-800 pt-6 animate-fade-in">
+                                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <div class="w-5 h-5 text-[#5865F2]">${App.Config.svgs.discord}</div> Discord Connections
+                                </h3>
+                                <div class="bg-osint-900/30 border border-osint-800 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center opacity-80">
+                                    <span class="material-symbols-outlined text-4xl text-gray-500 mb-2">lock</span>
+                                    <h4 class="font-bold text-gray-300 text-sm mb-1">Advamced Intelligence</h4>
+                                    <p class="text-xs text-gray-500">Requires an active API Key to view linked Discord accounts and servers.</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     if (!discordData || !discordData.discordAccounts || discordData.discordAccounts.length === 0) {
                          return `
                             <div class="flex flex-col items-center justify-center p-8 text-gray-500 border border-osint-800 border-dashed rounded-xl bg-osint-900/30 mt-4">
@@ -1260,6 +1422,10 @@
                         return;
                     }
 
+                    if (!cursor && query && !App.Security.checkLimit()) {
+                        return this.showRateLimitError('search');
+                    }
+
                     App.Views.titleDiv.innerText = 'Player Search / Lookup';
                     App.Views.contentDiv.innerHTML = App.Views.renderSearchTemplate('player', query, limit);
 
@@ -1418,6 +1584,10 @@
                         return;
                     }
 
+                    if (!cursor && query && !App.Security.checkLimit()) {
+                        return this.showRateLimitError('search');
+                    }
+
                     App.Views.titleDiv.innerText = 'Group Search / Lookup';
                     App.Views.contentDiv.innerHTML = App.Views.renderSearchTemplate('group', query, limit);
 
@@ -1512,8 +1682,116 @@
                         resultsDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Search Failed: ${err.message}</div>`;
                     }
                 },
+                async executeDiscordLookup(query) {
+                    if (!localStorage.getItem('rc_api_key')) {
+                        App.Views.titleDiv.innerText = 'Discord Intelligence';
+                        App.Views.contentDiv.innerHTML = `
+                            <div class="max-w-2xl mx-auto w-full mt-10">
+                                <div class="ui-card border-osint-800 p-10 text-center rounded-3xl animate-fade-in shadow-lg">
+                                    <span class="material-symbols-outlined text-6xl text-gray-500 mb-4">lock</span>
+                                    <h3 class="text-white text-2xl font-bold mb-2">Premium Feature</h3>
+                                    <p class="text-gray-400 mb-6">Discord Intelligence mapping is only available for users with a valid API Key.</p>
+                                    <a href="#settings" class="bg-osint-primary hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-colors inline-flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-lg">key</span> Enter API Key
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    if (query && !App.Security.checkLimit()) {
+                        return this.showRateLimitError('search');
+                    }
+
+                    App.Views.titleDiv.innerText = 'Discord Intelligence';
+                    App.Views.contentDiv.innerHTML = `
+                        <div class="max-w-6xl mx-auto">
+                            <form id="discord-search-form" class="relative mb-8 shadow-2xl flex gap-3">
+                                <div class="relative flex-1">
+                                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                        <span class="material-symbols-outlined text-gray-500">hub</span>
+                                    </div>
+                                    <input type="text" id="discord-query" value="${query || ''}" required placeholder="Enter Discord ID" 
+                                        class="w-full bg-osint-900 border-2 border-osint-800 text-white rounded-2xl py-4 pl-14 pr-4 focus:outline-none focus:border-osint-primary transition-colors font-mono text-lg shadow-inner">
+                                </div>
+                                <button type="submit" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white font-bold py-2 px-8 rounded-2xl transition-colors shadow-[0_0_10px_rgba(33,150,243,0.3)] flex items-center gap-2">
+                                    Analyze
+                                </button>
+                            </form>
+                            <div id="target-results">
+                                ${query ? App.Utils.createSkeleton('dossier') : `
+                                    <div class="flex flex-col items-center justify-center py-32 opacity-30 animate-fade-in">
+                                        <div class="w-20 h-20 mb-4 fill-current">${App.Config.svgs.discord}</div>
+                                        <p class="text-xl font-mono tracking-widest uppercase">Awaiting Discord ID</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById('discord-search-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const q = document.getElementById('discord-query').value.trim();
+                        if (q) window.location.hash = `#discord-lookup?id=${encodeURIComponent(q)}`;
+                    });
+
+                    if(!query) return;
+                    
+                    const resDiv = document.getElementById('target-results');
+                    try {
+                        const data = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/discord/user/${query}`);
+                        if(!data.success) throw new Error("No intelligence found for this Discord ID.");
+
+                        const d = data.data;
+                        const serversHtml = d.servers.map(srv => {
+                            let tags = '';
+                            if(srv.isTase) tags += `<span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] uppercase font-bold ml-2">TASE</span>`;
+                            if(srv.inGracePeriod) tags += `<span class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[9px] uppercase font-bold ml-2">Grace</span>`;
+                            const dateStr = srv.joinedAt ? `Joined: ${App.Utils.formatDate(srv.joinedAt)}` : `First Seen: ${App.Utils.formatDate(srv.firstSeenAt)}`;
+                            return `
+                                <div class="flex justify-between items-center py-3 border-b border-osint-800 last:border-0">
+                                    <div class="flex items-center"><span class="material-symbols-outlined text-gray-500 mr-2 text-[18px]">dns</span><span class="font-medium text-gray-200">${App.Utils.sanitize(srv.serverName)}</span>${tags}</div>
+                                    <span class="text-xs font-mono text-gray-500">${dateStr}</span>
+                                </div>
+                            `;
+                        }).join('');
+
+                        const connectionsHtml = d.connections.map(c => `
+                            <a href="#player-dossier?id=${c.robloxUserId}" class="block bg-osint-900 border border-osint-800 p-4 rounded-xl hover:border-osint-primary transition-colors flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-osint-800 flex items-center justify-center text-gray-400"><span class="material-symbols-outlined">person</span></div>
+                                    <div>
+                                        <div class="font-bold text-white text-lg">${App.Utils.sanitize(c.robloxUsername)}</div>
+                                        <div class="text-xs text-gray-500 font-mono">UID: ${c.robloxUserId}</div>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-gray-600">chevron_right</span>
+                            </a>
+                        `).join('');
+
+                        resDiv.innerHTML = `
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
+                                <div class="ui-card rounded-2xl p-6">
+                                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-osint-800 pb-2"><span class="material-symbols-outlined text-osint-primary">link</span> Roblox Connections</h3>
+                                    <div class="space-y-3">${connectionsHtml || '<p class="text-gray-500">No direct Roblox connections found.</p>'}</div>
+                                </div>
+                                <div class="ui-card rounded-2xl p-6">
+                                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 border-b border-osint-800 pb-2"><span class="material-symbols-outlined text-osint-integration">dns</span> Server Memberships</h3>
+                                    <div class="bg-osint-900/50 rounded-xl px-4 py-1 border border-osint-800">${serversHtml || '<p class="text-gray-500 py-3">No tracked servers.</p>'}</div>
+                                </div>
+                            </div>
+                        `;
+                    } catch(err) {
+                        resDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Lookup Failed: ${err.message}</div>`;
+                    }
+                },
 
                 async executePlayerDossier(userId) {
+                    if (!App.Security.checkLimit()) {
+                        return this.showRateLimitError('dossier');
+                    }
+
                     const resultsDiv = document.getElementById('app-content');
                     resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto w-full">${App.Utils.createSkeleton('dossier')}</div>`;
 
@@ -1567,6 +1845,18 @@
                         }
                         App.Utils.updateMetaTags(`[${flag.name}] ${profile.displayName} (@${profile.name}) - Dossier`, embedDesc, avatar, flag.hex);
 
+                        // Deep Analytics Access Logic
+                        const hasApiKey = localStorage.getItem('rc_api_key');
+                        const deepAnalyzeHtml = hasApiKey ? `
+                            <button onclick="window.location.hash='#analyze?id=${profile.id}'" class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-osint-primary hover:text-white hover:border-osint-primary transition-colors active:scale-[0.98]">
+                                <span class="material-symbols-outlined text-[16px]">troubleshoot</span> Deep Analyze
+                            </button>
+                        ` : `
+                            <div class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-600 border border-dashed border-gray-700 transition-colors cursor-not-allowed select-none" title="Requires API Key in Settings">
+                                <span class="material-symbols-outlined text-[16px]">lock</span> Deep Analyze
+                            </div>
+                        `;
+
                         resultsDiv.innerHTML = `
                             <div class="max-w-6xl mx-auto w-full">
                                 <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1 transition-colors bg-osint-900 px-3 py-1.5 rounded-lg border border-osint-800 w-fit"><span class="material-symbols-outlined text-sm">arrow_back</span> Back to Results</button>
@@ -1605,9 +1895,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <button onclick="window.location.hash='#analyze?id=${profile.id}'" class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-osint-primary hover:text-white hover:border-osint-primary transition-colors active:scale-[0.98]">
-                                            <span class="material-symbols-outlined text-[16px]">troubleshoot</span> Deep Analyze Network
-                                        </button>
+                                        ${deepAnalyzeHtml}
                                         <a href="https://www.roblox.com/users/${profile.id}/profile" target="_blank" class="ui-card rounded-xl p-4 flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-white hover:border-gray-500 transition-colors active:scale-[0.98]">
                                             Open Roblox Profile <span class="material-symbols-outlined text-[16px]">open_in_new</span>
                                         </a>
@@ -1648,6 +1936,10 @@
                 },
 
                 async executeGroupDossier(groupId) {
+                    if (!App.Security.checkLimit()) {
+                        return this.showRateLimitError('dossier');
+                    }
+
                     const resultsDiv = document.getElementById('app-content');
                     resultsDiv.innerHTML = `<div class="max-w-6xl mx-auto w-full">${App.Utils.createSkeleton('dossier')}</div>`;
 
@@ -1793,6 +2085,8 @@
                     const container = document.getElementById(containerId);
                     if (!container) return;
 
+                    const hasApiKey = !!localStorage.getItem('rc_api_key');
+
                     let html = '';
                     if (users.length > 0) {
                         html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">` + 
@@ -1816,21 +2110,32 @@
                         
                         const totalPages = Math.ceil(pagination.totalCount / 50);
                         if (totalPages > 1) {
-                            const hasPrev = pagination.currentPage > 0;
-                            const hasNext = pagination.hasMore;
-                            html += `
-                                <div class="flex items-center justify-between mt-5 bg-osint-950/50 px-4 py-2 rounded-xl border border-osint-800">
-                                    <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
-                                            ${!hasPrev ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(-1)">
-                                        <span class="material-symbols-outlined text-sm">arrow_back</span> Prev
-                                    </button>
-                                    <span class="text-xs text-gray-400 font-mono font-medium">Page ${pagination.currentPage + 1} of ${totalPages}</span>
-                                    <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
-                                            ${!hasNext ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(1, '${pagination.nextCursor || ''}')">
-                                        Next <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                                    </button>
-                                </div>
-                            `;
+                            if (!hasApiKey && pagination.currentPage === 0) {
+                                html += `
+                                    <div class="mt-5 bg-osint-900/50 p-4 rounded-xl border border-osint-800 text-center">
+                                        <p class="text-sm text-gray-400 mb-3"><span class="material-symbols-outlined text-[16px] align-text-bottom mr-1">lock</span> ${App.Utils.formatNumber(pagination.totalCount - users.length)} more flagged members hidden.</p>
+                                        <a href="#settings" class="bg-osint-800 hover:bg-osint-700 text-white font-bold py-2 px-6 rounded-lg transition-colors inline-flex items-center gap-2 text-xs border border-osint-700">
+                                            Unlock Full List with API Key
+                                        </a>
+                                    </div>
+                                `;
+                            } else {
+                                const hasPrev = pagination.currentPage > 0;
+                                const hasNext = pagination.hasMore;
+                                html += `
+                                    <div class="flex items-center justify-between mt-5 bg-osint-950/50 px-4 py-2 rounded-xl border border-osint-800">
+                                        <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
+                                                ${!hasPrev ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(-1)">
+                                            <span class="material-symbols-outlined text-sm">arrow_back</span> Prev
+                                        </button>
+                                        <span class="text-xs text-gray-400 font-mono font-medium">Page ${pagination.currentPage + 1} of ${totalPages}</span>
+                                        <button class="px-4 py-1.5 rounded-lg bg-osint-800 hover:bg-osint-700 text-white font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-95 flex items-center gap-1" 
+                                                ${!hasNext ? 'disabled' : ''} onclick="App.Controllers.changeGroupPage(1, '${pagination.nextCursor || ''}')">
+                                            Next <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                        </button>
+                                    </div>
+                                `;
+                            }
                         }
 
                     } else {
@@ -1849,6 +2154,12 @@
                 async changeGroupPage(direction, robloxNextCursor = null) {
                     const state = App.State.groupPagination;
                     if (!state.groupId) return;
+
+                    const hasApiKey = !!localStorage.getItem('rc_api_key');
+                    if (!hasApiKey && direction === 1) {
+                        App.Utils.toast('API Key required to view more pages.', 'warning');
+                        return;
+                    }
 
                     const targetPage = state.currentPage + direction;
                     
@@ -1893,6 +2204,13 @@
 
                 // --- Realtime Deep Analyze Mind Map (Hierarchical List Version) ---
                 renderAnalysis(userId) {
+                    const apiKey = localStorage.getItem('rc_api_key');
+                    if (!apiKey) {
+                        App.Utils.toast("API Key is required to utilize Deep Inspection.", "error");
+                        window.history.back();
+                        return;
+                    }
+
                     App.Views.titleDiv.innerText = 'Deep Inspection Analyzer';
                     App.Views.contentDiv.innerHTML = `
                         <div class="flex flex-col h-full w-full animate-fade-in relative">
@@ -1902,9 +2220,9 @@
                                         <span class="material-symbols-outlined">arrow_back</span>
                                     </button>
                                     <div>
-                                        <h3 class="font-bold text-white text-sm">Real-time Mind Map</h3>
+                                        <h3 class="font-bold text-white text-sm">Analyze of ${userId}</h3>
                                         <p id="analyze-status" class="text-[10px] font-mono text-osint-primary flex items-center gap-1">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-osint-primary animate-pulse shrink-0"></span> <span class="truncate">Connecting to network...</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-osint-primary animate-pulse shrink-0"></span> <span class="truncate">Authenticating with network...</span>
                                         </p>
                                     </div>
                                 </div>
@@ -1919,7 +2237,7 @@
                         </div>
                     `;
 
-                    this.startAnalysisSocket(userId);
+                    this.startAnalysisSocket(userId, apiKey);
                 },
 
                 stopAnalysis() {
@@ -1932,7 +2250,7 @@
                     }
                 },
 
-                startAnalysisSocket(userId) {
+                startAnalysisSocket(userId, apiKey) {
                     if (App.State.analysisWS) App.State.analysisWS.close();
 
                     const container = document.getElementById('mindmap-container');
@@ -1958,9 +2276,9 @@
                     const updateGraph = () => {
                         if (!treeData) return;
 
-                        // Create hierarchical D3 tree (left to right list layout)
+                        // Create hierarchical D3 tree (Increased node size/distance per request)
                         const root = d3.hierarchy(treeData);
-                        const treeLayout = d3.tree().nodeSize([50, 250]); // y-spacing, x-spacing
+                        const treeLayout = d3.tree().nodeSize([100, 400]); // y-spacing increased, x-spacing increased
                         treeLayout(root);
 
                         const linkGen = d3.linkHorizontal().x(d => d.y).y(d => d.x);
@@ -2102,7 +2420,8 @@
 
                         ws.onopen = () => {
                             stopBtn.classList.remove('hidden');
-                            ws.send(JSON.stringify({ action: 'analyze', userId: userId }));
+                            // Injecting secure apiKey payload
+                            ws.send(JSON.stringify({ action: 'analyze', userId: userId, apiKey: apiKey }));
                         };
 
                         ws.onmessage = (event) => {
