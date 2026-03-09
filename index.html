@@ -702,7 +702,7 @@
                                         <input type="password" id="api-key-input" placeholder="Enter API Key..." value="${localStorage.getItem('rc_api_key') || ''}" class="w-full bg-osint-900 border border-osint-700 text-white rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:border-osint-primary transition-colors font-mono">
                                     </div>
                                     <button onclick="App.Controllers.saveApiKey()" class="bg-osint-primary hover:bg-blue-500 active:scale-95 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-[0_0_10px_rgba(33,150,243,0.2)]">
-                                        Save & Validate
+                                        Validate
                                     </button>
                                 </div>
                                 <div id="api-key-status" class="mt-3 text-sm flex items-center gap-1 min-h-[20px]">
@@ -762,7 +762,6 @@
                                         <div class="pt-1"><input type="radio" name="proxy" value="catchthem" ${currentProxy === 'catchthem' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
                                         <div>
                                             <h4 class="font-bold text-white text-md">Catch Them Proxy</h4>
-                                            <p class="text-xs text-gray-500 font-mono mt-1">catchthem.mk-7.org/proxy/...</p>
                                         </div>
                                     </label>
 
@@ -770,7 +769,7 @@
                                         <div class="pt-1"><input type="radio" name="proxy" value="roproxy" ${currentProxy === 'roproxy' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
                                         <div>
                                             <h4 class="font-bold text-white text-md">RoProxy</h4>
-                                            <p class="text-xs text-gray-500 font-mono mt-1">roproxy.com routes directly</p>
+                                          
                                         </div>
                                     </label>
                                     
@@ -778,7 +777,7 @@
                                         <div class="pt-1"><input type="radio" name="proxy" value="corsproxy" ${currentProxy === 'corsproxy' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
                                         <div>
                                             <h4 class="font-bold text-white text-md">CorsProxy.io</h4>
-                                            <p class="text-xs text-gray-500 font-mono mt-1">corsproxy.io/?https://...</p>
+                                            
                                         </div>
                                     </label>
 
@@ -786,7 +785,7 @@
                                         <div class="pt-1"><input type="radio" name="proxy" value="direct" ${currentProxy === 'direct' ? 'checked' : ''} class="w-4 h-4 text-osint-primary bg-osint-950 border-osint-700 focus:ring-osint-primary"></div>
                                         <div>
                                             <h4 class="font-bold text-white text-md">Direct Connection</h4>
-                                            <p class="text-xs text-gray-500 font-mono mt-1">No Proxy (May cause CORS)</p>
+                                          
                                         </div>
                                     </label>
                                 </div>
