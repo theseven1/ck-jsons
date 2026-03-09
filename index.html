@@ -336,6 +336,7 @@
 
             // --- State Management ---
             State: {
+                routeToken: null, // Used to prevent race conditions when navigating rapidly
                 groupPagination: {
                     groupId: null,
                     cursors: [null],
@@ -527,7 +528,7 @@
             API: {
                 buildRobloxUrl(domain, endpoint) {
                     const fullUrl = `https://${domain}${endpoint}`;
-                    const proxyType = localStorage.getItem('rc_proxy_preference') || 'catchthem';
+                    const proxyType = localStorage.getItem('rc_proxy_preference') || 'roproxy';
                     
                     if (proxyType === 'roproxy') {
                         return `https://${domain.replace('roblox.com', 'roproxy.com')}${endpoint}`;
@@ -875,11 +876,14 @@
                 },
 
                 async renderStatistics() {
+                    const currentToken = App.State.routeToken;
                     App.Views.titleDiv.innerText = 'Global Statistics';
                     App.Views.contentDiv.innerHTML = App.Utils.createSkeleton('dossier');
 
                     try {
                         const stats = await App.API.getStatistics();
+                        if (App.State.routeToken !== currentToken) return;
+
                         const totalFlagged = stats.data?.totalFlaggedUsers || 0;
                         const totalConfirmed = stats.data?.totalConfirmedUsers || 0;
                         const totalBanned = stats.data?.totalBannedUsers || 0;
@@ -920,6 +924,7 @@
                             </div>
                         `;
                     } catch (err) {
+                        if (App.State.routeToken !== currentToken) return;
                         App.Views.contentDiv.innerHTML = `
                             <div class="ui-card border-red-500/30 p-10 text-center rounded-3xl max-w-2xl mx-auto mt-10 animate-fade-in">
                                 <span class="material-symbols-outlined text-5xl text-red-500 mb-4">cloud_off</span>
@@ -1102,6 +1107,7 @@
                         localStorage.removeItem('rc_api_key');
                         App.Utils.toast('API Key removed.', 'info');
                         statusEl.innerHTML = '';
+                        setTimeout(() => App.Views.renderSettings(), 100);
                         return;
                     }
                     
@@ -1117,16 +1123,18 @@
                         
                         if (data.valid) {
                             localStorage.setItem('rc_api_key', key);
-                            App.Utils.toast('API Key verified & activated!', 'success');
+                            App.Utils.toast('API Key activated!', 'success');
                             statusEl.innerHTML = `<span class="text-green-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Key active. Deep Inspection unlocked.</span>`;
+                            setTimeout(() => App.Views.renderSettings(), 500);
                         } else {
                             App.Utils.toast('Invalid API Key.', 'error');
                             statusEl.innerHTML = `<span class="text-red-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">error</span> Invalid API Key.</span>`;
                         }
                     } catch(e) {
-                        App.Utils.toast('Validation service offline. Saved locally for later validation.', 'warning');
+                        App.Utils.toast('Validation service offline.', 'warning');
                         localStorage.setItem('rc_api_key', key);
                         statusEl.innerHTML = `<span class="text-yellow-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">warning</span> Key saved.</span>`;
+                        setTimeout(() => App.Views.renderSettings(), 500);
                     }
                 },
 
@@ -1245,7 +1253,7 @@
                                 </h3>
                                 <div class="bg-osint-900/30 border border-osint-800 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center opacity-80">
                                     <span class="material-symbols-outlined text-4xl text-gray-500 mb-2">lock</span>
-                                    <h4 class="font-bold text-gray-300 text-sm mb-1">Advamced Intelligence</h4>
+                                    <h4 class="font-bold text-gray-300 text-sm mb-1">Premium Intelligence</h4>
                                     <p class="text-xs text-gray-500">Requires an active API Key to view linked Discord accounts and servers.</p>
                                 </div>
                             </div>
@@ -1416,6 +1424,8 @@
                 },
 
                 async executePlayerSearch(query, limit = 25, cursor = '') {
+                    const currentToken = App.State.routeToken;
+
                     // ID Bypass routing for direct navigation via URL
                     if (query && /^\d+$/.test(query)) {
                         window.location.hash = `#player-dossier?id=${query}`;
@@ -1450,6 +1460,7 @@
                     try {
                         const searchUrl = App.API.buildRobloxUrl('users.roblox.com', `/v1/users/search?keyword=${encodeURIComponent(query)}&limit=${limit}${cursor ? '&cursor='+encodeURIComponent(cursor) : ''}`);
                         searchData = await App.API.fetchSafe(searchUrl);
+                        if (App.State.routeToken !== currentToken) return;
                         
                         if (!searchData.data || searchData.data.length === 0) {
                             throw new Error("EmptyResult");
@@ -1463,6 +1474,7 @@
                                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                                 body: JSON.stringify({ usernames: [query], excludeBannedUsers: true })
                             });
+                            if (App.State.routeToken !== currentToken) return;
 
                             if (resolveData.data && resolveData.data.length > 0) {
                                 searchData = {
@@ -1482,6 +1494,7 @@
                                 throw err;
                             }
                         } catch(fallbackErr) {
+                            if (App.State.routeToken !== currentToken) return;
                             if (err.message === "EmptyResult") {
                                 resultsDiv.innerHTML = `<div class="text-center py-10 text-gray-500">No players found matching "${query}".</div>`;
                             } else {
@@ -1502,6 +1515,8 @@
                         
                         const thumbRes = await App.API.fetchSafe(App.API.buildRobloxUrl('thumbnails.roblox.com', `/v1/users/avatar-headshot?userIds=${userIds.join(',')}&size=150x150&format=Webp&isCircular=false`));
 
+                        if (App.State.routeToken !== currentToken) return;
+
                         const rotMap = rotRes.success ? rotRes.data : {};
                         const thumbMap = {};
                         if (thumbRes.data) {
@@ -1520,6 +1535,8 @@
                                 } catch(e) {}
                             }));
                         }
+
+                        if (App.State.routeToken !== currentToken) return;
 
                         let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">`;
                         
@@ -1574,11 +1591,14 @@
 
                         resultsDiv.innerHTML = html;
                     } catch(err) {
+                        if (App.State.routeToken !== currentToken) return;
                         resultsDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Search Failed: ${err.message}</div>`;
                     }
                 },
 
                 async executeGroupSearch(query, limit = 25, cursor = '') {
+                    const currentToken = App.State.routeToken;
+
                     if (query && /^\d+$/.test(query)) {
                         window.location.hash = `#group-dossier?id=${query}`;
                         return;
@@ -1610,7 +1630,8 @@
                     try {
                         const searchUrl = App.API.buildRobloxUrl('groups.roblox.com', `/v1/groups/search?keyword=${encodeURIComponent(query)}&limit=${limit}${cursor ? '&cursor='+encodeURIComponent(cursor) : ''}`);
                         const searchData = await App.API.fetchSafe(searchUrl);
-                        
+                        if (App.State.routeToken !== currentToken) return;
+
                         if (!searchData.data || searchData.data.length === 0) {
                             resultsDiv.innerHTML = `<div class="text-center py-10 text-gray-500">No groups found matching "${query}".</div>`;
                             return;
@@ -1626,6 +1647,8 @@
                             }),
                             App.API.fetchSafe(App.API.buildRobloxUrl('thumbnails.roblox.com', `/v1/groups/icons?groupIds=${groupIds.join(',')}&size=150x150&format=Webp&isCircular=false`))
                         ]);
+
+                        if (App.State.routeToken !== currentToken) return;
 
                         const rotMap = rotRes.status === 'fulfilled' && rotRes.value.success ? rotRes.value.data : {};
                         const thumbMap = {};
@@ -1679,17 +1702,20 @@
 
                         resultsDiv.innerHTML = html;
                     } catch(err) {
+                        if (App.State.routeToken !== currentToken) return;
                         resultsDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Search Failed: ${err.message}</div>`;
                     }
                 },
                 async executeDiscordLookup(query) {
+                    const currentToken = App.State.routeToken;
+
                     if (!localStorage.getItem('rc_api_key')) {
                         App.Views.titleDiv.innerText = 'Discord Intelligence';
                         App.Views.contentDiv.innerHTML = `
                             <div class="max-w-2xl mx-auto w-full mt-10">
                                 <div class="ui-card border-osint-800 p-10 text-center rounded-3xl animate-fade-in shadow-lg">
                                     <span class="material-symbols-outlined text-6xl text-gray-500 mb-4">lock</span>
-                                    <h3 class="text-white text-2xl font-bold mb-2">Premium Feature</h3>
+                                    <h3 class="text-white text-2xl font-bold mb-2">Advanced Feature</h3>
                                     <p class="text-gray-400 mb-6">Discord Intelligence mapping is only available for users with a valid API Key.</p>
                                     <a href="#settings" class="bg-osint-primary hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-colors inline-flex items-center gap-2">
                                         <span class="material-symbols-outlined text-lg">key</span> Enter API Key
@@ -1741,6 +1767,8 @@
                     const resDiv = document.getElementById('target-results');
                     try {
                         const data = await App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/discord/user/${query}`);
+                        if (App.State.routeToken !== currentToken) return;
+
                         if(!data.success) throw new Error("No intelligence found for this Discord ID.");
 
                         const d = data.data;
@@ -1783,11 +1811,14 @@
                             </div>
                         `;
                     } catch(err) {
+                        if (App.State.routeToken !== currentToken) return;
                         resDiv.innerHTML = `<div class="text-red-400 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/30 font-bold"><span class="material-symbols-outlined text-4xl mb-2">error</span><br>Lookup Failed: ${err.message}</div>`;
                     }
                 },
 
                 async executePlayerDossier(userId) {
+                    const currentToken = App.State.routeToken;
+
                     if (!App.Security.checkLimit()) {
                         return this.showRateLimitError('dossier');
                     }
@@ -1803,6 +1834,8 @@
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/user/${userId}/discord`),
                             App.API.getXTrackerData(userId)
                         ]);
+
+                        if (App.State.routeToken !== currentToken) return;
 
                         const isInvisible = rbxProfile.status === 'rejected';
 
@@ -1922,6 +1955,7 @@
                         `;
 
                     } catch (err) {
+                        if (App.State.routeToken !== currentToken) return;
                         resultsDiv.innerHTML = `
                             <div class="max-w-6xl mx-auto">
                                 <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1"><span class="material-symbols-outlined text-sm">arrow_back</span> Back</button>
@@ -1936,6 +1970,8 @@
                 },
 
                 async executeGroupDossier(groupId) {
+                    const currentToken = App.State.routeToken;
+
                     if (!App.Security.checkLimit()) {
                         return this.showRateLimitError('dossier');
                     }
@@ -1950,6 +1986,8 @@
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group/${groupId}`),
                             App.API.fetchSafe(`${App.Config.rotectorAPI}/lookup/roblox/group/${groupId}/tracked-users?limit=50`)
                         ]);
+
+                        if (App.State.routeToken !== currentToken) return;
 
                         const isInvisible = rbxGroup.status === 'rejected';
                         
@@ -2068,6 +2106,7 @@
 
                         this.renderGroupTrackedUsers('tracked-users-wrapper', trackedData.users || [], App.State.groupPagination);
                     } catch (err) {
+                        if (App.State.routeToken !== currentToken) return;
                         resultsDiv.innerHTML = `
                             <div class="max-w-6xl mx-auto">
                                 <button onclick="window.history.back()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-1"><span class="material-symbols-outlined text-sm">arrow_back</span> Back</button>
@@ -2152,6 +2191,7 @@
                 },
 
                 async changeGroupPage(direction, robloxNextCursor = null) {
+                    const currentToken = App.State.routeToken;
                     const state = App.State.groupPagination;
                     if (!state.groupId) return;
 
@@ -2178,7 +2218,8 @@
                         if (cursorToUse) url += `&cursor=${encodeURIComponent(cursorToUse)}`;
                         
                         const res = await App.API.fetchSafe(url);
-                        
+                        if (App.State.routeToken !== currentToken) return;
+
                         if (res.success) {
                             state.currentPage = targetPage;
                             state.hasMore = res.data.hasMore;
@@ -2198,6 +2239,7 @@
                             this.renderGroupTrackedUsers('tracked-users-wrapper', newUsers, state);
                         }
                     } catch(e) {
+                        if (App.State.routeToken !== currentToken) return;
                         App.Utils.toast('Failed to load page: ' + e.message, 'error');
                     }
                 },
@@ -2496,8 +2538,8 @@
 
                     try {
                         const pip = await window.documentPictureInPicture.requestWindow({
-                            width: 320,
-                            height: 480
+                            width: 360,
+                            height: 500
                         });
                         App.State.pipWindow = pip;
 
@@ -2544,6 +2586,46 @@
                             </div>
                         `;
 
+                        // Security: PiP Resize Lock for Non-Premium Users
+                        pip.addEventListener('resize', () => {
+    if (!localStorage.getItem('rc_api_key')) {
+        // Use a consistent reference for the "Default" size
+        const defaultW = 360;
+        const defaultH = 480;
+
+        // Check against innerWidth/Height (the actual content area)
+        // We use a small threshold (5px) to account for browser rounding
+        const isResized = Math.abs(pip.innerWidth - defaultW) > 5 || 
+                          Math.abs(pip.innerHeight - defaultH) > 5;
+        
+        let overlay = pip.document.getElementById('pip-resize-overlay');
+        
+        if (isResized) {
+            if (!overlay) {
+                overlay = pip.document.createElement('div');
+                overlay.id = 'pip-resize-overlay';
+                overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,14,0.98);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;text-align:center;padding:20px;backdrop-filter:blur(4px);';
+                overlay.innerHTML = `
+                    <svg width="48" height="48" fill="none" stroke="#ef4444" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    <h2 style="margin:0 0 8px 0;font-size:18px;font-weight:bold;">Locked Feature</h2>
+                    <p style="font-size:13px;color:#aaa;margin:0 0 16px 0;line-height:1.4;">Customizing size requires an API Key.</p>
+                    <button id="pip-restore-btn" style="background:#2196f3;color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px;">Fix Size</button>
+                `;
+                pip.document.body.appendChild(overlay);
+
+                pip.document.getElementById('pip-restore-btn').onclick = () => {
+                    // resizeBy handles the delta to ensure the content area returns to exactly 360x500
+                    const widthDelta = defaultW - pip.innerWidth;
+                    const heightDelta = defaultH - pip.innerHeight;
+                    pip.resizeBy(widthDelta, heightDelta);
+                };
+            }
+        } else {
+            // Remove overlay if we are back at default size
+            if (overlay) overlay.remove();
+        }
+    }
+});
                         pip.document.getElementById('pip-form').addEventListener('submit', async (e) => {
                             e.preventDefault();
                             const val = pip.document.getElementById('pip-input').value.trim();
@@ -2762,6 +2844,9 @@
                         App.State.analysisWS.close();
                         App.State.analysisWS = null;
                     }
+
+                    // Assign unique route token to prevent asynchronous overlap
+                    App.State.routeToken = Date.now().toString() + Math.random().toString();
 
                     App.Views.contentDiv.innerHTML = '';
                     App.Views.contentDiv.scrollTop = 0;
