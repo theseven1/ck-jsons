@@ -1123,7 +1123,7 @@
                         if (data.valid) {
                             localStorage.setItem('rc_api_key', key);
                             App.Utils.toast('API Key activated!', 'success');
-                            statusEl.innerHTML = `<span class="text-green-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Key active. Deep Inspection unlocked.</span>`;
+                            statusEl.innerHTML = `<span class="text-green-400 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">check_circle</span> Key active.</span>`;
                             setTimeout(() => App.Views.renderSettings(), 500);
                         } else {
                             App.Utils.toast('Invalid API Key.', 'error');
